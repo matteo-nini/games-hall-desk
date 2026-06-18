@@ -20,9 +20,15 @@
   --red-bd: #f3c7c7;
   --amber: #a96a09;
   --amber-bg: #fdf2dd;
+  --green-ink: #0f6b3a;
+  --amber-ink: #8a5708;
+  --red-ink: #9c2222;
+  --amber-border: #f0d59a;
   --r: 14px;
   --rs: 10px;
   --rxs: 8px;
+  --rpill: 20px;
+  --topbar-h: 55px;
   --sh: 0 1px 2px rgba(20, 30, 55, .05), 0 2px 8px rgba(20, 30, 55, .05);
 }
 
@@ -134,14 +140,14 @@ h3 {
 
 .badge {
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--rpill);
   font-size: 12px;
   font-weight: 600
 }
 
 .badge.open {
   background: var(--green-bg);
-  color: var(--green)
+  color: var(--green-ink)
 }
 
 .badge.closed {
@@ -156,7 +162,7 @@ h3 {
 .ok {
   margin: 10px 24px;
   background: var(--green-bg);
-  color: var(--green);
+  color: var(--green-ink);
   border: 1px solid var(--green-bd);
   padding: 10px 14px;
   border-radius: var(--rs)
@@ -165,7 +171,7 @@ h3 {
 .warn {
   margin: 10px 24px;
   background: var(--amber-bg);
-  color: var(--amber);
+  color: var(--amber-ink);
   padding: 10px 14px;
   border-radius: var(--rs)
 }
@@ -223,7 +229,7 @@ h3 {
 }
 
 .statusbar.ok .big {
-  color: #0f6b3a
+  color: var(--green-ink)
 }
 
 .statusbar.bad {
@@ -237,7 +243,7 @@ h3 {
 }
 
 .statusbar.bad .big {
-  color: #9c2222
+  color: var(--red-ink)
 }
 
 /* ---- griglie e schede ---- */
@@ -825,7 +831,7 @@ table.grid {
 /* ---- confronto totale = fondo nella fascia stato ---- */
 .statusbar.warn {
   background: var(--amber-bg);
-  border-color: #f0d59a
+  border-color: var(--amber-border)
 }
 
 .statusbar.warn .ico {
@@ -834,7 +840,7 @@ table.grid {
 }
 
 .statusbar.warn .big {
-  color: #8a5708
+  color: var(--amber-ink)
 }
 
 .statusbar .cmp {
@@ -881,6 +887,10 @@ table.grid {
   color: var(--red)
 }
 
+.statusbar.ok .cmp .l { color: var(--green-ink) }
+.statusbar.warn .cmp .l { color: var(--amber-ink) }
+.statusbar.bad .cmp .l { color: var(--red-ink) }
+
 @media(max-width:640px) {
   .statusbar .cmp {
     margin-left: 0;
@@ -911,8 +921,10 @@ table.grid {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   line-height: 1.15;
   min-width: 120px;
+  min-height: 44px;
   font-size: 14px;
   transition: none
 }
@@ -922,7 +934,11 @@ table.grid {
   font-weight: 500;
   color: var(--faint);
   text-transform: uppercase;
-  letter-spacing: .4px
+  letter-spacing: .4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%
 }
 
 .tab.active {
@@ -1028,7 +1044,7 @@ table.grid {
 /* ---- sticky header giornaliero ---- */
 .stickyhead {
   position: sticky;
-  top: 55px;
+  top: var(--topbar-h);
   z-index: 30;
   background: var(--bg)
 }
@@ -1051,13 +1067,26 @@ table.grid {
 
 .sh-nav a {
   color: var(--muted);
-  padding: 4px 6px
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0
 }
 
 .sh-right {
   display: flex;
   align-items: center;
   gap: 14px
+}
+
+.sh-right .switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px
 }
 
 .sh-metric {
@@ -1288,7 +1317,8 @@ textarea.note:focus {
   padding-bottom: 12px;
   border-bottom: 2px solid var(--accent-weak);
   color: var(--text);
-  display: block
+  display: block;
+  text-wrap: balance
 }
 
 .seg {
@@ -1310,7 +1340,8 @@ textarea.note:focus {
   color: var(--accent);
   font-weight: 800;
   letter-spacing: 0;
-  font-size: 13px
+  font-size: 13px;
+  flex-shrink: 0
 }
 
 .entry .field {
@@ -1336,7 +1367,13 @@ textarea.note:focus {
 
 .entry .machrow label {
   font-size: 13px;
-  color: var(--text)
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 8px
 }
 
 .entry .machrow input {
@@ -1826,9 +1863,8 @@ textarea.note:focus {
 
 .ob-tip {
   background: var(--accent-weak);
-  border-left: 3px solid var(--accent);
   padding: 10px 14px;
-  border-radius: 0 var(--rxs) var(--rxs) 0;
+  border-radius: var(--rxs);
   font-size: 13px;
   color: var(--accent-ink);
   margin-top: 10px
@@ -1853,3 +1889,20 @@ textarea.note:focus {
 .ob-green { background: var(--green) }
 .ob-amber { background: var(--amber) }
 .ob-red   { background: var(--red) }
+
+/* ---- utilities ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: none }
+}

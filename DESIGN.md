@@ -22,6 +22,10 @@ colors:
   status-bad-border: "#f3c7c7"
   status-warn: "#a96a09"
   status-warn-bg: "#fdf2dd"
+  status-ok-ink: "#0f6b3a"
+  status-warn-ink: "#8a5708"
+  status-bad-ink: "#9c2222"
+  status-warn-border: "#f0d59a"
 typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
@@ -60,6 +64,7 @@ rounded:
   lg: "14px"
   md: "10px"
   sm: "8px"
+  pill: "20px"
 spacing:
   xs: "4px"
   sm: "8px"
