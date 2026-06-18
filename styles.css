@@ -28,7 +28,8 @@
   --rs: 10px;
   --rxs: 8px;
   --rpill: 20px;
-  --topbar-h: 55px;
+  --topbar-h: 0px;
+  --sidebar-w: 220px;
   --sh: 0 1px 2px rgba(20, 30, 55, .05), 0 2px 8px rgba(20, 30, 55, .05);
 }
 
@@ -47,7 +48,8 @@ body {
   color: var(--text);
   font-size: 14px;
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased
+  -webkit-font-smoothing: antialiased;
+  margin-left: var(--sidebar-w)
 }
 
 a {
@@ -801,6 +803,9 @@ table.grid {
 @media print {
 
   .menu,
+  .sidebar,
+  .sb-toggle,
+  .sb-overlay,
   .topbar,
   .actions,
   .no-print,
@@ -809,6 +814,7 @@ table.grid {
   }
 
   body {
+    margin-left: 0;
     background: #fff
   }
 
@@ -887,9 +893,17 @@ table.grid {
   color: var(--red)
 }
 
-.statusbar.ok .cmp .l { color: var(--green-ink) }
-.statusbar.warn .cmp .l { color: var(--amber-ink) }
-.statusbar.bad .cmp .l { color: var(--red-ink) }
+.statusbar.ok .cmp .l {
+  color: var(--green-ink)
+}
+
+.statusbar.warn .cmp .l {
+  color: var(--amber-ink)
+}
+
+.statusbar.bad .cmp .l {
+  color: var(--red-ink)
+}
 
 @media(max-width:640px) {
   .statusbar .cmp {
@@ -1794,7 +1808,7 @@ textarea.note:focus {
   justify-content: center;
   font-size: 26px;
   margin: 0 auto 16px;
-  box-shadow: 0 8px 20px rgba(59,91,219,.3)
+  box-shadow: 0 8px 20px rgba(59, 91, 219, .3)
 }
 
 .ob-hero h1 {
@@ -1886,9 +1900,17 @@ textarea.note:focus {
   flex-shrink: 0
 }
 
-.ob-green { background: var(--green) }
-.ob-amber { background: var(--amber) }
-.ob-red   { background: var(--red) }
+.ob-green {
+  background: var(--green)
+}
+
+.ob-amber {
+  background: var(--amber)
+}
+
+.ob-red {
+  background: var(--red)
+}
 
 /* ---- utilities ---- */
 .sr-only {
@@ -1898,11 +1920,935 @@ textarea.note:focus {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0,0,0,0);
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toast { transition: none }
+  .toast {
+    transition: none
+  }
+}
+
+/* ============ Nuovo layout Cassa giornaliera ============ */
+
+/* ---- datebar (riga 1 stickyhead) ---- */
+.sh-datebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 24px;
+  border-bottom: 1px solid var(--border)
+}
+
+.sh-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto
+}
+
+.sh-actions .switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 18px
+}
+
+/* ---- tabbar (riga 2 stickyhead) ---- */
+.sh-tabbar {
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--border)
+}
+
+.sh-tabbar .tabs {
+  margin: 5px 0
+}
+
+.sh-tabbar .save-btn {
+  margin-left: auto
+}
+
+/* ---- verdict band (riga 3 stickyhead) ---- */
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background: var(--surface2);
+  transition: background .15s ease
+}
+
+.verdict.ok {
+  background: var(--green-bg)
+}
+
+.verdict.warn {
+  background: var(--amber-bg)
+}
+
+.verdict.bad {
+  background: var(--red-bg)
+}
+
+.verdict-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0
+}
+
+.verdict-ico {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0
+}
+
+.verdict-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block
+}
+
+.verdict.ok .verdict-ico {
+  color: var(--green)
+}
+
+.verdict.warn .verdict-ico {
+  color: var(--amber)
+}
+
+.verdict.bad .verdict-ico {
+  color: var(--red)
+}
+
+.verdict-text {
+  min-width: 0
+}
+
+.verdict-big {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
+}
+
+.verdict.ok .verdict-big {
+  color: var(--green-ink)
+}
+
+.verdict.warn .verdict-big {
+  color: var(--amber-ink)
+}
+
+.verdict.bad .verdict-big {
+  color: var(--red-ink)
+}
+
+.verdict-sub {
+  font-size: 12px;
+  color: var(--text);
+  margin-top: 2px;
+  white-space: nowrap
+}
+
+.verdict-formula {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0
+}
+
+.vf-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center
+}
+
+.vf-lbl {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+  white-space: nowrap
+}
+
+.vf-num {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text)
+}
+
+.verdict.ok .vf-num {
+  color: var(--green-ink)
+}
+
+.verdict.warn .vf-num {
+  color: var(--amber-ink)
+}
+
+.verdict.bad .vf-num {
+  color: var(--red-ink)
+}
+
+.vf-sign {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: 3px;
+  color: var(--muted);
+  flex-shrink: 0
+}
+
+.verdict.ok .vf-sign {
+  color: var(--green)
+}
+
+.verdict.warn .vf-sign {
+  color: var(--amber)
+}
+
+.verdict.bad .vf-sign {
+  color: var(--red)
+}
+
+.vf-sep {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  flex-shrink: 0;
+  align-self: center
+}
+
+.verdict.ok .vf-sep {
+  background: var(--green-bd)
+}
+
+.verdict.warn .vf-sep {
+  background: var(--amber-border)
+}
+
+.verdict.bad .vf-sep {
+  background: var(--red-bd)
+}
+
+/* ---- daily summary strip ---- */
+.daily-summary {
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto
+}
+
+.ds-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 20px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0
+}
+
+.ds-sep {
+  width: 1px;
+  background: var(--border2);
+  align-self: stretch;
+  margin: 6px 0;
+  flex-shrink: 0
+}
+
+.ds-item:has(+ .ds-sep) {
+  border-right: 0
+}
+
+.ds-item:last-child {
+  border-right: 0
+}
+
+.ds-l {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap
+}
+
+.ds-v {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  margin-top: 3px;
+  white-space: nowrap
+}
+
+.ds-secondary .ds-v {
+  font-size: 13px;
+  color: var(--muted)
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict {
+    transition: none
+  }
+}
+
+@media (max-width: 760px) {
+  .sh-datebar {
+    padding: 6px 16px
+  }
+
+  .verdict {
+    padding: 10px 16px;
+    gap: 12px
+  }
+
+  .verdict-formula {
+    gap: 6px
+  }
+
+  .vf-num {
+    font-size: 18px
+  }
+
+  .vf-sign {
+    font-size: 22px
+  }
+
+  .daily-summary {
+    padding: 0
+  }
+}
+
+/* ============ Sidebar layout ============ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  overflow-y: auto;
+  overflow-x: hidden
+}
+
+.sb-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0
+}
+
+.sb-logo {
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  flex-shrink: 0
+}
+
+.sb-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
+}
+
+.sb-nav {
+  flex: 1;
+  padding: 10px 8px;
+  overflow-y: auto;
+  overflow-x: hidden
+}
+
+.sn-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 4px
+}
+
+.sn-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--rxs);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background .08s, color .08s
+}
+
+.sn-link:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.sn-link.active {
+  background: var(--accent-weak);
+  color: var(--accent);
+  font-weight: 600
+}
+
+.sn-ico {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+
+.sn-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block
+}
+
+.sn-lbl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0
+}
+
+.sb-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0
+}
+
+.sf-avatar {
+  width: 26px;
+  height: 26px;
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0
+}
+
+.sf-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text)
+}
+
+.sf-exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rxs);
+  color: var(--muted);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background .08s, color .08s
+}
+
+.sf-exit:hover {
+  background: var(--red-bg);
+  color: var(--red)
+}
+
+.sf-exit svg {
+  width: 16px;
+  height: 16px;
+  display: block
+}
+
+/* Hamburger toggle (hidden on desktop) */
+.sb-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sh)
+}
+
+.sb-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block
+}
+
+.sb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 40, .35);
+  z-index: 35;
+  cursor: pointer
+}
+
+/* ============ Hero metric boxes ============ */
+
+.sh-hero {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  border-bottom: 1px solid var(--border)
+}
+
+.hero-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  min-width: 0
+}
+
+/* Scostamento box */
+.hb-scost {
+  background: var(--surface2)
+}
+
+.hb-scost.ok {
+  background: var(--green-bg)
+}
+
+.hb-scost.warn {
+  background: var(--amber-bg)
+}
+
+.hb-scost.bad {
+  background: var(--red-bg)
+}
+
+.hb-scost {
+  transition: background .15s ease
+}
+
+.hb-scost {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0
+}
+
+.hb-main {
+  display: flex;
+  align-items: center;
+  gap: 14px
+}
+
+.hb-formula {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, .1)
+}
+
+.hb-scost.ok .hb-formula {
+  color: var(--green-ink)
+}
+
+.hb-scost.warn .hb-formula {
+  color: var(--amber-ink)
+}
+
+.hb-scost.bad .hb-formula {
+  color: var(--red-ink)
+}
+
+.hbf-val {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap
+}
+
+.hbf-eq {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 1px
+}
+
+.hbf-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-left: auto;
+  white-space: nowrap;
+  padding-left: 6px
+}
+
+.hb-ico {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--faint)
+}
+
+.hb-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block
+}
+
+.hb-scost.ok .hb-ico {
+  color: var(--green)
+}
+
+.hb-scost.warn .hb-ico {
+  color: var(--amber)
+}
+
+.hb-scost.bad .hb-ico {
+  color: var(--red)
+}
+
+.hb-msg {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0
+}
+
+.hb-scost.ok .hb-msg {
+  color: var(--green-ink)
+}
+
+.hb-scost.warn .hb-msg {
+  color: var(--amber-ink)
+}
+
+.hb-scost.bad .hb-msg {
+  color: var(--red-ink)
+}
+
+.hb-num-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  flex-shrink: 0
+}
+
+.hb-num {
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--text)
+}
+
+.hb-scost.ok .hb-num {
+  color: var(--green-ink)
+}
+
+.hb-scost.warn .hb-num {
+  color: var(--amber-ink)
+}
+
+.hb-scost.bad .hb-num {
+  color: var(--red-ink)
+}
+
+.hb-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 3px;
+  white-space: nowrap
+}
+
+/* Versamento box */
+.hb-versamento {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  gap: 12px;
+  border-radius: var(--rs);
+  margin: 10px 24px;
+}
+
+.hb-versamento .hb-ico {
+  color: var(--accent)
+}
+
+.hb-versamento .hb-num {
+  color: var(--text)
+}
+
+.hb-num-wrap--left {
+  align-items: flex-start;
+  text-align: left
+}
+
+.hb-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-top: 3px
+}
+
+/* ============ Daily summary — formula variant ============ */
+
+.ds-formula {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border)
+}
+
+.dff-grp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center
+}
+
+.dff-lbl {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap
+}
+
+.dff-val {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap
+}
+
+.dff-eq {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+  padding: 0 2px
+}
+
+/* ============ Input & panel improvements ============ */
+
+/* Cleaner focus ring on all inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent) !important
+}
+
+/* Remove number spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield
+}
+
+/* Larger, clearer entry inputs */
+.entry input {
+  padding: 8px 10px;
+  font-size: 14px;
+  text-align: right
+}
+
+/* Panel improvements */
+.entry .panel {
+  padding: 16px 18px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh)
+}
+
+.entry .panel h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 12px
+}
+
+/* ============ Mobile / tablet sidebar ============ */
+
+@media (max-width: 899px) {
+  body {
+    margin-left: 0
+  }
+
+  .sidebar {
+    transform: translateX(calc(-1 * var(--sidebar-w)));
+    transition: transform .22s cubic-bezier(.4, 0, .2, 1)
+  }
+
+  .sidebar.open {
+    transform: translateX(0)
+  }
+
+  .sb-toggle {
+    display: flex
+  }
+
+  .sb-overlay.open {
+    display: block
+  }
+
+  .sh-datebar {
+    padding-left: 56px
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none
+  }
+
+  .hb-scost {
+    transition: none
+  }
+}
+
+/* ============ Day metrics card groups ============ */
+
+.day-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--bg)
+}
+
+.dm-main,
+.dm-detail {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
+}
+
+.dm-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 20px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0
+}
+
+.dm-tile:last-child {
+  border-right: 0
+}
+
+.dm-l {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap
+}
+
+.dm-v {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  margin-top: 4px;
+  white-space: nowrap
+}
+
+.dm-v--sm {
+  font-size: 14px;
+  color: var(--muted)
+}
+
+@media (max-width: 760px) {
+  .day-metrics {
+    padding: 10px 16px;
+    gap: 8px
+  }
+
+  .dm-tile {
+    padding: 10px 14px
+  }
+
+  .dm-v {
+    font-size: 15px
+  }
 }
