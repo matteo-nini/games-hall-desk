@@ -176,6 +176,14 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
       <a href="?data=<?= $next ?>" aria-label="Giorno successivo">&#9654;</a>
     </div>
     <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span>
+
+    <div class="sh-tabbar">
+    <div class="tabs" role="tablist" aria-label="Selezione turno">
+      <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
+      <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
+    </div>
+    <?php if ($anyEdit): ?><button style="margin-left: auto;" type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
+  </div>
   </div>
 
   <div class="sh-hero">
@@ -205,18 +213,7 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
     </div>
   </div>
 
-  <div class="sh-tabbar">
-    <div class="tabs" role="tablist" aria-label="Selezione turno">
-      <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
-      <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
-    </div>
-    <?php if ($anyEdit): ?><button type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
-  </div>
-
-</div>
-<?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
-
-<div class="day-metrics" aria-label="Riepilogo giornata">
+  <div class="day-metrics" aria-label="Riepilogo giornata">
   <div class="dm-main">
     <div class="dm-tile"><span class="dm-l">Cassetto</span><span class="dm-v" id="m-cassetto">0,00</span></div>
     <div class="dm-tile"><span class="dm-l">Bancomat</span><span class="dm-v" id="g-bancomat">0,00</span></div>
@@ -229,6 +226,9 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
     <div class="dm-tile"><span class="dm-l">SPIELO</span><span class="dm-v dm-v--sm" id="g-SPIELO">0,00</span></div>
   </div>
 </div>
+
+</div>
+<?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
 
 <form method="post" id="frm">
 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
