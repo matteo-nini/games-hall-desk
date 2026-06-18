@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-18T00:00:00Z",
+  "title": "Design System: Games Palace Desk",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Blu Operativo",
+        "canonical": "oklch(51% 0.21 264)",
+        "tonalRamp": [
+          "oklch(20% 0.21 264)",
+          "oklch(28% 0.21 264)",
+          "oklch(36% 0.21 264)",
+          "oklch(44% 0.21 264)",
+          "oklch(51% 0.21 264)",
+          "oklch(62% 0.16 264)",
+          "oklch(76% 0.10 264)",
+          "oklch(92% 0.04 264)"
+        ]
+      },
+      "accent-weak": {
+        "role": "primary-container",
+        "displayName": "Blu Operativo (tint)",
+        "canonical": "oklch(92% 0.04 264)",
+        "tonalRamp": []
+      },
+      "accent-ink": {
+        "role": "primary-on-container",
+        "displayName": "Blu Operativo (ink)",
+        "canonical": "oklch(36% 0.21 264)",
+        "tonalRamp": []
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Page Canvas",
+        "canonical": "oklch(95% 0.015 248)",
+        "tonalRamp": [
+          "oklch(35% 0.015 248)",
+          "oklch(47% 0.015 248)",
+          "oklch(57% 0.015 248)",
+          "oklch(67% 0.015 248)",
+          "oklch(77% 0.015 248)",
+          "oklch(85% 0.012 248)",
+          "oklch(91% 0.010 248)",
+          "oklch(95% 0.015 248)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Panel Surface",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": []
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Metric Surface",
+        "canonical": "oklch(97% 0.008 248)",
+        "tonalRamp": []
+      },
+      "surface-3": {
+        "role": "neutral",
+        "displayName": "Tab Container",
+        "canonical": "oklch(95% 0.012 248)",
+        "tonalRamp": []
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(18% 0.03 240)",
+        "tonalRamp": [
+          "oklch(10% 0.03 240)",
+          "oklch(18% 0.03 240)",
+          "oklch(30% 0.02 240)",
+          "oklch(42% 0.02 240)",
+          "oklch(55% 0.02 240)",
+          "oklch(68% 0.01 240)",
+          "oklch(82% 0.01 240)",
+          "oklch(95% 0.01 240)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "oklch(53% 0.03 248)",
+        "tonalRamp": []
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint Text",
+        "canonical": "oklch(68% 0.02 248)",
+        "tonalRamp": []
+      },
+      "status-ok": {
+        "role": "secondary",
+        "displayName": "Status Ok",
+        "canonical": "oklch(55% 0.17 155)",
+        "tonalRamp": [
+          "oklch(20% 0.17 155)",
+          "oklch(30% 0.17 155)",
+          "oklch(40% 0.17 155)",
+          "oklch(55% 0.17 155)",
+          "oklch(65% 0.14 155)",
+          "oklch(75% 0.10 155)",
+          "oklch(85% 0.07 155)",
+          "oklch(93% 0.04 155)"
+        ]
+      },
+      "status-bad": {
+        "role": "tertiary",
+        "displayName": "Status Bad",
+        "canonical": "oklch(51% 0.21 25)",
+        "tonalRamp": [
+          "oklch(20% 0.21 25)",
+          "oklch(30% 0.21 25)",
+          "oklch(40% 0.21 25)",
+          "oklch(51% 0.21 25)",
+          "oklch(62% 0.17 25)",
+          "oklch(72% 0.12 25)",
+          "oklch(83% 0.07 25)",
+          "oklch(93% 0.03 25)"
+        ]
+      },
+      "status-warn": {
+        "role": "tertiary",
+        "displayName": "Status Warn",
+        "canonical": "oklch(52% 0.15 60)",
+        "tonalRamp": [
+          "oklch(20% 0.15 60)",
+          "oklch(30% 0.15 60)",
+          "oklch(40% 0.15 60)",
+          "oklch(52% 0.15 60)",
+          "oklch(63% 0.12 60)",
+          "oklch(74% 0.09 60)",
+          "oklch(85% 0.06 60)",
+          "oklch(94% 0.03 60)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page identity: sala name, login title. One instance per screen." },
+      "headline": { "displayName": "Headline", "purpose": "Turn-level headings (Mattino / Sera). One or two per section." },
+      "title": { "displayName": "Title", "purpose": "Panel h3 headers. Internal workspace label." },
+      "body": { "displayName": "Body", "purpose": "Field values, labels, prose. 65ch max for guide text." },
+      "label": { "displayName": "Label", "purpose": "Uppercase section dividers within panels. Not for page-level eyebrows." },
+      "data": { "displayName": "Data", "purpose": "Monetary values and KPI numbers. Always tabular-nums." }
+    },
+    "shadows": [
+      {
+        "name": "ambient-panel",
+        "value": "0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05)",
+        "purpose": "The only shadow in the system. Applied to panels, cards, statusbar, login box. Never varied or escalated."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "0.12s ease",
+        "purpose": "Border color, box-shadow, background for input focus and button hover states."
+      },
+      {
+        "name": "toast-in",
+        "value": "opacity 0.35s ease, transform 0.35s ease",
+        "purpose": "Toast appear: fade in + translateY(-10px) to 0. Only choreographed motion in the system."
+      },
+      {
+        "name": "details-chevron",
+        "value": "transform 0.15s ease",
+        "purpose": "Details element disclosure triangle rotation."
+      }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "640px", "purpose": "Status bar comparison cluster wraps to full width." },
+      { "name": "tablet", "value": "760px", "purpose": "Entry grid collapses from 2-column to 1-column." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action: save turn, confirm form. Blu Operativo fill.",
+      "html": "<button class=\"ds-btn-primary\">Salva turno</button>",
+      "css": ".ds-btn-primary { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 10px 18px; border: 1px solid #3b5bdb; background: #3b5bdb; color: #fff; transition: filter .12s; white-space: nowrap; } .ds-btn-primary:hover { filter: brightness(.95); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px #e9edfd; } .ds-btn-primary:disabled { opacity: .5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action: date nav, topbar controls. White fill, ink text.",
+      "html": "<button class=\"ds-btn-ghost\">← Giorno precedente</button>",
+      "css": ".ds-btn-ghost { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 10px 18px; border: 1px solid #d3d9e6; background: #ffffff; color: #1d2733; transition: filter .12s; } .ds-btn-ghost:hover { filter: brightness(.97); background: #f6f8fc; } .ds-btn-ghost:focus-visible { outline: none; border-color: #3b5bdb; box-shadow: 0 0 0 3px #e9edfd; } .ds-btn-ghost:disabled { opacity: .5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Numeric Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Currency/numeric entry field. Right-aligned, fixed 110px width.",
+      "html": "<input class=\"ds-input-number\" type=\"number\" value=\"1250.00\" />",
+      "css": ".ds-input-number { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-variant-numeric: tabular-nums; padding: 8px 10px; border: 1px solid #d3d9e6; border-radius: 8px; background: #ffffff; color: #1d2733; width: 110px; text-align: right; transition: border-color .12s, box-shadow .12s; } .ds-input-number:focus { outline: none; border-color: #3b5bdb; box-shadow: 0 0 0 3px #e9edfd; } .ds-input-number:disabled { background: #eef2f8; color: #69748a; }"
+    },
+    {
+      "name": "Panel / Card",
+      "kind": "card",
+      "refersTo": "button-primary",
+      "description": "Primary data-entry and display workspace. White surface, ambient shadow.",
+      "html": "<div class=\"ds-panel\"><h3 class=\"ds-panel-title\"><span class=\"ds-panel-ic\">◈</span> Contanti</h3><p class=\"ds-panel-body\">Inserisci i tagli di banconote e monete ricevute durante il turno.</p></div>",
+      "css": ".ds-panel { background: #ffffff; border: 1px solid #e4e8f0; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05); } .ds-panel-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; color: #1d2733; } .ds-panel-ic { color: #3b5bdb; } .ds-panel-body { font-size: 14px; color: #69748a; margin: 0; line-height: 1.5; }"
+    },
+    {
+      "name": "Mini Metric Card",
+      "kind": "card",
+      "refersTo": "button-ghost",
+      "description": "Compact read-only calculated output (Cassetto, Versamento, Scostamento). --surface-2 background signals computed, not entered.",
+      "html": "<div class=\"ds-mini\"><div class=\"ds-mini-l\">Totale Cassa</div><div class=\"ds-mini-v\">€ 3.248,50</div></div>",
+      "css": ".ds-mini { background: #f6f8fc; border-radius: 10px; padding: 10px 12px; } .ds-mini-l { font-size: 12px; color: #69748a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-mini-v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; color: #1d2733; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-mini.ds-mini-err .ds-mini-v { color: #cf3535; } .ds-mini.ds-mini-err { background: #fbe9e9; }"
+    },
+    {
+      "name": "Status Bar (Ok)",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Primary operator communication. Shows reconciliation state. One of three states: ok / warn / bad.",
+      "html": "<div class=\"ds-statusbar ds-statusbar-ok\"><div class=\"ds-sb-ico\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg></div><div><div class=\"ds-sb-big\">€ 0,10</div><div class=\"ds-sb-sub\">Scostamento — in quadratura</div></div></div>",
+      "css": ".ds-statusbar { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 10px; border: 1px solid; box-shadow: 0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05); } .ds-sb-ico { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; } .ds-sb-big { font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-sb-sub { font-size: 13px; color: #69748a; } .ds-statusbar-ok { background: #e6f6ec; border-color: #bfe6cd; } .ds-statusbar-ok .ds-sb-ico { background: #15924f; } .ds-statusbar-ok .ds-sb-big { color: #0f6b3a; }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "button-ghost",
+      "description": "Open/closed day status indicator. Two states: open (green) and closed (muted).",
+      "html": "<span class=\"ds-badge ds-badge-open\">Aperta</span> <span class=\"ds-badge ds-badge-closed\">Chiusa</span>",
+      "css": ".ds-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: inline-block; } .ds-badge-open { background: #e6f6ec; color: #15924f; } .ds-badge-closed { background: #eef2f8; color: #69748a; }"
+    },
+    {
+      "name": "Nav Link (active)",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "Top navigation link. Active state uses Blu Operativo text + 2px bottom border only — no fill.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" class=\"ds-nav-link\">Dashboard</a><a href=\"#\" class=\"ds-nav-link ds-nav-active\">Cassa</a><a href=\"#\" class=\"ds-nav-link\">Ticket</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 2px; background: #ffffff; border-bottom: 1px solid #e4e8f0; padding: 0 16px; } .ds-nav-link { color: #69748a; padding: 14px; font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; transition: color .1s; } .ds-nav-link:hover { color: #1d2733; } .ds-nav-active { color: #3b5bdb; border-bottom-color: #3b5bdb; }"
+    },
+    {
+      "name": "Turn Tab",
+      "kind": "custom",
+      "refersTo": "button-ghost",
+      "description": "Mattino / Sera switcher. Color (amber vs blue) identifies active turn before the operator reads the label.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-matt ds-tab-active\"><span>Mattino</span><small>Turno 1</small></button><button class=\"ds-tab ds-tab-sera\"><span>Sera</span><small>Turno 2</small></button></div>",
+      "css": ".ds-tabs { display: inline-flex; background: #eef2f8; border: 1px solid #e4e8f0; border-radius: 12px; padding: 5px; gap: 5px; } .ds-tab { border: 0; background: transparent; color: #69748a; font-weight: 600; padding: 9px 18px; border-radius: 9px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; min-width: 120px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-tab small { font-size: 11px; font-weight: 500; color: #98a2b3; text-transform: uppercase; letter-spacing: .4px; } .ds-tab-active { background: #ffffff; box-shadow: 0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05); } .ds-tab-active.ds-tab-matt { color: #a96a09; } .ds-tab-active.ds-tab-matt small { color: #a96a09; } .ds-tab-active.ds-tab-sera { color: #3b5bdb; } .ds-tab-active.ds-tab-sera small { color: #3b5bdb; }"
+    },
+    {
+      "name": "Toast (Success)",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Save-success feedback. The only choreographed motion in the system. Auto-dismisses after ~3s.",
+      "html": "<div class=\"ds-toast\"><div class=\"ds-toast-ico\">✓</div><span>Turno salvato</span></div>",
+      "css": ".ds-toast { position: fixed; top: 18px; right: 18px; z-index: 60; background: #15924f; color: #fff; padding: 13px 18px 13px 16px; border-radius: 12px; box-shadow: 0 8px 24px rgba(20,30,55,.18); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; animation: ds-toast-in .35s ease both; } @keyframes ds-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } @media (prefers-reduced-motion: reduce) { .ds-toast { animation: none; } } .ds-toast-ico { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Reliable Register",
+    "overview": "The visual system is built on earned trust through daily repetition. An operator opens this interface at 6 AM, again at 2 PM, and again at midnight — same layout, same color vocabulary, same status signals. The interface earns credibility by never surprising the person using it. Every session starts the same way. Every shift ends the same way. The UI disappears into the task.\n\nThis system explicitly rejects the ERP gestionale aesthetic — dense rows of same-weight text, no visual hierarchy, form controls that look and feel like 2005 software. It equally refuses the SaaS dashboard trap: metric-hero widgets, heavy accent saturation, motion that exists to impress rather than inform.\n\nWhat remains is a clean, tactile operational surface. A single cobalt accent used sparingly as a reference signal. Semantic colors (green, amber, red) that carry the entire state vocabulary without ambiguity. Surface layering that establishes hierarchy without relying on shadow drama.",
+    "keyCharacteristics": [
+      "Numeric clarity above all: tabular-nums everywhere money appears",
+      "State speaks before style: the statusbar (ok/warn/bad) is the primary UI element",
+      "Tonal layering for depth: hierarchy through surface steps, not shadow escalation",
+      "One operational accent used only for actions, selection, and focus",
+      "Touch-aware density: 44px minimum targets, compact panels"
+    ],
+    "rules": [
+      { "name": "The State Vocabulary Rule", "body": "Green, amber, and red are reserved for reconciliation state, status indicators, and feedback — never decoration. Each semantic color is always deployed as a trio: foreground + *-bg + *-border.", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "Blu Operativo (#3b5bdb) covers ≤10% of any given screen surface. Reserve it strictly for: primary action buttons, active navigation underlines, focus rings, active tab labels, and text links.", "section": "colors" },
+      { "name": "The Tabular Numbers Rule", "body": "Every monetary value, count, percentage, or quantity uses font-variant-numeric: tabular-nums without exception.", "section": "typography" },
+      { "name": "The Scale Ceiling Rule", "body": "No heading on this interface exceeds 26px. Typographic scale is a function of information hierarchy, not visual impact.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Elements at the same depth level differentiate themselves through surface color steps, not shadow variations. Shadow exclusively signals a depth-level change.", "section": "elevation" },
+      { "name": "The One Shadow Rule", "body": "There is one shadow token (--sh). It does not vary by component type, state, or context.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use font-variant-numeric: tabular-nums on every monetary value, count, or metric.",
+      "Do deploy semantic colors as a trio: foreground + *-bg + *-border.",
+      "Do keep Blu Operativo (#3b5bdb) off inactive states and decorative elements.",
+      "Do use 44px minimum height for all interactive elements.",
+      "Do maintain the three-level surface stack: page → panel → sub-panel metric.",
+      "Do keep the statusbar sticky — operators need reconciliation state visible while scrolling.",
+      "Do apply text-wrap: balance on h2–h3 headings."
+    ],
+    "donts": [
+      "Don't reproduce the ERP/gestionale aesthetic: no equal-weight text, no zero-whitespace density.",
+      "Don't add decorative motion. Motion is reserved for state transitions only.",
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe.",
+      "Don't apply a semantic color to components that don't carry state meaning.",
+      "Don't introduce a second accent hue.",
+      "Don't build metric/KPI hero layouts with big number + small label + gradient accent.",
+      "Don't display monetary values without tabular-nums.",
+      "Don't put muted or faint text on semantic tinted backgrounds."
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+<?php
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/lib.php';
+$user = require_login();
+$cfg  = config();
+$pdo  = db();
+$h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+
+$macchine_list = $pdo->query('SELECT codice FROM macchine WHERE attiva=1 ORDER BY tipo,ordine')
+                      ->fetchAll(PDO::FETCH_COLUMN);
+
+/* ---- POST ---- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    check_csrf();
+    $az = $_POST['azione'] ?? '';
+
+    if ($az === 'nuovo') {
+        $ap  = $_POST['data_apertura'] ?? date('Y-m-d');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $ap)) $ap = date('Y-m-d');
+        $mac = mb_substr(trim($_POST['macchina'] ?? ''), 0, 50);
+        $prb = mb_substr(trim($_POST['problema'] ?? ''), 0, 500);
+        $idt = mb_substr(trim($_POST['id_ticket'] ?? ''), 0, 50) ?: null;
+        if ($mac === '' || $prb === '') { header('Location: ticket.php?err=campi'); exit; }
+        $pdo->prepare('INSERT INTO ticket_assistenza (data_apertura,macchina,problema,id_ticket,stato,creato_da) VALUES (?,?,?,?,"aperto",?)')
+            ->execute([$ap, $mac, $prb, $idt, $user['id']]);
+        audit('ticket_aperto','ticket_assistenza',(int)$pdo->lastInsertId(),"$mac – $prb");
+        header('Location: ticket.php?ok=1'); exit;
+    }
+
+    if ($az === 'chiudi') {
+        $id  = (int)($_POST['id'] ?? 0);
+        $dc  = $_POST['data_chiusura'] ?? date('Y-m-d');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dc)) $dc = date('Y-m-d');
+        $ris = mb_substr(trim($_POST['risoluzione'] ?? ''), 0, 500) ?: null;
+        $idt = mb_substr(trim($_POST['id_ticket'] ?? ''), 0, 50) ?: null;
+        $pdo->prepare('UPDATE ticket_assistenza SET risoluzione=?,data_chiusura=?,id_ticket=COALESCE(id_ticket,?),stato="risolto" WHERE id=?')
+            ->execute([$ris, $dc, $idt, $id]);
+        audit('ticket_chiuso','ticket_assistenza',$id,$ris ?? '');
+        header('Location: ticket.php?ok=1'); exit;
+    }
+
+    if ($az === 'elimina' && is_responsabile()) {
+        $id = (int)($_POST['id'] ?? 0);
+        $pdo->prepare('DELETE FROM ticket_assistenza WHERE id=?')->execute([$id]);
+        audit('ticket_eliminato','ticket_assistenza',$id);
+        header('Location: ticket.php?ok=1'); exit;
+    }
+
+    header('Location: ticket.php'); exit;
+}
+
+/* ---- GET ---- */
+$filtro = in_array($_GET['filtro'] ?? '', ['aperto','risolto']) ? $_GET['filtro'] : 'tutti';
+$where  = $filtro !== 'tutti' ? 'WHERE t.stato=?' : '';
+$params = $filtro !== 'tutti' ? [$filtro] : [];
+$st = $pdo->prepare("SELECT t.*, COALESCE(NULLIF(u.nome,''),u.username) AS op
+                     FROM ticket_assistenza t LEFT JOIN utenti u ON u.id=t.creato_da
+                     $where ORDER BY (t.stato='aperto') DESC, t.id DESC");
+$st->execute($params);
+$tickets = $st->fetchAll();
+$n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato="aperto"')->fetchColumn();
+?>
+<!doctype html><html lang="it"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket assistenza</title><link rel="stylesheet" href="styles.css"></head><body>
+<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+
+<header class="topbar">
+  <div>
+    <strong>Ticket assistenza</strong>
+    <?php if ($n_aperti): ?><span class="badge-count"><?= $n_aperti ?> aperti</span><?php endif; ?>
+  </div>
+  <div class="filtri-bar">
+    <a class="filtro-btn <?= $filtro==='tutti'?'active':'' ?>" href="?filtro=tutti">Tutti</a>
+    <a class="filtro-btn <?= $filtro==='aperto'?'active':'' ?>" href="?filtro=aperto">Aperti</a>
+    <a class="filtro-btn <?= $filtro==='risolto'?'active':'' ?>" href="?filtro=risolto">Risolti</a>
+  </div>
+</header>
+
+<?php if (isset($_GET['ok'])): ?><div class="ok">Salvato</div><?php endif; ?>
+<?php if (isset($_GET['err'])): ?><div class="warn">Compilare tutti i campi obbligatori.</div><?php endif; ?>
+
+<!-- Nuovo ticket -->
+<details class="ticket-new-wrap" <?= isset($_GET['nuovo'])?'open':'' ?>>
+  <summary class="ticket-new-toggle">+ Apri nuovo ticket</summary>
+  <form method="post" class="ticket-new-form">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="nuovo">
+    <div class="tnf-grid">
+      <div class="field">
+        <label>Data apertura</label>
+        <input type="date" name="data_apertura" value="<?= date('Y-m-d') ?>" required>
+      </div>
+      <div class="field">
+        <label>Macchina *</label>
+        <input type="text" name="macchina" list="mac-list" required placeholder="es. INSP 110">
+        <datalist id="mac-list">
+          <?php foreach ($macchine_list as $m): ?><option value="<?= $h($m) ?>"><?php endforeach; ?>
+        </datalist>
+      </div>
+      <div class="field tnf-full">
+        <label>Problema *</label>
+        <input type="text" name="problema" required placeholder="descrizione del guasto o anomalia" style="width:100%">
+      </div>
+      <div class="field">
+        <label>ID Ticket (opz.)</label>
+        <input type="text" name="id_ticket" placeholder="CAS-XXXXXXX">
+      </div>
+    </div>
+    <button type="submit">Apri ticket</button>
+  </form>
+</details>
+
+<!-- Lista ticket -->
+<div class="ticket-list">
+  <?php foreach ($tickets as $t): ?>
+  <div class="ticket-card tc-<?= $h($t['stato']) ?>">
+    <div class="tc-head">
+      <span class="tc-mach"><?= $h($t['macchina']) ?></span>
+      <span class="badge <?= $t['stato']==='aperto'?'open':'closed' ?>"><?= $t['stato']==='aperto'?'APERTO':'RISOLTO' ?></span>
+    </div>
+    <div class="tc-prob"><?= $h($t['problema']) ?></div>
+    <div class="tc-meta">
+      <span>Apertura: <?= $h($t['data_apertura']) ?></span>
+      <?php if ($t['id_ticket']): ?><span>&middot; <?= $h($t['id_ticket']) ?></span><?php endif; ?>
+      <?php if ($t['op']): ?><span>&middot; <?= $h($t['op']) ?></span><?php endif; ?>
+    </div>
+    <?php if ($t['stato'] === 'risolto'): ?>
+    <div class="tc-ris">&#10003; <?= $h($t['risoluzione'] ?? '—') ?><?php if ($t['data_chiusura']): ?> &middot; <span class="tc-dch">chiuso <?= $h($t['data_chiusura']) ?></span><?php endif; ?></div>
+    <?php else: ?>
+    <details class="tc-chiudi">
+      <summary>Chiudi ticket</summary>
+      <form method="post" class="tc-chiudi-form">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="chiudi">
+        <input type="hidden" name="id" value="<?= $h($t['id']) ?>">
+        <div class="field"><label>Data chiusura</label><input type="date" name="data_chiusura" value="<?= date('Y-m-d') ?>"></div>
+        <div class="field"><label>ID Ticket (se mancante)</label><input type="text" name="id_ticket" placeholder="CAS-XXXXXXX"></div>
+        <div class="field tnf-full"><label>Risoluzione</label><input type="text" name="risoluzione" placeholder="es. Intervento remoto / Mandano tecnico" style="width:100%"></div>
+        <button type="submit">Segna risolto</button>
+      </form>
+    </details>
+    <?php endif; ?>
+    <?php if (is_responsabile()): ?>
+    <form method="post" class="tc-del" onsubmit="return confirm('Eliminare questo ticket?')">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="elimina">
+      <input type="hidden" name="id" value="<?= $h($t['id']) ?>">
+      <button type="submit" class="ghost tc-del-btn">Elimina</button>
+    </form>
+    <?php endif; ?>
+  </div>
+  <?php endforeach; ?>
+  <?php if (empty($tickets)): ?>
+  <p class="ticket-empty">Nessun ticket trovato per il filtro selezionato.</p>
+  <?php endif; ?>
+</div>
+</body></html>
