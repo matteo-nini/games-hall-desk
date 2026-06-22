@@ -3014,3 +3014,535 @@ input[type="number"] {
     font-size: 15px
   }
 }
+
+/* ============================================================
+   Turni operatori — calendario mensile + riepilogo
+   ============================================================ */
+
+/* Layout pagina: calendario + riepilogo affiancati */
+.tp-page {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+  padding: 12px 24px 40px;
+  align-items: start
+}
+
+/* ---- Sezione calendario ---- */
+.tp-cal-section {
+  min-width: 0
+}
+
+.tp-cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px
+}
+
+.tp-cal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.tp-cal-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rxs);
+  color: var(--muted);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  transition: background .08s, color .08s
+}
+
+.tp-cal-arrow:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+/* Grid calendario: 7 colonne Mon-Dom */
+.tp-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px
+}
+
+.tp-cal-dow {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--faint);
+  padding: 4px 0 6px
+}
+
+.tp-cal-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 6px 5px 5px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: relative
+}
+
+.tp-cal-cell.tp-oggi {
+  border-color: var(--accent);
+  border-width: 2px
+}
+
+.tp-cal-cell.tp-passato {
+  background: var(--bg);
+  opacity: .8
+}
+
+.tp-cal-empty {
+  background: transparent;
+  border: none
+}
+
+.tp-cal-day {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px
+}
+
+.tp-oggi-badge {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 4px
+}
+
+/* ---- Slot turno (dentro cella) ---- */
+.tp-slot {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 10px;
+  line-height: 1.3;
+  min-height: 18px;
+  position: relative
+}
+
+.tp-slot-empty {
+  background: var(--surface3);
+  color: var(--faint)
+}
+
+.tp-slot-other {
+  background: var(--surface2);
+  color: var(--muted)
+}
+
+.tp-slot-mine {
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+  font-weight: 700
+}
+
+.tp-slot-icon {
+  font-size: 8px;
+  line-height: 1;
+  flex-shrink: 0
+}
+
+.tp-slot-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0
+}
+
+.tp-slot-vuoto {
+  color: var(--faint);
+  font-size: 9px
+}
+
+.tp-slot-del {
+  display: none;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background: var(--red-bg);
+  color: var(--red);
+  border: none;
+  border-radius: 3px;
+  font-size: 9px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1
+}
+
+.tp-slot:hover .tp-slot-del {
+  display: flex
+}
+
+.tp-del-form {
+  display: contents
+}
+
+.tp-slot-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: 1px dashed var(--border2);
+  border-radius: 4px;
+  color: var(--faint);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color .08s, color .08s
+}
+
+.tp-slot-add:hover {
+  border-color: var(--accent);
+  color: var(--accent)
+}
+
+/* ---- Legenda ---- */
+.tp-legenda {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  flex-wrap: wrap
+}
+
+.tp-legenda-item {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px
+}
+
+.tp-legenda-price {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px
+}
+
+/* ---- Sezione riepilogo ---- */
+.tp-summary-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: var(--sh);
+  position: sticky;
+  top: 12px
+}
+
+.tp-summary-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin-bottom: 12px
+}
+
+.tp-summary-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border)
+}
+
+.tp-stot {
+  display: flex;
+  flex-direction: column;
+  gap: 1px
+}
+
+.tp-stot-lbl {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--faint)
+}
+
+.tp-stot-val {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1.1
+}
+
+.tp-stot-preview {
+  color: var(--muted)
+}
+
+.tp-stot-sub {
+  font-size: 10px;
+  color: var(--faint)
+}
+
+.tp-summary-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--faint);
+  margin-bottom: 6px
+}
+
+.tp-tipo-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--rpill)
+}
+
+.tp-tipo-matt {
+  background: var(--amber-bg);
+  color: var(--amber-ink)
+}
+
+.tp-tipo-sera {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.tp-earn {
+  margin-left: auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--green-ink)
+}
+
+.tp-earn-preview {
+  color: var(--muted)
+}
+
+/* ---- Inizia turno (operatore) ---- */
+.tp-inizia-wrap {
+  margin: 8px 24px 4px
+}
+
+.tp-inizia-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  box-shadow: var(--sh)
+}
+
+.tp-inizia-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1
+}
+
+.tp-inizia-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--faint)
+}
+
+.tp-inizia-turno {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.tp-inizia-stato {
+  font-size: 12px
+}
+
+.ok-text { color: var(--green-ink) }
+.warn-text { color: var(--amber-ink) }
+.muted-text { color: var(--muted) }
+
+.btn-inizia-turno {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rs);
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+  flex-shrink: 0
+}
+
+.btn-inizia-turno:hover {
+  background: var(--accent-ink)
+}
+
+.tp-gia-in-corso {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-ink);
+  background: var(--green-bg);
+  padding: 8px 14px;
+  border-radius: var(--rs)
+}
+
+.tp-fuori-msg {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 0
+}
+
+/* ---- Dialog modal ---- */
+.tp-dialog {
+  border: none;
+  border-radius: var(--r);
+  padding: 0;
+  box-shadow: 0 8px 32px rgba(15, 20, 50, .18);
+  max-width: 440px;
+  width: 90vw
+}
+
+.tp-dialog::backdrop {
+  background: rgba(15, 20, 40, .4)
+}
+
+.tp-dlg-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border)
+}
+
+.tp-dlg-header h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.tp-dlg-body {
+  padding: 16px 20px
+}
+
+.tp-dlg-turno {
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--text)
+}
+
+.tp-dlg-ok {
+  font-size: 13px;
+  color: var(--green-ink);
+  background: var(--green-bg);
+  border-radius: var(--rxs);
+  padding: 8px 12px;
+  margin: 0
+}
+
+.tp-dlg-warn {
+  font-size: 13px;
+  color: var(--amber-ink);
+  background: var(--amber-bg);
+  border-radius: var(--rxs);
+  padding: 8px 12px;
+  margin: 0
+}
+
+.tp-dlg-danger {
+  font-size: 13px;
+  color: var(--red-ink);
+  background: var(--red-bg);
+  border-radius: var(--rxs);
+  padding: 8px 12px;
+  margin: 8px 0 0
+}
+
+.tp-dlg-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border)
+}
+
+.btn-inizia-confirm {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rs);
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .1s
+}
+
+.btn-inizia-confirm:hover {
+  background: var(--accent-ink)
+}
+
+/* Mobile responsive */
+@media (max-width: 760px) {
+  .tp-page {
+    grid-template-columns: 1fr;
+    padding: 8px 16px 40px
+  }
+
+  .tp-summary-section {
+    position: static
+  }
+
+  .tp-cal-cell {
+    min-height: 52px;
+    padding: 4px 3px
+  }
+
+  .tp-cal-day {
+    font-size: 10px
+  }
+
+  .tp-slot {
+    font-size: 9px
+  }
+
+  .tp-inizia-card {
+    flex-wrap: wrap;
+    gap: 10px
+  }
+
+  .tp-inizia-wrap {
+    margin: 8px 16px 4px
+  }
+}
