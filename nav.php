@@ -25,7 +25,7 @@ function top_menu(array $user): void {
 
     $salaItems = [
         'awp.php'      => ['label' => 'AWP',      'ico' => 'awp'],
-        'ticket.php'   => ['label' => 'Ticket',   'ico' => 'ticket'],
+        'ticket.php'   => ['label' => 'Assistenze',   'ico' => 'ticket'],
         'prestiti.php' => ['label' => 'Prestiti', 'ico' => 'prestiti'],
     ];
 
