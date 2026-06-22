@@ -39,7 +39,7 @@ function updateActive(){
   var el;
   el=document.getElementById('m-cassetto'); if(el) el.textContent=eur(r.cassetto);
   el=document.getElementById('m-vers-reale'); if(el) el.textContent='€ '+eur(r.cont-r.fondo);
-  el=document.getElementById('m-versamento'); if(el) el.textContent='€ '+eur(Math.round(r.versamento/5)*5);
+  el=document.getElementById('m-versamento'); if(el) el.textContent='€ '+eur(Math.floor(r.versamento/10)*10 + ((r.versamento%10)<3 ? 0 : (r.versamento%10)<=7 ? 5 : 10)); //eur(Math.round(r.versamento/5)*5);
 }
 function recalcAll(){
   var g={bancomat:0,versamento:0,ticket:0,incasso:0,NOVO:0,INSPIRED:0,SPIELO:0};
