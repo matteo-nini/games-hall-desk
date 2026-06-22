@@ -1158,12 +1158,22 @@ table.grid {
 }
 
 .entry .panel {
-  padding: 11px 13px
+  padding: 11px 13px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh)
 }
 
 .entry .panel h3 {
-  margin: 0 0 9px;
-  font-size: 13px
+  margin: 0 0 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border)
 }
 
 .entry .field {
@@ -1354,25 +1364,6 @@ textarea.note:focus {
   margin-top: 16px
 }
 
-/* ---- giornaliero: due blocchi con carattere (override finale) ---- */
-.entry {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
-}
-
-.entry .panel {
-  padding: 16px 18px
-}
-
-.entry .panel h3 {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 4px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--accent-weak);
-  color: var(--text);
-  display: block;
-  text-wrap: balance
-}
 
 .seg {
   display: flex;
@@ -2390,26 +2381,35 @@ textarea.note:focus {
 
 .sb-nav {
   flex: 1;
-  padding: 10px 8px;
+  padding: 8px 8px 4px;
   overflow-y: auto;
   overflow-x: hidden
 }
 
-.sn-sep {
-  height: 1px;
-  background: var(--border);
-  margin: 8px 4px
+.sn-group {
+  margin-bottom: 4px
+}
+
+.sn-cat {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--faint);
+  padding: 10px 10px 3px;
+  white-space: nowrap
 }
 
 .sn-link {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-radius: var(--rxs);
   color: var(--muted);
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -2427,13 +2427,23 @@ textarea.note:focus {
   font-weight: 600
 }
 
+.sn-link.active .sn-ico {
+  color: var(--accent)
+}
+
 .sn-ico {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center
+  justify-content: center;
+  opacity: .75
+}
+
+.sn-link.active .sn-ico,
+.sn-link:hover .sn-ico {
+  opacity: 1
 }
 
 .sn-ico svg {
@@ -2448,11 +2458,22 @@ textarea.note:focus {
   min-width: 0
 }
 
+.sb-util {
+  padding: 4px 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0
+}
+
+.sb-util .sn-link {
+  font-size: 12.5px;
+  color: var(--faint)
+}
+
 .sb-foot {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-top: 1px solid var(--border);
   flex-shrink: 0
 }
@@ -2551,11 +2572,11 @@ textarea.note:focus {
 .hero-box {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
+  gap: 10px;
+  padding: 8px 14px;
   min-width: 0;
   border-radius: var(--rs);
-  margin: 10px 24px;
+  margin: 6px 14px;
 }
 
 /* Scostamento box */
@@ -2588,16 +2609,16 @@ textarea.note:focus {
 .hb-main {
   display: flex;
   align-items: center;
-  gap: 14px
+  gap: 10px
 }
 
 .hb-formula {
   display: flex;
   align-items: baseline;
   gap: 5px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(0, 0, 0, .1)
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(0, 0, 0, .08)
 }
 
 .hb-scost.ok .hb-formula {
@@ -2636,8 +2657,8 @@ textarea.note:focus {
 }
 
 .hb-ico {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   color: var(--faint)
 }
@@ -2692,7 +2713,7 @@ textarea.note:focus {
 }
 
 .hb-num {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
@@ -2725,9 +2746,9 @@ textarea.note:focus {
 .hb-versamento {
   background: var(--surface);
   border: 1px solid var(--border);
-  gap: 12px;
+  gap: 10px;
   border-radius: var(--rs);
-  margin: 10px 24px;
+  margin: 6px 14px;
 }
 
 .hb-versamento .hb-ico {
@@ -2826,21 +2847,6 @@ input[type="number"] {
   text-align: right
 }
 
-/* Panel improvements */
-.entry .panel {
-  padding: 16px 18px;
-  border-radius: var(--r);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--sh)
-}
-
-.entry .panel h3 {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0 0 12px
-}
 
 /* ============ Mobile / tablet sidebar ============ */
 
