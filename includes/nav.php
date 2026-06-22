@@ -14,6 +14,7 @@ function top_menu(array $user): void {
         'giornaliero' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
         'settimanale' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
         'mensile'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>',
+        'annuale'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 16l2-2 3 2 3-3"/></svg>',
         'awp'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
         'turni'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>',
         'ticket'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg>',
@@ -30,6 +31,7 @@ function top_menu(array $user): void {
         'cassa/giornaliero.php' => ['label' => 'Giornaliero', 'ico' => 'giornaliero'],
         'cassa/settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
         'cassa/mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
+        'cassa/annuale.php'     => ['label' => 'Annuale',     'ico' => 'annuale'],
     ];
 
     $salaItems = [
@@ -71,12 +73,10 @@ function top_menu(array $user): void {
 
   <nav class="sb-nav" aria-label="Menu principale">
 
-    <!-- Dashboard (operatori) -->
-    <?php if ($role !== 'responsabile'): ?>
+    <!-- Dashboard -->
     <div class="sn-group">
-      <?php $renderLink('account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
+      <?php $renderLink($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
     </div>
-    <?php endif; ?>
 
     <div class="sn-group">
       <span class="sn-cat">Cassa</span>

@@ -1,0 +1,258 @@
+/* ============================================================
+   Parco macchine — macchine.php
+   ============================================================ */
+
+.mach-page {
+  padding: 16px 24px 48px
+}
+
+.mach-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap
+}
+
+.mach-chips {
+  display: flex;
+  gap: 6px
+}
+
+.mach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: var(--rpill);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted)
+}
+
+/* Small type badge inside chip */
+.mach-type-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  border-radius: var(--rpill);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .3px
+}
+
+/* Group type badge */
+.mach-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--rpill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .3px
+}
+
+.mach-type-vlt {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.mach-type-awp {
+  background: var(--green-bg);
+  color: var(--green-ink)
+}
+
+/* Status badge */
+.mach-status-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: var(--rpill);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap
+}
+
+.mach-status-on {
+  background: var(--green-bg);
+  color: var(--green-ink);
+  border: 1px solid var(--green-bd)
+}
+
+.mach-status-off {
+  background: var(--surface3);
+  color: var(--faint);
+  border: 1px solid var(--border)
+}
+
+/* Table wrap */
+.mach-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden;
+  max-width: 820px
+}
+
+/* Column header row */
+.mach-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 60px 90px 72px 80px;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  align-items: center
+}
+
+/* Group separator row */
+.mach-group-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border)
+}
+
+.mach-group-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--faint)
+}
+
+/* Machine row — uses display:contents on child forms so inputs flow into the grid */
+.mach-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 60px 90px 72px 80px;
+  gap: 8px;
+  padding: 8px 14px;
+  align-items: center;
+  border-top: 1px solid var(--border)
+}
+
+.mach-row:hover {
+  background: var(--surface2)
+}
+
+.mach-row-off {
+  opacity: .5
+}
+
+.mach-col-ord {
+  text-align: right
+}
+
+/* Row inputs */
+.mach-input {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+  text-align: left
+}
+
+.mach-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent)
+}
+
+.mach-ord {
+  text-align: right
+}
+
+.mach-select {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%
+}
+
+.mach-select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent)
+}
+
+/* Row action buttons */
+.mach-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--rxs);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .08s, color .08s, border-color .08s
+}
+
+.mach-btn-save {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border)
+}
+
+.mach-btn-save:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2)
+}
+
+.mach-btn-off {
+  background: var(--surface);
+  color: var(--red-ink);
+  border: 1px solid var(--red-bd)
+}
+
+.mach-btn-off:hover {
+  background: var(--red-bg)
+}
+
+.mach-btn-on {
+  background: var(--surface);
+  color: var(--green-ink);
+  border: 1px solid var(--green-bd)
+}
+
+.mach-btn-on:hover {
+  background: var(--green-bg)
+}
+
+/* Footer hint */
+.mach-hint {
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 10px;
+  max-width: 820px
+}
+
+/* Overflow scroll on small screens */
+@media (max-width: 640px) {
+  .mach-wrap {
+    overflow-x: auto
+  }
+
+  .mach-head,
+  .mach-row {
+    min-width: 580px
+  }
+}
