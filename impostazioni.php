@@ -48,6 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'moduli') {
+        $ma = isset($_POST['modulo_assistenze']) ? '1' : '0';
+        $mp = isset($_POST['modulo_prestiti'])   ? '1' : '0';
+        $st = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $st->execute(['modulo_assistenze', $ma]);
+        $st->execute(['modulo_prestiti',   $mp]);
+        audit('impostazioni_moduli', null, null, "assistenze=$ma prestiti=$mp");
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     header('Location: impostazioni.php'); exit;
 }
 
@@ -157,6 +167,29 @@ $ps = $prezzi['sera']    ?? 70.0;
       </label>
       <div style="margin-top:12px">
         <button type="submit">Salva permessi</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===== Moduli ===== -->
+  <section class="imp-card">
+    <h2 class="imp-card-title">Moduli aggiuntivi</h2>
+    <p class="imp-card-desc">Attiva o disattiva le sezioni opzionali dell'applicazione. Quando disabilitati, i link non vengono mostrati nella barra laterale.</p>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="moduli">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label class="imp-toggle-label">
+          <input type="checkbox" name="modulo_assistenze" <?= ($sett['modulo_assistenze'] ?? '1') === '1' ? 'checked' : '' ?>>
+          Ticket assistenza — gestione manutenzione macchine
+        </label>
+        <label class="imp-toggle-label">
+          <input type="checkbox" name="modulo_prestiti" <?= ($sett['modulo_prestiti'] ?? '1') === '1' ? 'checked' : '' ?>>
+          Prestiti e rientri — tracciamento movimenti di cassa extra
+        </label>
+      </div>
+      <div style="margin-top:14px">
+        <button type="submit">Salva moduli</button>
       </div>
     </form>
   </section>

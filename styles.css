@@ -4119,3 +4119,462 @@ body {
     border-bottom: none
   }
 }
+
+/* ============================================================
+   Dialog form generico (.form-dialog)
+   ============================================================ */
+
+.form-dialog {
+  border: none;
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: 0 8px 40px rgba(0,0,0,.22);
+  padding: 0;
+  width: min(520px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto
+}
+
+.form-dialog::backdrop {
+  background: rgba(0,0,0,.45)
+}
+
+.dlg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1
+}
+
+.dlg-head strong {
+  font-size: 14px
+}
+
+.dlg-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .08s, color .08s
+}
+
+.dlg-close:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.form-dialog .ticket-new-form {
+  padding: 18px 18px 4px
+}
+
+.dlg-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 14px
+}
+
+/* ============================================================
+   Topbar action button
+   ============================================================ */
+
+.topbar-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rs);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background .1s
+}
+
+.topbar-action-btn:hover {
+  background: var(--accent-ink);
+  color: #fff
+}
+
+/* ============================================================
+   Settimanale — navigazione settimane
+   ============================================================ */
+
+.settimana-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.settimana-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background .08s
+}
+
+.settimana-nav-btn:hover {
+  background: var(--surface3)
+}
+
+.settimana-nav-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap
+}
+
+.settimana-nav-range {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px
+}
+
+.settimana-tab {
+  display: inline-block;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--rxs);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .08s, color .08s, border-color .08s
+}
+
+.settimana-tab:hover {
+  background: var(--surface3);
+  color: var(--text)
+}
+
+.settimana-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff
+}
+
+/* ============================================================
+   Topbar sub-text utility
+   ============================================================ */
+
+.topbar-sub strong {
+  color: var(--text)
+}
+
+/* ============================================================
+   User list — utenti.php
+   ============================================================ */
+
+.ul-page {
+  padding: 16px 24px 48px
+}
+
+/* Count chip in topbar */
+.ul-count-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--rpill);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted)
+}
+
+/* Table wrapper */
+.ul-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
+}
+
+.ul-table {
+  width: 100%;
+  border-collapse: collapse
+}
+
+.ul-table thead th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--faint);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap
+}
+
+.ul-th-ava { width: 52px }
+.ul-th-act { text-align: right; width: 1%; white-space: nowrap }
+
+.ul-table tbody tr + tr {
+  border-top: 1px solid var(--border)
+}
+
+.ul-row td {
+  padding: 12px 14px;
+  vertical-align: middle
+}
+
+.ul-row:hover {
+  background: var(--surface2)
+}
+
+.ul-row-off {
+  opacity: .55
+}
+
+/* Avatar */
+.ul-td-ava {
+  padding: 12px 8px 12px 16px !important;
+  width: 52px
+}
+
+.ul-ava {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none
+}
+
+.ul-ava-img {
+  object-fit: cover
+}
+
+.ul-ava-active {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.ul-ava-inactive {
+  background: var(--surface3);
+  color: var(--faint)
+}
+
+/* User name column */
+.ul-td-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px
+}
+
+/* Override: td flex needs to become block when inside table */
+.ul-table td.ul-td-user {
+  display: table-cell
+}
+
+.ul-nome {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text)
+}
+
+.ul-username {
+  display: block;
+  font-size: 11px;
+  color: var(--faint)
+}
+
+.ul-you {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: var(--rpill);
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 5px;
+  vertical-align: middle;
+  line-height: 16px
+}
+
+/* Badges */
+.ul-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--rpill);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 18px
+}
+
+.ul-role-resp {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.ul-role-op {
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border)
+}
+
+.ul-status-on {
+  background: var(--green-bg);
+  color: var(--green-ink);
+  border: 1px solid var(--green-bd)
+}
+
+.ul-status-off {
+  background: var(--surface3);
+  color: var(--faint);
+  border: 1px solid var(--border)
+}
+
+/* Actions column */
+.ul-td-act {
+  text-align: right
+}
+
+.ul-act-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-wrap: wrap
+}
+
+.ul-inline-form {
+  display: contents
+}
+
+.ul-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .08s, color .08s, border-color .08s
+}
+
+.ul-btn:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2)
+}
+
+.ul-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed
+}
+
+.ul-btn-off:not(:disabled):hover {
+  background: var(--red-bg);
+  color: var(--red-ink);
+  border-color: var(--red-bd)
+}
+
+.ul-btn-on:not(:disabled) {
+  border-color: var(--green-bd);
+  color: var(--green-ink)
+}
+
+.ul-btn-on:not(:disabled):hover {
+  background: var(--green-bg);
+  border-color: var(--green-bd);
+  color: var(--green-ink)
+}
+
+/* Empty state */
+.ul-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--faint);
+  font-size: 14px;
+  text-align: center
+}
+
+.ul-empty-icon {
+  color: var(--border2)
+}
+
+/* Dialog specifics */
+.ul-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px
+}
+
+.ul-req {
+  color: var(--red);
+  font-size: 10px
+}
+
+.ul-reset-for {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 10px;
+  background: var(--surface2);
+  border-radius: var(--rxs)
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .ul-form-grid {
+    grid-template-columns: 1fr
+  }
+
+  .ul-table thead th:nth-child(3),
+  .ul-table tbody td:nth-child(3) {
+    display: none
+  }
+
+  .ul-act-row {
+    flex-direction: column;
+    align-items: flex-end
+  }
+}

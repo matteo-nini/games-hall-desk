@@ -7,6 +7,10 @@ $pdo  = db();
 $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => number_format((float)$v, 2, ',', '.');
 
+if ((get_settings($pdo)['modulo_prestiti'] ?? '1') !== '1') {
+    header('Location: giornaliero.php'); exit;
+}
+
 /* ---- POST ---- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
@@ -105,8 +109,11 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 <?php require __DIR__ . '/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
-  <div><strong>Prestiti e rientri</strong></div>
-  <div class="prest-totale">Totale dare: <strong><?= $nv($tot_dare) ?> €</strong></div>
+  <div><strong>Prestiti e rientri</strong> <span class="topbar-sub">Totale dare: <strong><?= $nv($tot_dare) ?> €</strong></span></div>
+  <div style="display:flex;gap:8px">
+    <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-movimento').showModal()">+ Movimento</button>
+    <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-persona').showModal()">+ Persona</button>
+  </div>
 </header>
 
 <?php if (isset($_GET['ok'])): ?><div class="ok">Salvato</div><?php endif; ?>
@@ -122,9 +129,12 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
   <?php endforeach; ?>
 </div>
 
-<!-- Aggiungi movimento -->
-<details class="ticket-new-wrap" <?= isset($_GET['nuovo'])?'open':'' ?>>
-  <summary class="ticket-new-toggle">+ Aggiungi movimento</summary>
+<!-- Dialog: aggiungi movimento -->
+<dialog id="dlg-movimento" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Aggiungi movimento</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
   <form method="post" class="ticket-new-form">
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="movimento">
@@ -150,13 +160,19 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
       <div class="field"><label>Importo (€) *</label><input type="number" step="0.01" min="0.01" name="quantita" required></div>
       <div class="field tnf-full"><label>Note</label><input type="text" name="note" placeholder="annotazioni opzionali" style="width:100%"></div>
     </div>
-    <button type="submit">Salva movimento</button>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Salva movimento</button>
+    </div>
   </form>
-</details>
+</dialog>
 
-<!-- Aggiungi persona -->
-<details class="ticket-new-wrap">
-  <summary class="ticket-new-toggle">+ Aggiungi persona</summary>
+<!-- Dialog: aggiungi persona -->
+<dialog id="dlg-persona" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Aggiungi persona</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
   <form method="post" class="ticket-new-form">
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="persona">
@@ -165,9 +181,15 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
       <div class="field"><label>Saldo iniziale (€)</label><input type="number" step="0.01" name="saldo_iniziale" value="0" placeholder="0"></div>
       <div class="field tnf-full"><label>Note</label><input type="text" name="note" style="width:100%" placeholder="opzionale"></div>
     </div>
-    <button type="submit">Aggiungi persona</button>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Aggiungi persona</button>
+    </div>
   </form>
-</details>
+</dialog>
+<script>
+  <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-movimento').showModal();<?php endif; ?>
+</script>
 
 <!-- Lista movimenti -->
 <div style="margin: 20px 24px 0">

@@ -6,6 +6,10 @@ $cfg  = config();
 $pdo  = db();
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
+if ((get_settings($pdo)['modulo_assistenze'] ?? '1') !== '1') {
+    header('Location: giornaliero.php'); exit;
+}
+
 $macchine_list = $pdo->query('SELECT codice FROM macchine WHERE attiva=1 ORDER BY tipo,ordine')
                       ->fetchAll(PDO::FETCH_COLUMN);
 
@@ -75,14 +79,18 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     <a class="filtro-btn <?= $filtro==='aperto'?'active':'' ?>" href="?filtro=aperto">Aperti</a>
     <a class="filtro-btn <?= $filtro==='risolto'?'active':'' ?>" href="?filtro=risolto">Risolti</a>
   </div>
+  <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-ticket').showModal()">+ Apri ticket</button>
 </header>
 
 <?php if (isset($_GET['ok'])): ?><div class="ok">Salvato</div><?php endif; ?>
 <?php if (isset($_GET['err'])): ?><div class="warn">Compilare tutti i campi obbligatori.</div><?php endif; ?>
 
-<!-- Nuovo ticket -->
-<details class="ticket-new-wrap" <?= isset($_GET['nuovo'])?'open':'' ?>>
-  <summary class="ticket-new-toggle">+ Apri nuovo ticket</summary>
+<!-- Dialog nuovo ticket -->
+<dialog id="dlg-ticket" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Apri nuovo ticket</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
   <form method="post" class="ticket-new-form">
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="nuovo">
@@ -107,9 +115,15 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
         <input type="text" name="id_ticket" placeholder="CAS-XXXXXXX">
       </div>
     </div>
-    <button type="submit">Apri ticket</button>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Apri ticket</button>
+    </div>
   </form>
-</details>
+</dialog>
+<script>
+  <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-ticket').showModal();<?php endif; ?>
+</script>
 
 <!-- Lista ticket -->
 <div class="ticket-list">

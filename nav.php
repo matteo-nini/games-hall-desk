@@ -4,6 +4,11 @@ function top_menu(array $user): void {
     $role = $user['ruolo'] ?? '';
     $nome = htmlspecialchars($user['nome'] ?: $user['username']);
 
+    $navPdo  = db();
+    $navSett = get_settings($navPdo);
+    $modAssistenze = ($navSett['modulo_assistenze'] ?? '1') === '1';
+    $modPrestiti   = ($navSett['modulo_prestiti']   ?? '1') === '1';
+
     $ico = [
         'dashboard'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
         'giornaliero' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
@@ -27,12 +32,9 @@ function top_menu(array $user): void {
         'mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
     ];
 
-    $salaItems = [
-        'awp.php'      => ['label' => 'AWP',        'ico' => 'awp'],
-        'turni.php'    => ['label' => 'Turni',       'ico' => 'turni'],
-        'ticket.php'   => ['label' => 'Assistenze',  'ico' => 'ticket'],
-        'prestiti.php' => ['label' => 'Prestiti',    'ico' => 'prestiti'],
-    ];
+    $salaItems = ['awp.php' => ['label' => 'AWP', 'ico' => 'awp'], 'turni.php' => ['label' => 'Turni', 'ico' => 'turni']];
+    if ($modAssistenze) $salaItems['ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
+    if ($modPrestiti)   $salaItems['prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
 
     $adminItems = ($role === 'responsabile') ? [
         'macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],

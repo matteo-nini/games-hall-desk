@@ -178,13 +178,28 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
       </div>
     <?php else: ?>
       <div class="dash-hero-info">
-        <span class="dash-hero-label">Fuori orario</span>
-        <span class="dash-hero-turno">Nessun turno attivo</span>
+        <span class="dash-hero-label">Avvio manuale</span>
+        <span class="dash-hero-turno">Scegli turno da avviare</span>
         <span class="dash-hero-stato muted-text">
-          Mattino <?= $h($mInizio) ?> – <?= $h($mFine) ?> · Sera <?= $h($sInizio) ?> – <?= $h($sFine) ?>
+          M <?= $h($mInizio) ?>&ndash;<?= $h($mFine) ?> &nbsp;&middot;&nbsp; S <?= $h($sInizio) ?>&ndash;<?= $h($sFine) ?>
         </span>
       </div>
-      <a href="giornaliero.php" class="btn-dash-cassa">Apri cassa &rarr;</a>
+      <div class="dash-hero-actions" style="display:flex;gap:8px;flex-wrap:wrap">
+        <form method="post">
+          <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+          <input type="hidden" name="azione" value="inizia">
+          <input type="hidden" name="data"   value="<?= $h($oggi) ?>">
+          <input type="hidden" name="numero" value="1">
+          <button type="submit" class="btn-dash-cassa">Mattino</button>
+        </form>
+        <form method="post">
+          <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+          <input type="hidden" name="azione" value="inizia">
+          <input type="hidden" name="data"   value="<?= $h($oggi) ?>">
+          <input type="hidden" name="numero" value="2">
+          <button type="submit" class="btn-dash-inizia">Sera</button>
+        </form>
+      </div>
     <?php endif; ?>
   </div>
   <?php endif; ?>
