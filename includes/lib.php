@@ -90,13 +90,13 @@ function sums_turno(PDO $pdo, int $tid): array {
     return compact('contanti','refill','scass','ticket') + ['scass_forn'=>$scass_forn];
 }
 
-/** Riepilogo di giornata = somma dei due turni dei valori derivati. */
+/** Riepilogo finanziario di giornata: solo turno sera (numero=2). Il mattino è controllo, non contabilità. */
 function riepilogo_giornata(PDO $pdo, string $data): array {
     $z = ['bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,'incasso_vlt'=>0.0,
           'scass'=>['NOVO'=>0.0,'INSPIRED'=>0.0,'SPIELO'=>0.0]];
     $g = $pdo->prepare('SELECT id FROM giornate WHERE data=?'); $g->execute([$data]); $g = $g->fetch();
     if (!$g) return $z;
-    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=?'); $ts->execute([$g['id']]);
+    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? AND numero=2'); $ts->execute([$g['id']]);
     foreach ($ts as $t) {
         $s = sums_turno($pdo, (int)$t['id']);
         $c = calcola_turno([
