@@ -111,7 +111,7 @@ function top_menu(array $user): void {
   <div class="sb-foot">
     <a href="<?= base_url('account/profilo.php') ?>" class="sf-avatar-link" title="Profilo">
       <?php if ($foto): ?>
-        <img src="<?= base_url('uploads/profili/') . htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
+        <img src="<?= base_url('account/uploads/profili/') . htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
       <?php else: ?>
         <span class="sf-avatar" aria-hidden="true"><?= $initial ?></span>
       <?php endif; ?>
