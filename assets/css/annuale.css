@@ -1,0 +1,77 @@
+/* ============================================================
+   Vista annuale — cassa/annuale.php
+   ============================================================ */
+
+.ann-page {
+  padding: 16px 24px 48px
+}
+
+.ann-year-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px
+}
+
+.ann-year-nav strong {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 46px;
+  text-align: center
+}
+
+.ann-year-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px
+}
+
+.ann-year-form input[type=number] {
+  width: 84px;
+  font-variant-numeric: tabular-nums
+}
+
+.ann-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px
+}
+
+.ann-giorni {
+  font-variant-numeric: tabular-nums
+}
+
+.ann-riepilogo {
+  max-width: 740px
+}
+
+.ann-month-link {
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none
+}
+
+.ann-month-link:hover {
+  color: var(--accent)
+}
+
+.ann-row-empty td {
+  color: var(--faint)
+}
+
+.ann-days {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted)
+}
+
+@media (max-width: 600px) {
+  .ann-riepilogo {
+    overflow-x: auto
+  }
+
+  .ann-riepilogo .grid {
+    min-width: 520px
+  }
+}

@@ -1,43 +1,125 @@
 /* ============================================================
-   Turni operatori — calendario mensile + riepilogo
+   Turni — layout full-height + pannello destra collassabile
    ============================================================ */
 
-/* Layout pagina: calendario + riepilogo affiancati */
-.tp-page {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 16px;
-  padding: 12px 24px 40px;
-  align-items: start
+/* Month nav in topbar */
+.tp-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px
 }
 
-/* ---- Sezione calendario ---- */
-.tp-cal-section {
+/* body diventa flex column per consumare tutta l'altezza disponibile */
+body:has(.tp-layout) {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column
+}
+
+body:has(.tp-layout)>.topbar {
+  flex-shrink: 0
+}
+
+body:has(.tp-layout)>.ok,
+body:has(.tp-layout)>.warn {
+  flex-shrink: 0
+}
+
+/* ---- Layout 2 colonne ---- */
+.tp-layout {
+  display: grid;
+  grid-template-columns: 1fr 292px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden
+}
+
+/* Colonna calendario: scorribile */
+.tp-cal-col {
+  overflow-y: auto;
+  padding: 10px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-width: 0
 }
 
-.tp-cal-nav {
+/* Colonna destra: scorribile, sfondo surface */
+.tp-right {
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px
+  flex-direction: column;
+  margin: 10px 20px 10px 0;
+  border-radius: var(--r);
 }
 
-.tp-cal-title {
-  font-size: 16px;
+/* ---- Sezioni collassabili (details/summary) ---- */
+.tp-section {
+  border-bottom: 1px solid var(--border)
+}
+
+.tp-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--text)
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  gap: 8px
+}
+
+.tp-section-head::-webkit-details-marker {
+  display: none
+}
+
+.tp-section-head::after {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--faint);
+  border-bottom: 1.5px solid var(--faint);
+  transform: rotate(45deg);
+  margin-top: -2px;
+  transition: transform .15s
+}
+
+.tp-section[open]>.tp-section-head::after {
+  transform: rotate(-135deg);
+  margin-top: 2px
+}
+
+.tp-section-body {
+  padding: 4px 16px 14px
+}
+
+/* ---- Nav mese ---- */
+.tp-cal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 120px;
+  text-align: center
 }
 
 .tp-cal-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--rxs);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 11px;
   border: 1px solid var(--border);
   background: var(--surface);
   text-decoration: none;
@@ -49,11 +131,13 @@
   color: var(--text)
 }
 
-/* Grid calendario: 7 colonne Mon-Dom */
+/* ---- Griglia calendario ---- */
 .tp-cal-grid {
   display: grid;
+  grid-template-rows: 20px auto;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px
+  gap: 3px;
+  height: 100%;
 }
 
 .tp-cal-dow {
@@ -63,15 +147,15 @@
   text-transform: uppercase;
   letter-spacing: .5px;
   color: var(--faint);
-  padding: 4px 0 6px
+  padding: 3px 0 5px
 }
 
 .tp-cal-cell {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--rs);
-  padding: 6px 5px 5px;
-  min-height: 64px;
+  padding: 5px 4px 4px;
+  min-height: 58px;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -100,11 +184,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 2px
+  margin-bottom: 1px
 }
 
 .tp-oggi-badge {
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .3px;
@@ -114,17 +198,18 @@
   padding: 1px 4px
 }
 
-/* ---- Slot turno (dentro cella) ---- */
+/* ---- Slot turno ---- */
 .tp-slot {
   display: flex;
   align-items: center;
   gap: 3px;
   border-radius: 5px;
   padding: 2px 4px;
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.3;
-  min-height: 18px;
-  position: relative
+  min-height: 17px;
+  position: relative;
+  height: stretch;
 }
 
 .tp-slot-empty {
@@ -144,9 +229,35 @@
 }
 
 .tp-slot-icon {
-  font-size: 8px;
-  line-height: 1;
-  flex-shrink: 0
+  display: none
+}
+
+.tp-slot-tag {
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0
+}
+
+.tp-slot-empty .tp-slot-tag {
+  background: var(--border);
+  color: var(--faint)
+}
+
+.tp-slot-other .tp-slot-tag {
+  background: var(--surface3);
+  color: var(--muted)
+}
+
+.tp-slot-mine .tp-slot-tag {
+  background: var(--accent);
+  color: #fff
 }
 
 .tp-slot-name {
@@ -194,8 +305,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   background: none;
   border: 1px dashed var(--border2);
   border-radius: 4px;
@@ -214,15 +325,15 @@
 .tp-legenda {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 10px;
-  flex-wrap: wrap
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px
 }
 
 .tp-legenda-item {
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px
+  padding: 2px 7px;
+  border-radius: var(--rxs)
 }
 
 .tp-legenda-price {
@@ -231,32 +342,83 @@
   font-size: 11px
 }
 
-/* ---- Sezione riepilogo ---- */
-.tp-summary-section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px;
-  box-shadow: var(--sh);
-  position: sticky;
-  top: 12px
+/* ---- Turno corrente (operatore) ---- */
+.tp-inizia-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px
 }
 
-.tp-summary-title {
-  font-size: 12px;
+.tp-inizia-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px
+}
+
+.tp-inizia-turno {
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  color: var(--muted);
-  margin-bottom: 12px
+  color: var(--text)
 }
 
+.tp-inizia-stato {
+  font-size: 12px
+}
+
+.ok-text {
+  color: var(--green-ink)
+}
+
+.warn-text {
+  color: var(--amber-ink)
+}
+
+.muted-text {
+  color: var(--muted)
+}
+
+.btn-inizia-turno {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rs);
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .12s;
+  align-self: flex-start
+}
+
+.btn-inizia-turno:hover {
+  background: var(--accent-ink)
+}
+
+.tp-gia-in-corso {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-ink);
+  background: var(--green-bg);
+  padding: 7px 12px;
+  border-radius: var(--rxs)
+}
+
+.tp-fuori-msg {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55
+}
+
+/* ---- Riepilogo guadagni ---- */
 .tp-summary-totals {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border)
 }
 
@@ -267,7 +429,7 @@
 }
 
 .tp-stot-lbl {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .4px;
@@ -275,7 +437,7 @@
 }
 
 .tp-stot-val {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -297,9 +459,10 @@
   text-transform: uppercase;
   letter-spacing: .5px;
   color: var(--faint);
-  margin-bottom: 6px
+  margin-bottom: 5px
 }
 
+/* ---- Badges tipo turno ---- */
 .tp-tipo-badge {
   font-size: 10px;
   font-weight: 700;
@@ -321,93 +484,12 @@
   margin-left: auto;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--green-ink)
 }
 
 .tp-earn-preview {
   color: var(--muted)
-}
-
-/* ---- Inizia turno (operatore) ---- */
-.tp-inizia-wrap {
-  margin: 8px 24px 4px
-}
-
-.tp-inizia-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 14px 18px;
-  box-shadow: var(--sh)
-}
-
-.tp-inizia-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1
-}
-
-.tp-inizia-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  color: var(--faint)
-}
-
-.tp-inizia-turno {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text)
-}
-
-.tp-inizia-stato {
-  font-size: 12px
-}
-
-.ok-text { color: var(--green-ink) }
-.warn-text { color: var(--amber-ink) }
-.muted-text { color: var(--muted) }
-
-.btn-inizia-turno {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--rs);
-  padding: 10px 22px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background .12s;
-  flex-shrink: 0
-}
-
-.btn-inizia-turno:hover {
-  background: var(--accent-ink)
-}
-
-.tp-gia-in-corso {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--green-ink);
-  background: var(--green-bg);
-  padding: 8px 14px;
-  border-radius: var(--rs)
-}
-
-.tp-fuori-msg {
-  font-size: 13px;
-  color: var(--muted);
-  padding: 10px 0
 }
 
 /* ---- Dialog modal ---- */
@@ -496,19 +578,26 @@
   background: var(--accent-ink)
 }
 
-/* Mobile responsive */
+/* ---- Mobile ---- */
 @media (max-width: 760px) {
-  .tp-page {
+  .tp-layout {
     grid-template-columns: 1fr;
-    padding: 8px 16px 40px
+    height: auto !important;
+    overflow: visible
   }
 
-  .tp-summary-section {
-    position: static
+  .tp-cal-col {
+    overflow-y: visible;
+    padding: 8px 12px 16px
+  }
+
+  .tp-right {
+    border-left: none;
+    border-top: 1px solid var(--border)
   }
 
   .tp-cal-cell {
-    min-height: 52px;
+    min-height: 50px;
     padding: 4px 3px
   }
 
@@ -520,45 +609,7 @@
     font-size: 9px
   }
 
-  .tp-inizia-card {
-    flex-wrap: wrap;
-    gap: 10px
+  .tp-month-nav .tp-cal-title {
+    min-width: auto
   }
-
-  .tp-inizia-wrap {
-    margin: 8px 16px 4px
-  }
-}
-/* ============================================================
-   Calendario turni — restyling (no emoji, celle pulite)
-   ============================================================ */
-
-.tp-slot-icon { display: none }
-
-.tp-slot-tag {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  font-size: 8px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0
-}
-
-.tp-slot-empty .tp-slot-tag {
-  background: var(--border);
-  color: var(--faint)
-}
-
-.tp-slot-other .tp-slot-tag {
-  background: var(--surface3);
-  color: var(--muted)
-}
-
-.tp-slot-mine .tp-slot-tag {
-  background: var(--accent);
-  color: #fff
 }

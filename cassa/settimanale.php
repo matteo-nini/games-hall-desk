@@ -72,9 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => ($v == 0 ? '' : rtrim(rtrim(number_format((float)$v, 2, '.', ''), '0'), '.'));
 $tot     = array_fill_keys(fornitori(), ['g' => 0, 'p' => 0, 'i' => 0]);
-$tot_banc = 0;
-$tot_vers = 0;
-$rows     = [];
+$tot_banc   = 0;
+$tot_vers   = 0;
+$tot_ticket = 0;
+$rows       = [];
 foreach ($giorni as $d) {
     $bw  = betwin_giorno($pdo, $d);
     $ri  = riepilogo_giornata($pdo, $d);
@@ -84,8 +85,9 @@ foreach ($giorni as $d) {
         $tot[$f]['p'] += $bw[$f]['pagato'];
         $tot[$f]['i'] += $ri['scass'][$f];
     }
-    $tot_banc += $ri['bancomat'];
-    $tot_vers += $ri['versamento'];
+    $tot_banc   += $ri['bancomat'];
+    $tot_vers   += arrotonda_versamento($ri['versamento']);
+    $tot_ticket += $ri['ticket'];
 }
 $pct = fn($p, $g) => $g > 0 ? number_format($p / $g * 100, 1, ',', '.') . '%' : '—';
 $tg = array_sum(array_column($tot, 'g'));
@@ -100,7 +102,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     header('Content-Disposition: attachment; filename="' . $fname . '"');
     echo "\xEF\xBB\xBF"; // BOM UTF-8
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['Data', 'Fornitore', 'Giocato', 'Pagato', 'Inserito', 'Payout%', 'Bancomat', 'Versamento'], ';');
+    fputcsv($out, ['Data', 'Fornitore', 'Giocato', 'Pagato', 'Inserito', 'Payout%', 'Bancomat', 'Ticket', 'Versamento'], ';');
     foreach ($giorni as $d) {
         $bw = $rows[$d]['bw'];
         $ri = $rows[$d]['ri'];
@@ -111,8 +113,9 @@ if (($_GET['export'] ?? '') === 'csv') {
                 number_format($bw[$f]['pagato'],  2, ',', '.'),
                 number_format($ri['scass'][$f],   2, ',', '.'),
                 $pct($bw[$f]['pagato'], $bw[$f]['giocato']),
-                $first ? number_format($ri['bancomat'],    2, ',', '.') : '',
-                $first ? number_format($ri['versamento'],  2, ',', '.') : '',
+                $first ? number_format($ri['bancomat'],                      2, ',', '.') : '',
+                $first ? number_format($ri['ticket'],                        2, ',', '.') : '',
+                $first ? number_format(arrotonda_versamento($ri['versamento']), 2, ',', '.') : '',
             ];
             fputcsv($out, $row, ';');
             $first = false;
@@ -120,7 +123,8 @@ if (($_GET['export'] ?? '') === 'csv') {
     }
     fputcsv($out, [], ';');
     fputcsv($out, ['TOTALI', '', number_format($tg, 2, ',', '.'), number_format($tp, 2, ',', '.'), '', $pct($tp, $tg),
-                   number_format($tot_banc, 2, ',', '.'), number_format($tot_vers, 2, ',', '.')], ';');
+                   number_format($tot_banc, 2, ',', '.'), number_format($tot_ticket, 2, ',', '.'),
+                   number_format($tot_vers, 2, ',', '.')], ';');
     fclose($out);
     exit;
 }
@@ -164,7 +168,8 @@ if (($_GET['export'] ?? '') === 'csv') {
     $dg  = 0; $dp = 0;
     foreach (fornitori() as $f) { $dg += $bw[$f]['giocato']; $dp += $bw[$f]['pagato']; }
     $ricavo  = $dg - $dp;
-    $cassa   = $ri['bancomat'] + $ri['versamento'];
+    $vers    = arrotonda_versamento($ri['versamento']);
+    $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
   <section class="turno t1" style="flex-basis:320px">
     <h2><?= $h(date('D d/m', strtotime($d))) ?></h2>
@@ -182,7 +187,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     </table>
     <table class="grid">
       <tr><td>Bancomat</td><td class="rt"><?= eur($ri['bancomat']) ?></td></tr>
-      <tr><td>Versamento</td><td class="rt"><?= eur($ri['versamento']) ?></td></tr>
+      <tr><td>Versamento</td><td class="rt"><?= eur($vers) ?></td></tr>
       <tr><td>Ricavo (G&minus;P)</td><td class="rt"><?= eur($ricavo) ?></td></tr>
       <tr class="<?= abs($margine) > 0.005 ? 'errore' : 'tot' ?>"><td>Margine</td><td class="rt"><?= eur($margine) ?></td></tr>
     </table>

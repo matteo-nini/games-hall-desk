@@ -1,7 +1,7 @@
 (function () {
   /* --- dialog inizia turno (operatore) --- */
-  var btnI  = document.getElementById('btn-inizia');
-  var dlgI  = document.getElementById('dlg-inizia');
+  var btnI = document.getElementById('btn-inizia');
+  var dlgI = document.getElementById('dlg-inizia');
   if (btnI && dlgI) {
     btnI.addEventListener('click', function () {
       var n         = this.dataset.n;

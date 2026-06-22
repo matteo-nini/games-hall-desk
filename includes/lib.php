@@ -8,6 +8,13 @@
 function fornitori(): array { return ['NOVO', 'INSPIRED', 'SPIELO']; }
 function tagli(): array     { return [5, 10, 20, 50, 100, 200, 500]; }
 
+/** Arrotonda il versamento al multiplo di 5 più vicino: su se resto > 2, giù altrimenti. */
+function arrotonda_versamento(float $v): float {
+    $v    = round($v, 2);
+    $base = floor($v / 5) * 5;
+    return ($v - $base) > 2.0 ? $base + 5.0 : $base;
+}
+
 function base_url(string $path = ''): string {
     static $base = null;
     if ($base === null) {
@@ -90,13 +97,13 @@ function sums_turno(PDO $pdo, int $tid): array {
     return compact('contanti','refill','scass','ticket') + ['scass_forn'=>$scass_forn];
 }
 
-/** Riepilogo di giornata = somma dei due turni dei valori derivati. */
+/** Riepilogo finanziario di giornata: solo turno sera (numero=2). Il mattino è controllo, non contabilità. */
 function riepilogo_giornata(PDO $pdo, string $data): array {
     $z = ['bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,'incasso_vlt'=>0.0,
           'scass'=>['NOVO'=>0.0,'INSPIRED'=>0.0,'SPIELO'=>0.0]];
     $g = $pdo->prepare('SELECT id FROM giornate WHERE data=?'); $g->execute([$data]); $g = $g->fetch();
     if (!$g) return $z;
-    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=?'); $ts->execute([$g['id']]);
+    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? AND numero=2'); $ts->execute([$g['id']]);
     foreach ($ts as $t) {
         $s = sums_turno($pdo, (int)$t['id']);
         $c = calcola_turno([

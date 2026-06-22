@@ -192,6 +192,31 @@ if ($migrationOk) {
     /* Permesso operatori da impostazioni */
     $opPuoModificare = setting($pdo, 'operatori_modifica_turni', '1') === '1';
 
+    /* CSV export mensile */
+    if (($_GET['export'] ?? '') === 'csv') {
+        $fname = "turni_{$anno}_{$mese}.csv";
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $fname . '"');
+        echo "\xEF\xBB\xBF";
+        $st = $pdo->prepare(
+            'SELECT tp.data, tp.numero, COALESCE(NULLIF(u.nome,""), u.username) AS nome
+             FROM turni_programmati tp
+             JOIN utenti u ON u.id = tp.operatore_id
+             WHERE tp.data BETWEEN ? AND ?
+             ORDER BY tp.data, tp.numero'
+        );
+        $st->execute([$primoGiorno, $ultimoGiorno]);
+        $byDay = [];
+        foreach ($st as $r) $byDay[$r['data']][(int)$r['numero']] = $r['nome'];
+        $f = fopen('php://output', 'w');
+        fputcsv($f, ['Data', 'Mattino', 'Sera'], ';');
+        for ($g = 1; $g <= $giorniMese; $g++) {
+            $dc = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
+            fputcsv($f, [$dc, $byDay[$dc][1] ?? '', $byDay[$dc][2] ?? ''], ';');
+        }
+        fclose($f); exit;
+    }
+
 } /* end if migrationOk */
 
 /* =========================================================
@@ -207,7 +232,18 @@ if ($migrationOk) {
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
-  <div><strong>Turni operatori</strong></div>
+  <strong>Turni operatori</strong>
+  <div class="tp-month-nav">
+    <a href="?anno=<?= $prevMese['anno'] ?>&mese=<?= $prevMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese precedente">&#9664;</a>
+    <span class="tp-cal-title"><?= $h($nomiMesi[$mese]) ?> <?= $anno ?></span>
+    <a href="?anno=<?= $nextMese['anno'] ?>&mese=<?= $nextMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese successivo">&#9654;</a>
+  </div>
+  <?php if ($migrationOk): ?>
+  <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=csv" class="topbar-action-btn btnlink">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14M10 3v10M6 9l4 4 4-4"/></svg>
+    Esporta CSV
+  </a>
+  <?php endif; ?>
 </header>
 
 <?php if (isset($_GET['ok'])): ?><div class="ok">Salvato.</div><?php endif; ?>
@@ -215,100 +251,14 @@ if ($migrationOk) {
 
 <?php if (!$migrationOk): ?>
 <div class="warn" style="margin:16px 24px;padding:14px 18px;border-radius:var(--r);font-size:13px;line-height:1.5">
-  <strong>Setup incompleto.</strong> Eseguire <code>sql/004_turni_programmati.sql</code> sul database (phpMyAdmin o CLI MySQL) per attivare questa funzione.
+  <strong>Setup incompleto.</strong> Eseguire <code>sql/004_turni_programmati.sql</code> sul database per attivare questa funzione.
 </div>
-<?php else: /* ===== migration ok — contenuto principale ===== */ ?>
+<?php else: ?>
 
-<!-- ===== CARD "INIZIA TURNO" (solo operatori) ===== -->
-<?php if (!is_responsabile()):
-    $assegnatoA  = null;
-    if ($nCorrente !== null && isset($turniOggi[$nCorrente])) {
-        $assegnatoA = (int)$turniOggi[$nCorrente]['operatore_id'] === $uid
-            ? 'me'
-            : $turniOggi[$nCorrente]['nome'];
-    }
-    $labelTurno = $nCorrente === 1 ? 'Mattino (13:00 – 19:00)'
-                : ($nCorrente === 2 ? 'Sera (19:00 – 01:00)' : null);
+<div class="tp-layout">
 
-    /* Stato reale dal giornaliero (turno già iniziato oggi?) */
-    $turnoGiornaliero = false;
-    if ($nCorrente !== null) {
-        $st = $pdo->prepare(
-            'SELECT t.operatore_id, t.iniziato_il,
-                    COALESCE(NULLIF(u.nome,""),u.username) AS nomeop
-             FROM turni t
-             JOIN giornate g ON g.id = t.giornata_id
-             LEFT JOIN utenti u ON u.id = t.operatore_id
-             WHERE g.data = ? AND t.numero = ?'
-        );
-        $st->execute([$oggi, $nCorrente]);
-        $turnoGiornaliero = $st->fetch() ?: false;
-    }
-    $giaIniziato  = $turnoGiornaliero && !empty($turnoGiornaliero['iniziato_il']) && (int)$turnoGiornaliero['operatore_id'] === $uid;
-    $altroInCorso = $turnoGiornaliero && !empty($turnoGiornaliero['iniziato_il']) && (int)($turnoGiornaliero['operatore_id'] ?? 0) !== $uid;
-?>
-<div class="tp-inizia-wrap">
-  <?php if ($nCorrente !== null): ?>
-  <div class="tp-inizia-card">
-    <div class="tp-inizia-info">
-      <span class="tp-inizia-label">Turno corrente</span>
-      <span class="tp-inizia-turno"><?= $h($labelTurno) ?></span>
-      <?php if ($assegnatoA === 'me'): ?>
-        <span class="tp-inizia-stato ok-text">Sei assegnato a questo turno</span>
-      <?php elseif ($assegnatoA !== null): ?>
-        <span class="tp-inizia-stato warn-text">Assegnato a <?= $h($assegnatoA) ?></span>
-      <?php else: ?>
-        <span class="tp-inizia-stato muted-text">Nessun operatore assegnato</span>
-      <?php endif; ?>
-    </div>
-    <?php if ($giaIniziato): ?>
-      <div class="tp-gia-in-corso">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12l5 5L20 7"/></svg>
-        Turno iniziato alle <?= $h(date('H:i', strtotime($turnoGiornaliero['iniziato_il']))) ?>
-      </div>
-    <?php else: ?>
-      <button type="button" class="btn-inizia-turno" id="btn-inizia"
-              data-n="<?= (int)$nCorrente ?>"
-              data-label="<?= $h($labelTurno) ?>"
-              data-assegnato="<?= $h($assegnatoA ?? 'nessuno') ?>"
-              data-altro-nome="<?= $h($altroInCorso ? ($turnoGiornaliero['nomeop'] ?? '') : '') ?>"
-              data-altro="<?= $altroInCorso ? '1' : '0' ?>">
-        Inizia turno
-      </button>
-    <?php endif; ?>
-  </div>
-  <?php else: ?>
-  <p class="tp-fuori-msg">Fuori orario. I turni iniziano alle 13:00 (mattino) o alle 19:00 (sera).</p>
-  <?php endif; ?>
-</div>
-
-<!-- dialog conferma inizia turno -->
-<dialog id="dlg-inizia" class="tp-dialog">
-  <form method="post" id="frm-inizia">
-    <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
-    <input type="hidden" name="azione" value="inizia">
-    <input type="hidden" name="data"   value="<?= $h($oggi) ?>">
-    <input type="hidden" name="numero" id="dlg-numero" value="">
-    <div class="tp-dlg-header"><h2>Conferma inizio turno</h2></div>
-    <div class="tp-dlg-body"  id="dlg-body"></div>
-    <div class="tp-dlg-footer">
-      <button type="button" id="dlg-cancel" class="ghost">Annulla</button>
-      <button type="submit" class="btn-inizia-confirm">Conferma e inizia</button>
-    </div>
-  </form>
-</dialog>
-<?php endif; /* !is_responsabile */ ?>
-
-<!-- ===== LAYOUT: calendario + riepilogo ===== -->
-<div class="tp-page">
-
-<!-- ===== CALENDARIO ===== -->
-<section class="tp-cal-section">
-  <div class="tp-cal-nav">
-    <a href="?anno=<?= $prevMese['anno'] ?>&mese=<?= $prevMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese precedente">&#9664;</a>
-    <h2 class="tp-cal-title"><?= $h($nomiMesi[$mese]) ?> <?= $anno ?></h2>
-    <a href="?anno=<?= $nextMese['anno'] ?>&mese=<?= $nextMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese successivo">&#9654;</a>
-  </div>
+<!-- ===== COLONNA CALENDARIO ===== -->
+<section class="tp-cal-col">
 
   <div class="tp-cal-grid">
     <?php foreach (['Lun','Mar','Mer','Gio','Ven','Sab','Dom'] as $dow): ?>
@@ -316,7 +266,6 @@ if ($migrationOk) {
     <?php endforeach; ?>
 
     <?php
-    /* celle vuote prima del 1° del mese */
     $offset = (int)date('N', strtotime($primoGiorno)) - 1;
     for ($i = 0; $i < $offset; $i++): ?>
       <div class="tp-cal-cell tp-cal-empty"></div>
@@ -412,73 +361,160 @@ if ($migrationOk) {
     <span class="tp-legenda-item tp-slot-empty">Non assegnato</span>
     <span class="tp-legenda-price">Mattino <?= $h($nv($prezzoMattino)) ?> € · Sera <?= $h($nv($prezzoSera)) ?> €</span>
   </div>
+
 </section>
 
-<!-- ===== RIEPILOGO GUADAGNI ===== -->
-<section class="tp-summary-section">
-  <h3 class="tp-summary-title">I miei turni</h3>
+<!-- ===== COLONNA DESTRA ===== -->
+<aside class="tp-right">
 
-  <div class="tp-summary-totals">
-    <div class="tp-stot">
-      <span class="tp-stot-lbl">Guadagnato</span>
-      <span class="tp-stot-val"><?= $h($nv($guadagnato)) ?> €</span>
-      <span class="tp-stot-sub">ultimi 3 mesi</span>
+<?php
+$labels  = [1 => 'Mattino', 2 => 'Sera'];
+$passati = array_values(array_filter($miei_turni, fn($t) => $t['data'] <= $oggi));
+$futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi));
+?>
+
+<!-- Turno corrente (operatori) -->
+<?php if (!is_responsabile()):
+    $assegnatoA = null;
+    if ($nCorrente !== null && isset($turniOggi[$nCorrente])) {
+        $assegnatoA = (int)$turniOggi[$nCorrente]['operatore_id'] === $uid
+            ? 'me'
+            : $turniOggi[$nCorrente]['nome'];
+    }
+    $labelTurno = $nCorrente === 1 ? 'Mattino (13:00 – 19:00)'
+                : ($nCorrente === 2 ? 'Sera (19:00 – 01:00)' : null);
+    $turnoGiornaliero = false;
+    if ($nCorrente !== null) {
+        $stTg = $pdo->prepare(
+            'SELECT t.operatore_id, t.iniziato_il,
+                    COALESCE(NULLIF(u.nome,""),u.username) AS nomeop
+             FROM turni t
+             JOIN giornate g ON g.id = t.giornata_id
+             LEFT JOIN utenti u ON u.id = t.operatore_id
+             WHERE g.data = ? AND t.numero = ?'
+        );
+        $stTg->execute([$oggi, $nCorrente]);
+        $turnoGiornaliero = $stTg->fetch() ?: false;
+    }
+    $giaIniziato  = $turnoGiornaliero && !empty($turnoGiornaliero['iniziato_il']) && (int)$turnoGiornaliero['operatore_id'] === $uid;
+    $altroInCorso = $turnoGiornaliero && !empty($turnoGiornaliero['iniziato_il']) && (int)($turnoGiornaliero['operatore_id'] ?? 0) !== $uid;
+?>
+<details class="tp-section" <?= $nCorrente !== null ? 'open' : '' ?>>
+  <summary class="tp-section-head">Turno corrente</summary>
+  <div class="tp-section-body">
+    <?php if ($nCorrente !== null): ?>
+    <div class="tp-inizia-inner">
+      <div class="tp-inizia-info">
+        <span class="tp-inizia-turno"><?= $h($labelTurno) ?></span>
+        <?php if ($assegnatoA === 'me'): ?>
+          <span class="tp-inizia-stato ok-text">Sei assegnato a questo turno</span>
+        <?php elseif ($assegnatoA !== null): ?>
+          <span class="tp-inizia-stato warn-text">Assegnato a <?= $h($assegnatoA) ?></span>
+        <?php else: ?>
+          <span class="tp-inizia-stato muted-text">Nessun operatore assegnato</span>
+        <?php endif; ?>
+      </div>
+      <?php if ($giaIniziato): ?>
+        <div class="tp-gia-in-corso">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+          Iniziato alle <?= $h(date('H:i', strtotime($turnoGiornaliero['iniziato_il']))) ?>
+        </div>
+      <?php else: ?>
+        <button type="button" class="btn-inizia-turno" id="btn-inizia"
+                data-n="<?= (int)$nCorrente ?>"
+                data-label="<?= $h($labelTurno) ?>"
+                data-assegnato="<?= $h($assegnatoA ?? 'nessuno') ?>"
+                data-altro-nome="<?= $h($altroInCorso ? ($turnoGiornaliero['nomeop'] ?? '') : '') ?>"
+                data-altro="<?= $altroInCorso ? '1' : '0' ?>">
+          Inizia turno
+        </button>
+      <?php endif; ?>
     </div>
-    <div class="tp-stot">
-      <span class="tp-stot-lbl">Previsto</span>
-      <span class="tp-stot-val tp-stot-preview"><?= $h($nv($previsto)) ?> €</span>
-      <span class="tp-stot-sub">turni futuri</span>
+    <?php else: ?>
+    <p class="tp-fuori-msg" style="margin:0">Fuori orario turni<br><span class="muted-text" style="font-size:11px">13:00–19:00 mattino · 19:00–01:00 sera</span></p>
+    <?php endif; ?>
+  </div>
+</details>
+<dialog id="dlg-inizia" class="tp-dialog">
+  <form method="post" id="frm-inizia">
+    <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="inizia">
+    <input type="hidden" name="data"   value="<?= $h($oggi) ?>">
+    <input type="hidden" name="numero" id="dlg-numero" value="">
+    <div class="tp-dlg-header"><h2>Conferma inizio turno</h2></div>
+    <div class="tp-dlg-body"  id="dlg-body"></div>
+    <div class="tp-dlg-footer">
+      <button type="button" id="dlg-cancel" class="ghost">Annulla</button>
+      <button type="submit" class="btn-inizia-confirm">Conferma e inizia</button>
+    </div>
+  </form>
+</dialog>
+<?php endif; /* !is_responsabile */ ?>
+
+<!-- Riepilogo € -->
+<details class="tp-section" open>
+  <summary class="tp-section-head">Riepilogo €</summary>
+  <div class="tp-section-body">
+    <div class="tp-summary-totals">
+      <div class="tp-stot">
+        <span class="tp-stot-lbl">Guadagnato</span>
+        <span class="tp-stot-val"><?= $h($nv($guadagnato)) ?> €</span>
+        <span class="tp-stot-sub">ultimi 3 mesi</span>
+      </div>
+      <div class="tp-stot">
+        <span class="tp-stot-lbl">Previsto</span>
+        <span class="tp-stot-val tp-stot-preview"><?= $h($nv($previsto)) ?> €</span>
+        <span class="tp-stot-sub">turni futuri</span>
+      </div>
     </div>
   </div>
+</details>
 
-  <?php
-    $passati = array_values(array_filter($miei_turni, fn($t) => $t['data'] <= $oggi));
-    $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi));
-    $labels  = [1 => 'Mattino', 2 => 'Sera'];
-  ?>
-
-  <?php if ($passati): ?>
-  <div class="tp-summary-group">
-    <div class="tp-summary-group-label">Turni effettuati</div>
+<!-- Turni effettuati -->
+<details class="tp-section">
+  <summary class="tp-section-head">Turni effettuati</summary>
+  <div class="tp-section-body">
+    <?php if ($passati): ?>
     <div class="recent-list">
     <?php foreach (array_reverse($passati) as $mt):
         $n = (int)$mt['numero']; ?>
       <div class="recent-row">
         <span class="recent-date"><?= $h(date('d/m', strtotime($mt['data']))) ?></span>
         <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $labels[$n] ?></span>
-        <span class="muted-text" style="font-size:12px"><?= $n === 1 ? '13:00–19:00' : '19:00–01:00' ?></span>
+        <span class="muted-text" style="font-size:11px"><?= $n === 1 ? '13–19' : '19–01' ?></span>
         <span class="tp-earn"><?= $h($nv($mt['prezzo'])) ?> €</span>
       </div>
     <?php endforeach; ?>
     </div>
+    <?php else: ?>
+    <p class="ticket-empty" style="font-size:12px;margin:0">Nessun turno negli ultimi 3 mesi.</p>
+    <?php endif; ?>
   </div>
-  <?php endif; ?>
+</details>
 
-  <?php if ($futuri): ?>
-  <div class="tp-summary-group" style="margin-top:12px">
-    <div class="tp-summary-group-label">Prossimi turni</div>
+<!-- Prossimi turni -->
+<details class="tp-section" open>
+  <summary class="tp-section-head">Prossimi turni</summary>
+  <div class="tp-section-body">
+    <?php if ($futuri): ?>
     <div class="recent-list">
     <?php foreach ($futuri as $mt):
         $n = (int)$mt['numero']; ?>
       <div class="recent-row">
         <span class="recent-date"><?= $h(date('d/m', strtotime($mt['data']))) ?></span>
         <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $labels[$n] ?></span>
-        <span class="muted-text" style="font-size:12px"><?= $n === 1 ? '13:00–19:00' : '19:00–01:00' ?></span>
+        <span class="muted-text" style="font-size:11px"><?= $n === 1 ? '13–19' : '19–01' ?></span>
         <span class="tp-earn tp-earn-preview"><?= $h($nv($mt['prezzo'])) ?> €</span>
       </div>
     <?php endforeach; ?>
     </div>
+    <?php else: ?>
+    <p class="ticket-empty" style="font-size:12px;margin:0">Nessun turno programmato.</p>
+    <?php endif; ?>
   </div>
-  <?php endif; ?>
+</details>
 
-  <?php if (empty($miei_turni)): ?>
-  <p class="ticket-empty" style="margin-top:8px">Nessun turno nei prossimi 3 mesi.</p>
-  <?php endif; ?>
-</section>
-
-</div><!-- /.tp-page -->
-
-<!-- ===== DIALOG ASSEGNA (solo responsabile) ===== -->
+<!-- Dialog assegna (responsabile) + suo spazio destra -->
 <?php if (is_responsabile()): ?>
 <dialog id="dlg-assegna" class="tp-dialog">
   <form method="post" id="frm-assegna">
@@ -505,6 +541,10 @@ if ($migrationOk) {
   </form>
 </dialog>
 <?php endif; ?>
+
+</aside>
+
+</div><!-- /.tp-layout -->
 
 <script src="<?= base_url('assets/js/turni.js') ?>"></script>
 
