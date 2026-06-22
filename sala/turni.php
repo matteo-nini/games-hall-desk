@@ -198,8 +198,6 @@ if ($migrationOk) {
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $fname . '"');
         echo "\xEF\xBB\xBF";
-        $f = fopen('php://output', 'w');
-        fputcsv($f, ['Data', 'Tipo', 'Orario', 'Operatore'], ';');
         $st = $pdo->prepare(
             'SELECT tp.data, tp.numero, COALESCE(NULLIF(u.nome,""), u.username) AS nome
              FROM turni_programmati tp
@@ -208,11 +206,13 @@ if ($migrationOk) {
              ORDER BY tp.data, tp.numero'
         );
         $st->execute([$primoGiorno, $ultimoGiorno]);
-        $csvLabels = [1 => 'Mattino', 2 => 'Sera'];
-        $csvOrari  = [1 => '13:00-19:00', 2 => '19:00-01:00'];
-        foreach ($st as $r) {
-            $n = (int)$r['numero'];
-            fputcsv($f, [$r['data'], $csvLabels[$n] ?? '', $csvOrari[$n] ?? '', $r['nome']], ';');
+        $byDay = [];
+        foreach ($st as $r) $byDay[$r['data']][(int)$r['numero']] = $r['nome'];
+        $f = fopen('php://output', 'w');
+        fputcsv($f, ['Data', 'Mattino', 'Sera'], ';');
+        for ($g = 1; $g <= $giorniMese; $g++) {
+            $dc = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
+            fputcsv($f, [$dc, $byDay[$dc][1] ?? '', $byDay[$dc][2] ?? ''], ';');
         }
         fclose($f); exit;
     }

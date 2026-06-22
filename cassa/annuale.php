@@ -73,7 +73,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $out = fopen('php://output', 'w');
     fputcsv($out, ['Mese', 'Giorni', 'Incasso VLT', 'Ticket', 'Bancomat', 'Versamento'], ';');
     for ($m = 1; $m <= 12; $m++) {
-        $vers = $scassM[$m] - $bancM[$m] - $ticketM[$m];
+        $vers = arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
         fputcsv($out, [
             $mesi[$m],
             $giorniM[$m],
@@ -90,7 +90,10 @@ if (($_GET['export'] ?? '') === 'csv') {
 $totScass  = array_sum($scassM);
 $totTicket = array_sum($ticketM);
 $totBanc   = array_sum($bancM);
-$totVers   = $totScass - $totBanc - $totTicket;
+$totVers = 0;
+for ($m = 1; $m <= 12; $m++) {
+    $totVers += arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
+}
 $totGiorni = array_sum($giorniM);
 ?>
 <!doctype html><html lang="it"><head>
@@ -157,7 +160,7 @@ $totGiorni = array_sum($giorniM);
       </thead>
       <tbody>
         <?php for ($m = 1; $m <= 12; $m++):
-          $vers    = $scassM[$m] - $bancM[$m] - $ticketM[$m];
+          $vers    = arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
           $hasData = $giorniM[$m] > 0;
         ?>
         <tr class="<?= $hasData ? '' : 'ann-row-empty' ?>">
