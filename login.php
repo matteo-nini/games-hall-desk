@@ -1,13 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/lib.php';
 start_session();
 $cfg = config();
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     if (login(trim($_POST['username'] ?? ''), $_POST['password'] ?? '')) {
-        $dest = is_responsabile() ? base_url('cassa/giornaliero.php') : base_url('account/dashboard.php');
+        $dest = is_responsabile() ? 'cassa/giornaliero.php' : 'account/dashboard.php';
         header('Location: ' . $dest); exit;
     }
     $err = 'Credenziali non valide.';

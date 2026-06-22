@@ -1,4 +1,5 @@
 <?php
+ob_start();
 // Autenticazione minima basata su sessione.
 require_once __DIR__ . '/db.php';
 
@@ -22,7 +23,15 @@ function current_user(): ?array {
 
 function require_login(): array {
     $u = current_user();
-    if (!$u) { header('Location: ' . base_url('login.php')); exit; }
+    if (!$u) {
+        $appRoot   = realpath(dirname(__DIR__));
+        $scriptDir = realpath(dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+        $depth     = ($appRoot && $scriptDir && $scriptDir !== $appRoot && str_starts_with($scriptDir, $appRoot))
+            ? substr_count(ltrim(str_replace($appRoot, '', $scriptDir), '/\\'), DIRECTORY_SEPARATOR) + 1
+            : 0;
+        header('Location: ' . str_repeat('../', $depth) . 'login.php');
+        exit;
+    }
     return $u;
 }
 

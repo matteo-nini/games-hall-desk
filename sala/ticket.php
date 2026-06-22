@@ -7,7 +7,7 @@ $pdo  = db();
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
 if ((get_settings($pdo)['modulo_assistenze'] ?? '1') !== '1') {
-    header('Location: ' . base_url('cassa/giornaliero.php')); exit;
+    header('Location: ../cassa/giornaliero.php'); exit;
 }
 
 $macchine_list = $pdo->query('SELECT codice FROM macchine WHERE attiva=1 ORDER BY tipo,ordine')

@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$uid, (int)$t['id']]);
             audit('inizio_turno', 'turni', (int)$t['id'], "turno=$n data=$data via=dashboard");
         }
-        header('Location: ' . base_url('cassa/giornaliero.php')); exit;
+        header('Location: ../cassa/giornaliero.php'); exit;
     }
-    header('Location: ' . base_url('account/dashboard.php')); exit;
+    header('Location: dashboard.php'); exit;
 }
 
 /* =========================================================

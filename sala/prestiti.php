@@ -8,7 +8,7 @@ $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => number_format((float)$v, 2, ',', '.');
 
 if ((get_settings($pdo)['modulo_prestiti'] ?? '1') !== '1') {
-    header('Location: ' . base_url('cassa/giornaliero.php')); exit;
+    header('Location: ../cassa/giornaliero.php'); exit;
 }
 
 /* ---- POST ---- */
