@@ -4,7 +4,7 @@
 //  poi ELIMINARE questo file dal server.
 // =====================================================================
 require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/includes/auth.php';
 
 $n = (int) db()->query('SELECT COUNT(*) AS c FROM utenti')->fetch()['c'];
 $msg = '';
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $n === 0) {
 ?>
 <!doctype html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Setup</title><link rel="stylesheet" href="styles.css"></head><body>
+<title>Setup</title><link rel="stylesheet" href="assets/css/core.css"></head><body>
 <div class="login-box">
 <h1>Setup iniziale</h1>
 <?php if ($msg): ?><p class="<?= str_contains($msg,'creato')?'ok':'err' ?>"><?= htmlspecialchars($msg) ?></p><?php endif; ?>

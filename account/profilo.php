@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -115,9 +115,10 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Profilo</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/profilo.css') ?>">
 </head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
   <div><strong>Profilo</strong></div>

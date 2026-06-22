@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $cfg  = config();
 $pdo  = db();
@@ -37,8 +37,8 @@ $mesi = nomi_mesi();
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>"></head><body>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar no-print">
   <div><strong><?= $h($cfg['nome_sala']) ?></strong> · Riepilogo mensile</div>
   <form class="nav" method="get">
@@ -48,7 +48,7 @@ $mesi = nomi_mesi();
   </form>
   <div>
     <button onclick="window.print()">Stampa / PDF</button>
-    <a class="btnlink" href="export.php?anno=<?= $anno ?>&mese=<?= $mese ?>">Export CSV</a>
+    <a class="btnlink" href="<?= base_url('export.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>">Export CSV</a>
   </div>
 </header>
 

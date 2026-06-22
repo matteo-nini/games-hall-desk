@@ -1,0 +1,67 @@
+/* ============================================================
+   Settimanale — navigazione settimane
+   ============================================================ */
+
+.settimana-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.settimana-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background .08s
+}
+
+.settimana-nav-btn:hover {
+  background: var(--surface3)
+}
+
+.settimana-nav-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap
+}
+
+.settimana-nav-range {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px
+}
+
+.settimana-tab {
+  display: inline-block;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--rxs);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .08s, color .08s, border-color .08s
+}
+
+.settimana-tab:hover {
+  background: var(--surface3);
+  color: var(--text)
+}
+
+.settimana-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff
+}
+

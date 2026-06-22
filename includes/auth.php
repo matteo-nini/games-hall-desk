@@ -22,7 +22,7 @@ function current_user(): ?array {
 
 function require_login(): array {
     $u = current_user();
-    if (!$u) { header('Location: login.php'); exit; }
+    if (!$u) { header('Location: ' . base_url('login.php')); exit; }
     return $u;
 }
 

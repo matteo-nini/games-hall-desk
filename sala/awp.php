@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $cfg  = config();
 $pdo  = db();
@@ -48,8 +48,8 @@ $next = date('Y-m-d', strtotime("$data +1 day"));
 ?>
 <!doctype html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Refill AWP — <?= $h($data) ?></title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Refill AWP — <?= $h($data) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>"></head><body>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar">
   <div><strong>Refill AWP</strong> · operazioni rare</div>
   <div class="nav">
@@ -84,5 +84,5 @@ $next = date('Y-m-d', strtotime("$data +1 day"));
 </div>
 <?php if (!$readonly): ?><div class="actions"><button type="submit">Salva refill AWP</button></div><?php endif; ?>
 </form>
-<p class="hint" style="padding:0 16px 24px">Dopo il salvataggio, riapri il <a href="giornaliero.php?data=<?= $h($data) ?>">giornaliero</a> per vedere il totale refill già conteggiato nel cassetto.</p>
+<p class="hint" style="padding:0 16px 24px">Dopo il salvataggio, riapri il <a href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($data) ?>">giornaliero</a> per vedere il totale refill già conteggiato nel cassetto.</p>
 </body></html>
