@@ -55,6 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'retention') {
+        $rd = max(7, min(3650, (int)($_POST['retention_giorni'] ?? 90)));
+        $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
+            ->execute(['retention_giorni', (string)$rd]);
+        audit('impostazioni_retention', null, null, "retention_giorni=$rd");
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     header('Location: impostazioni.php'); exit;
 }
 
@@ -225,6 +233,33 @@ $ps = $prezzi['sera']    ?? 70.0;
       </div>
       <div class="imp-form-footer">
         <button type="submit">Salva moduli</button>
+      </div>
+    </form>
+  </section>
+
+
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><line x1="12" y1="9" x2="12" y2="12"/><line x1="12" y1="15" x2="12.01" y2="15"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Retention log audit</h2>
+        <p class="imp-card-desc">I log più vecchi del limite impostato possono essere eliminati dalla pagina Audit. Minimo 7 giorni.</p>
+      </div>
+    </div>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="retention">
+      <div class="imp-price-row">
+        <div class="imp-field">
+          <label for="imp-ret">Mantieni log per <span class="imp-unit">giorni</span></label>
+          <input id="imp-ret" type="number" min="7" max="3650" name="retention_giorni"
+                 value="<?= $h($sett['retention_giorni'] ?? '90') ?>">
+        </div>
+      </div>
+      <div class="imp-form-footer">
+        <button type="submit">Salva politica</button>
       </div>
     </form>
   </section>

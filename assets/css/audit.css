@@ -1,0 +1,225 @@
+/* ============================================================
+   Audit log — admin/audit.php
+   ============================================================ */
+
+.audit-page {
+  padding: 16px 24px 48px
+}
+
+/* Retention panel */
+.audit-ret {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  box-shadow: var(--sh)
+}
+
+.audit-ret-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px
+}
+
+.audit-ret-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted)
+}
+
+.audit-ret-count {
+  font-size: 12px;
+  color: var(--red-ink)
+}
+
+.audit-ret-ok {
+  font-size: 12px;
+  color: var(--green-ink)
+}
+
+.audit-ret-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--rxs);
+  background: var(--red-bg);
+  color: var(--red-ink);
+  border: 1px solid var(--red-bd);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .08s
+}
+
+.audit-ret-btn:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red)
+}
+
+/* Filters */
+.audit-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  align-items: flex-end
+}
+
+.audit-filters .imp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px
+}
+
+.audit-filters .imp-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted)
+}
+
+.audit-filters input[type=text],
+.audit-filters input[type=date],
+.audit-filters select {
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--rxs);
+  background: var(--surface);
+  color: var(--text);
+  width: auto
+}
+
+/* Table wrap */
+.audit-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse
+}
+
+.audit-table thead th {
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--faint);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap
+}
+
+.audit-table tbody tr {
+  border-top: 1px solid var(--border)
+}
+
+.audit-table tbody tr:hover {
+  background: var(--surface2)
+}
+
+.audit-table td {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--text);
+  vertical-align: middle;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.audit-table td.audit-ts {
+  color: var(--faint);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums
+}
+
+.audit-table td.audit-detail {
+  color: var(--muted);
+  max-width: 300px
+}
+
+.audit-table td.audit-ip {
+  color: var(--faint);
+  font-size: 11px
+}
+
+/* Action badge */
+.audit-action {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--rpill);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap
+}
+
+.aud-login     { background: var(--green-bg);    color: var(--green-ink) }
+.aud-close     { background: var(--accent-weak);  color: var(--accent-ink) }
+.aud-macchina  { background: var(--accent-weak);  color: var(--accent-ink) }
+.aud-utente    { background: var(--surface3);      color: var(--accent-ink); border: 1px solid var(--border) }
+.aud-imp       { background: var(--amber-bg);     color: var(--amber-ink) }
+.aud-ret       { background: var(--red-bg);       color: var(--red-ink) }
+.aud-default   { background: var(--surface2);     color: var(--muted) }
+
+/* Pagination */
+.audit-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted)
+}
+
+.audit-pager-links {
+  display: flex;
+  gap: 4px
+}
+
+.audit-pager-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  text-decoration: none;
+  transition: background .07s, color .07s
+}
+
+.audit-pager-link:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.audit-pager-link.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent)
+}

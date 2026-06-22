@@ -61,7 +61,8 @@ function top_menu(array $user): void {
     $foto    = $user['foto'] ?? null;
     $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
 ?>
-<aside class="sidebar" id="sidebar" aria-label="Navigazione principale">
+<link rel="stylesheet" href="<?= base_url('assets/css/ob-banners.css') ?>">
+<aside class="sidebar" id="sidebar" data-role="<?= htmlspecialchars($role) ?>" aria-label="Navigazione principale">
 
   <div class="sb-head">
     <span class="sb-logo" aria-hidden="true">GP</span>
@@ -130,5 +131,7 @@ function top_menu(array $user): void {
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
 <script src="<?= base_url('assets/js/sidebar.js') ?>"></script>
+<script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';</script>
+<script src="<?= base_url('assets/js/ob-banners.js') ?>" defer></script>
 <?php
 }
