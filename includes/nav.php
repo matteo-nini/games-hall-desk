@@ -27,27 +27,30 @@ function top_menu(array $user): void {
     ];
 
     $cassaItems = [
-        'giornaliero.php' => ['label' => 'Giornaliero', 'ico' => 'giornaliero'],
-        'settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
-        'mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
+        'cassa/giornaliero.php' => ['label' => 'Giornaliero', 'ico' => 'giornaliero'],
+        'cassa/settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
+        'cassa/mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
     ];
 
-    $salaItems = ['awp.php' => ['label' => 'AWP', 'ico' => 'awp'], 'turni.php' => ['label' => 'Turni', 'ico' => 'turni']];
-    if ($modAssistenze) $salaItems['ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
-    if ($modPrestiti)   $salaItems['prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
+    $salaItems = [
+        'sala/awp.php'   => ['label' => 'AWP',   'ico' => 'awp'],
+        'sala/turni.php' => ['label' => 'Turni', 'ico' => 'turni'],
+    ];
+    if ($modAssistenze) $salaItems['sala/ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
+    if ($modPrestiti)   $salaItems['sala/prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
 
     $adminItems = ($role === 'responsabile') ? [
-        'macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
-        'utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
-        'impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
-        'audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],
+        'admin/macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
+        'admin/utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
+        'admin/impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
+        'admin/audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],
     ] : [];
 
     $renderLink = function(string $file, array $item) use ($cur, $ico): void {
-        $active = ($file === $cur);
+        $active = (basename($file) === $cur);
         $cls    = 'sn-link' . ($active ? ' active' : '');
         $aria   = $active ? ' aria-current="page"' : '';
-        echo '<a class="' . $cls . '" href="' . $file . '"' . $aria . ' title="' . htmlspecialchars($item['label']) . '">';
+        echo '<a class="' . $cls . '" href="' . base_url($file) . '"' . $aria . ' title="' . htmlspecialchars($item['label']) . '">';
         echo '<span class="sn-ico" aria-hidden="true">' . $ico[$item['ico']] . '</span>';
         echo '<span class="sn-lbl">' . htmlspecialchars($item['label']) . '</span>';
         echo '</a>';
@@ -71,7 +74,7 @@ function top_menu(array $user): void {
     <!-- Dashboard (operatori) -->
     <?php if ($role !== 'responsabile'): ?>
     <div class="sn-group">
-      <?php $renderLink('dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
+      <?php $renderLink('account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
     </div>
     <?php endif; ?>
 
@@ -105,15 +108,15 @@ function top_menu(array $user): void {
   </div>
 
   <div class="sb-foot">
-    <a href="profilo.php" class="sf-avatar-link" title="Profilo">
+    <a href="<?= base_url('account/profilo.php') ?>" class="sf-avatar-link" title="Profilo">
       <?php if ($foto): ?>
-        <img src="uploads/profili/<?= htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
+        <img src="<?= base_url('uploads/profili/') . htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
       <?php else: ?>
         <span class="sf-avatar" aria-hidden="true"><?= $initial ?></span>
       <?php endif; ?>
     </a>
-    <a href="profilo.php" class="sf-name" title="Profilo"><?= $nome ?></a>
-    <a href="logout.php" class="sf-exit" aria-label="Esci" title="Esci">
+    <a href="<?= base_url('account/profilo.php') ?>" class="sf-name" title="Profilo"><?= $nome ?></a>
+    <a href="<?= base_url('logout.php') ?>" class="sf-exit" aria-label="Esci" title="Esci">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>
@@ -126,32 +129,6 @@ function top_menu(array $user): void {
 </button>
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
-<script>
-(function () {
-  var SB_KEY = 'gp_sb_collapsed';
-  var sidebar  = document.getElementById('sidebar');
-  var toggle   = document.getElementById('sb-toggle');
-  var overlay  = document.getElementById('sb-overlay');
-  var colBtn   = document.getElementById('sb-collapse');
-
-  /* === Mobile open/close === */
-  function openMob()  { sidebar.classList.add('open');  overlay.classList.add('open');  toggle && toggle.setAttribute('aria-expanded','true');  document.body.classList.add('sb-open'); }
-  function closeMob() { sidebar.classList.remove('open'); overlay.classList.remove('open'); toggle && toggle.setAttribute('aria-expanded','false'); document.body.classList.remove('sb-open'); }
-  if (toggle)  toggle.addEventListener('click', function () { sidebar.classList.contains('open') ? closeMob() : openMob(); });
-  if (overlay) overlay.addEventListener('click', closeMob);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sidebar.classList.contains('open')) { closeMob(); if(toggle) toggle.focus(); } });
-
-  /* === Desktop collapse === */
-  var collapsed = localStorage.getItem(SB_KEY) === '1';
-  function applyCollapse(c) {
-    sidebar.classList.toggle('sb-collapsed', c);
-    document.body.classList.toggle('sb-collapsed', c);
-    if (colBtn) colBtn.setAttribute('aria-expanded', c ? 'false' : 'true');
-    localStorage.setItem(SB_KEY, c ? '1' : '0');
-  }
-  applyCollapse(collapsed);
-  if (colBtn) colBtn.addEventListener('click', function () { applyCollapse(!sidebar.classList.contains('sb-collapsed')); });
-}());
-</script>
+<script src="<?= base_url('assets/js/sidebar.js') ?>"></script>
 <?php
 }

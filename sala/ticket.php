@@ -1,13 +1,13 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $cfg  = config();
 $pdo  = db();
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
 if ((get_settings($pdo)['modulo_assistenze'] ?? '1') !== '1') {
-    header('Location: giornaliero.php'); exit;
+    header('Location: ../cassa/giornaliero.php'); exit;
 }
 
 $macchine_list = $pdo->query('SELECT codice FROM macchine WHERE attiva=1 ORDER BY tipo,ordine')
@@ -66,8 +66,9 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ticket assistenza</title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Ticket assistenza</title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/ticket.css') ?>"></head><body>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
   <div>

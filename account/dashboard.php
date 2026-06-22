@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$uid, (int)$t['id']]);
             audit('inizio_turno', 'turni', (int)$t['id'], "turno=$n data=$data via=dashboard");
         }
-        header('Location: giornaliero.php'); exit;
+        header('Location: ../cassa/giornaliero.php'); exit;
     }
     header('Location: dashboard.php'); exit;
 }
@@ -129,9 +129,10 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard — <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/dashboard.css') ?>">
 </head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
   <div>
@@ -165,7 +166,7 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
       </div>
       <div class="dash-hero-actions">
         <?php if ($giaIniziato): ?>
-          <a href="giornaliero.php" class="btn-dash-cassa">Vai alla cassa &rarr;</a>
+          <a href="<?= base_url('cassa/giornaliero.php') ?>" class="btn-dash-cassa">Vai alla cassa &rarr;</a>
         <?php else: ?>
           <form method="post">
             <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
@@ -226,7 +227,7 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
           <span class="dash-earn-sub"><?= $h($nomiMesi[(int)date('n')]) ?></span>
         </div>
       </div>
-      <a href="turni.php" class="dash-card-link">Vedi calendario turni &rarr;</a>
+      <a href="<?= base_url('sala/turni.php') ?>" class="dash-card-link">Vedi calendario turni &rarr;</a>
     </section>
 
     <!-- ===== Prossimi turni ===== -->
@@ -249,34 +250,34 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
       <?php else: ?>
       <p class="ticket-empty">Nessun turno programmato.</p>
       <?php endif; ?>
-      <a href="turni.php" class="dash-card-link">Turni &rarr;</a>
+      <a href="<?= base_url('sala/turni.php') ?>" class="dash-card-link">Turni &rarr;</a>
     </section>
 
     <!-- ===== Accesso rapido ===== -->
     <section class="dash-card dash-quicklinks">
       <h2 class="dash-card-title">Accesso rapido</h2>
       <div class="dash-ql-grid">
-        <a href="giornaliero.php" class="dash-ql-item">
+        <a href="<?= base_url('cassa/giornaliero.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <span>Cassa</span>
         </a>
-        <a href="turni.php" class="dash-ql-item">
+        <a href="<?= base_url('sala/turni.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
           <span>Turni</span>
         </a>
-        <a href="awp.php" class="dash-ql-item">
+        <a href="<?= base_url('sala/awp.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           <span>AWP</span>
         </a>
-        <a href="ticket.php" class="dash-ql-item">
+        <a href="<?= base_url('sala/ticket.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg>
           <span>Assistenze</span>
         </a>
-        <a href="prestiti.php" class="dash-ql-item">
+        <a href="<?= base_url('sala/prestiti.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M12 14h4M12 14l2-2M12 14l2 2"/></svg>
           <span>Prestiti</span>
         </a>
-        <a href="profilo.php" class="dash-ql-item">
+        <a href="<?= base_url('account/profilo.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span>Profilo</span>
         </a>

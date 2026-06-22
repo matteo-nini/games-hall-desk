@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_responsabile();
 $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -87,9 +87,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Utenti</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/utenti.css') ?>">
 </head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:10px">

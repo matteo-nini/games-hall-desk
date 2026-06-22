@@ -1,12 +1,14 @@
 <?php
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/lib.php';
 $user = require_login();
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Guida operativa</title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Guida operativa</title><link rel="stylesheet" href="assets/css/core.css">
+<link rel="stylesheet" href="assets/css/onboarding.css"></head><body>
+<?php require __DIR__ . '/includes/nav.php'; top_menu($user); ?>
 
 <div class="ob-wrap">
 
@@ -108,7 +110,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
   </div>
 
   <div style="text-align:center; padding: 24px 0 40px">
-    <a class="btnlink" href="giornaliero.php">Vai al giornaliero &rarr;</a>
+    <a class="btnlink" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero &rarr;</a>
   </div>
 
 </div>

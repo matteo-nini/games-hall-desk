@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $cfg  = config();
 $pdo  = db();
@@ -8,7 +8,7 @@ $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => number_format((float)$v, 2, ',', '.');
 
 if ((get_settings($pdo)['modulo_prestiti'] ?? '1') !== '1') {
-    header('Location: giornaliero.php'); exit;
+    header('Location: ../cassa/giornaliero.php'); exit;
 }
 
 /* ---- POST ---- */
@@ -105,8 +105,9 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prestiti e rientri</title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Prestiti e rientri</title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/prestiti.css') ?>"></head><body>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
   <div><strong>Prestiti e rientri</strong> <span class="topbar-sub">Totale dare: <strong><?= $nv($tot_dare) ?> €</strong></span></div>

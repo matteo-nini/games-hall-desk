@@ -8,6 +8,23 @@
 function fornitori(): array { return ['NOVO', 'INSPIRED', 'SPIELO']; }
 function tagli(): array     { return [5, 10, 20, 50, 100, 200, 500]; }
 
+function base_url(string $path = ''): string {
+    static $base = null;
+    if ($base === null) {
+        $appRoot    = realpath(dirname(__DIR__));
+        $scriptFile = realpath($_SERVER['SCRIPT_FILENAME'] ?? '');
+        $scriptUrl  = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+        if ($appRoot && $scriptFile && str_starts_with($scriptFile, $appRoot)) {
+            $relFile = str_replace('\\', '/', substr($scriptFile, strlen($appRoot)));
+            $base    = substr($scriptUrl, 0, strlen($scriptUrl) - strlen($relFile));
+            $base    = rtrim($base, '/') . '/';
+        } else {
+            $base = '/';
+        }
+    }
+    return $base . ltrim($path, '/');
+}
+
 /**
  * Calcola la riconciliazione di un turno.
  * $t deve contenere: fondo_cassa, monete, bancomat, differenze, ii_cassa,
@@ -138,7 +155,7 @@ function get_settings(PDO $pdo): array {
     try {
         $rows  = $pdo->query('SELECT chiave, valore FROM impostazioni')->fetchAll();
         $cache = array_column($rows, 'valore', 'chiave');
-    } catch (PDOException $e) {
+    } catch (PDOException) {
         $cache = [];
     }
     return $cache;

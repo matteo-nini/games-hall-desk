@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_responsabile();
 $pdo  = db();
 $msg = '';
@@ -39,8 +39,8 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 ?>
 <!doctype html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Macchine</title><link rel="stylesheet" href="styles.css"></head><body>
-<?php require __DIR__ . '/nav.php'; top_menu($user); ?>
+<title>Macchine</title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>"></head><body>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar"><div><strong>Parco macchine</strong></div></header>
 <?php if ($msg): ?><div class="ok"><?= $h($msg) ?></div><?php endif; ?>
 
