@@ -131,3 +131,19 @@ function ensure_turno(PDO $pdo, int $giornata_id, int $n): array {
     }
     return $t;
 }
+
+function get_settings(PDO $pdo): array {
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    try {
+        $rows  = $pdo->query('SELECT chiave, valore FROM impostazioni')->fetchAll();
+        $cache = array_column($rows, 'valore', 'chiave');
+    } catch (PDOException $e) {
+        $cache = [];
+    }
+    return $cache;
+}
+
+function setting(PDO $pdo, string $key, string $default = ''): string {
+    return get_settings($pdo)[$key] ?? $default;
+}

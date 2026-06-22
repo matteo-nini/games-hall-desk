@@ -5,6 +5,7 @@ function top_menu(array $user): void {
     $nome = htmlspecialchars($user['nome'] ?: $user['username']);
 
     $ico = [
+        'dashboard'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
         'giornaliero' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
         'settimanale' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
         'mensile'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>',
@@ -16,6 +17,8 @@ function top_menu(array $user): void {
         'macchine'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2M7 11h5"/></svg>',
         'utenti'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
         'audit'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+        'impostazioni'=> '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>',
+        'profilo'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
     ];
 
     $cassaItems = [
@@ -32,41 +35,58 @@ function top_menu(array $user): void {
     ];
 
     $adminItems = ($role === 'responsabile') ? [
-        'macchine.php' => ['label' => 'Macchine', 'ico' => 'macchine'],
-        'utenti.php'   => ['label' => 'Utenti',   'ico' => 'utenti'],
-        'audit.php'    => ['label' => 'Audit',    'ico' => 'audit'],
+        'macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
+        'utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
+        'impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
+        'audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],
     ] : [];
 
     $renderLink = function(string $file, array $item) use ($cur, $ico): void {
         $active = ($file === $cur);
         $cls    = 'sn-link' . ($active ? ' active' : '');
         $aria   = $active ? ' aria-current="page"' : '';
-        echo '<a class="' . $cls . '" href="' . $file . '"' . $aria . '>';
+        echo '<a class="' . $cls . '" href="' . $file . '"' . $aria . ' title="' . htmlspecialchars($item['label']) . '">';
         echo '<span class="sn-ico" aria-hidden="true">' . $ico[$item['ico']] . '</span>';
         echo '<span class="sn-lbl">' . htmlspecialchars($item['label']) . '</span>';
         echo '</a>';
     };
 
+    $foto    = $user['foto'] ?? null;
     $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
 ?>
 <aside class="sidebar" id="sidebar" aria-label="Navigazione principale">
+
   <div class="sb-head">
     <span class="sb-logo" aria-hidden="true">GP</span>
     <span class="sb-title">Games Palace</span>
+    <button class="sb-collapse-btn" id="sb-collapse" type="button" title="Comprimi/Espandi menu" aria-label="Comprimi menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
   </div>
+
   <nav class="sb-nav" aria-label="Menu principale">
+
+    <!-- Dashboard (operatori) -->
+    <?php if ($role !== 'responsabile'): ?>
+    <div class="sn-group">
+      <?php $renderLink('dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
+    </div>
+    <?php endif; ?>
+
     <div class="sn-group">
       <span class="sn-cat">Cassa</span>
       <?php foreach ($cassaItems as $file => $item): ?>
         <?php $renderLink($file, $item); ?>
       <?php endforeach; ?>
     </div>
+
     <div class="sn-group">
       <span class="sn-cat">Sala</span>
       <?php foreach ($salaItems as $file => $item): ?>
         <?php $renderLink($file, $item); ?>
       <?php endforeach; ?>
     </div>
+
     <?php if (!empty($adminItems)): ?>
     <div class="sn-group">
       <span class="sn-cat">Admin</span>
@@ -75,34 +95,61 @@ function top_menu(array $user): void {
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
+
   </nav>
+
   <div class="sb-util">
     <?php $renderLink('onboarding.php', ['label' => 'Guida', 'ico' => 'onboarding']); ?>
   </div>
+
   <div class="sb-foot">
-    <span class="sf-avatar" aria-hidden="true"><?= $initial ?></span>
-    <span class="sf-name"><?= $nome ?></span>
-    <a href="logout.php" class="sf-exit" aria-label="Esci dall&#39;applicazione" title="Esci">
+    <a href="profilo.php" class="sf-avatar-link" title="Profilo">
+      <?php if ($foto): ?>
+        <img src="uploads/profili/<?= htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
+      <?php else: ?>
+        <span class="sf-avatar" aria-hidden="true"><?= $initial ?></span>
+      <?php endif; ?>
+    </a>
+    <a href="profilo.php" class="sf-name" title="Profilo"><?= $nome ?></a>
+    <a href="logout.php" class="sf-exit" aria-label="Esci" title="Esci">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>
+
 </aside>
-<button class="sb-toggle" id="sb-toggle" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Apri menu di navigazione">
+
+<!-- Hamburger mobile -->
+<button class="sb-toggle" id="sb-toggle" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Apri menu">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
 </button>
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
+
 <script>
-(function(){
-  var t=document.getElementById('sb-toggle'),
-      s=document.getElementById('sidebar'),
-      o=document.getElementById('sb-overlay');
-  if(!t||!s||!o)return;
-  function openSb(){s.classList.add('open');o.classList.add('open');t.setAttribute('aria-expanded','true');document.body.classList.add('sb-open');}
-  function closeSb(){s.classList.remove('open');o.classList.remove('open');t.setAttribute('aria-expanded','false');document.body.classList.remove('sb-open');}
-  t.addEventListener('click',function(){s.classList.contains('open')?closeSb():openSb();});
-  o.addEventListener('click',closeSb);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&s.classList.contains('open')){closeSb();t.focus();}});
-})();
+(function () {
+  var SB_KEY = 'gp_sb_collapsed';
+  var sidebar  = document.getElementById('sidebar');
+  var toggle   = document.getElementById('sb-toggle');
+  var overlay  = document.getElementById('sb-overlay');
+  var colBtn   = document.getElementById('sb-collapse');
+
+  /* === Mobile open/close === */
+  function openMob()  { sidebar.classList.add('open');  overlay.classList.add('open');  toggle && toggle.setAttribute('aria-expanded','true');  document.body.classList.add('sb-open'); }
+  function closeMob() { sidebar.classList.remove('open'); overlay.classList.remove('open'); toggle && toggle.setAttribute('aria-expanded','false'); document.body.classList.remove('sb-open'); }
+  if (toggle)  toggle.addEventListener('click', function () { sidebar.classList.contains('open') ? closeMob() : openMob(); });
+  if (overlay) overlay.addEventListener('click', closeMob);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sidebar.classList.contains('open')) { closeMob(); if(toggle) toggle.focus(); } });
+
+  /* === Desktop collapse === */
+  var collapsed = localStorage.getItem(SB_KEY) === '1';
+  function applyCollapse(c) {
+    sidebar.classList.toggle('sb-collapsed', c);
+    document.body.classList.toggle('sb-collapsed', c);
+    if (colBtn) colBtn.setAttribute('aria-expanded', c ? 'false' : 'true');
+    localStorage.setItem(SB_KEY, c ? '1' : '0');
+  }
+  applyCollapse(collapsed);
+  if (colBtn) colBtn.addEventListener('click', function () { applyCollapse(!sidebar.classList.contains('sb-collapsed')); });
+}());
 </script>
 <?php
 }

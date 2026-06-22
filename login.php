@@ -6,7 +6,8 @@ $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     if (login(trim($_POST['username'] ?? ''), $_POST['password'] ?? '')) {
-        header('Location: giornaliero.php'); exit;
+        $dest = is_responsabile() ? 'giornaliero.php' : 'dashboard.php';
+        header('Location: ' . $dest); exit;
     }
     $err = 'Credenziali non valide.';
 }

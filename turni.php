@@ -22,6 +22,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: turni.php?ok=1'); exit;
     }
 
+    /* Operatore: aggiunge se stesso a uno slot libero (se permesso abilitato) */
+    if ($az === 'programma' && !is_responsabile()) {
+        $perm = setting($pdo, 'operatori_modifica_turni', '1');
+        if ($perm === '1') {
+            $data = $_POST['data'] ?? '';
+            $n    = (int)($_POST['numero'] ?? 0);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) && in_array($n, [1,2])) {
+                /* assegna solo se slot ancora libero */
+                $check = $pdo->prepare('SELECT id FROM turni_programmati WHERE data=? AND numero=?');
+                $check->execute([$data, $n]);
+                if (!$check->fetch()) {
+                    $pdo->prepare(
+                        'INSERT INTO turni_programmati (data, numero, operatore_id, creato_da) VALUES (?,?,?,?)'
+                    )->execute([$data, $n, $user['id'], $user['id']]);
+                    audit('turno_self_assign', 'turni_programmati', null, "data=$data n=$n op={$user['id']}");
+                }
+            }
+        }
+        header('Location: turni.php?ok=1'); exit;
+    }
+
     if ($az === 'programma' && is_responsabile()) {
         $data = $_POST['data'] ?? '';
         $n    = (int)($_POST['numero'] ?? 0);
@@ -98,16 +119,17 @@ try {
 /* =========================================================
    GET — dati (solo se migration ok)
    ========================================================= */
-$uid           = (int)$user['id'];
-$calendario    = [];   /* [data][numero] => row */
-$operatori     = [];
-$prezzoMattino = 60.0;
-$prezzoSera    = 70.0;
-$miei_turni    = [];
-$guadagnato    = 0.0;
-$previsto      = 0.0;
-$nCorrente     = null; /* 1=mattino, 2=sera, null=fuori orario */
-$turniOggi     = [];   /* [1|2] => row – assegnazioni di oggi */
+$uid              = (int)$user['id'];
+$calendario       = [];
+$operatori        = [];
+$prezzoMattino    = 60.0;
+$prezzoSera       = 70.0;
+$miei_turni       = [];
+$guadagnato       = 0.0;
+$previsto         = 0.0;
+$nCorrente        = null;
+$turniOggi        = [];
+$opPuoModificare  = true; /* permesso operatore di aggiungere se stesso */
 
 if ($migrationOk) {
 
@@ -166,6 +188,9 @@ if ($migrationOk) {
     );
     $st->execute([$oggi]);
     foreach ($st as $r) $turniOggi[(int)$r['numero']] = $r;
+
+    /* Permesso operatori da impostazioni */
+    $opPuoModificare = setting($pdo, 'operatori_modifica_turni', '1') === '1';
 
 } /* end if migrationOk */
 
@@ -273,24 +298,6 @@ if ($migrationOk) {
 </dialog>
 <?php endif; /* !is_responsabile */ ?>
 
-<!-- ===== PREZZI TURNI (solo responsabile) ===== -->
-<?php if (is_responsabile()): ?>
-<details class="ticket-new-wrap" style="margin:8px 24px 0">
-  <summary class="ticket-new-toggle">Prezzi turni</summary>
-  <form method="post" class="ticket-new-form">
-    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-    <input type="hidden" name="azione" value="prezzi">
-    <div class="tnf-grid">
-      <div class="field"><label>Mattino (€)</label>
-        <input type="number" step="0.01" min="0" name="prezzo_mattino" value="<?= $h($nv($prezzoMattino)) ?>"></div>
-      <div class="field"><label>Sera (€)</label>
-        <input type="number" step="0.01" min="0" name="prezzo_sera" value="<?= $h($nv($prezzoSera)) ?>"></div>
-    </div>
-    <button type="submit">Aggiorna prezzi</button>
-  </form>
-</details>
-<?php endif; ?>
-
 <!-- ===== LAYOUT: calendario + riepilogo ===== -->
 <div class="tp-page">
 
@@ -328,8 +335,9 @@ if ($migrationOk) {
       </div>
 
       <!-- Slot mattino -->
-      <div class="tp-slot <?= $slotM ? ($slotM['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>" title="Mattino 13:00–19:00">
-        <span class="tp-slot-icon">☀</span>
+      <?php $canAddM = is_responsabile() || (!$slotM && $opPuoModificare); ?>
+      <div class="tp-slot <?= $slotM ? ($slotM['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
+        <span class="tp-slot-tag">M</span>
         <?php if ($slotM): ?>
           <span class="tp-slot-name"><?= $h($slotM['nome']) ?></span>
           <?php if (is_responsabile()): ?>
@@ -341,18 +349,29 @@ if ($migrationOk) {
             <button type="submit" class="tp-slot-del" title="Rimuovi">&times;</button>
           </form>
           <?php endif; ?>
-        <?php elseif (is_responsabile()): ?>
+        <?php elseif ($canAddM): ?>
+          <?php if (is_responsabile()): ?>
           <button type="button" class="tp-slot-add"
                   data-data="<?= $h($dc) ?>" data-n="1"
                   data-label="Mattino <?= $g ?>/<?= $mese ?>">+</button>
+          <?php else: ?>
+          <form method="post" class="tp-del-form">
+            <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+            <input type="hidden" name="azione" value="programma">
+            <input type="hidden" name="data"   value="<?= $h($dc) ?>">
+            <input type="hidden" name="numero" value="1">
+            <button type="submit" class="tp-slot-add" title="Aggiungiti">+</button>
+          </form>
+          <?php endif; ?>
         <?php else: ?>
           <span class="tp-slot-vuoto">—</span>
         <?php endif; ?>
       </div>
 
       <!-- Slot sera -->
-      <div class="tp-slot <?= $slotS ? ($slotS['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>" title="Sera 19:00–01:00">
-        <span class="tp-slot-icon">🌙</span>
+      <?php $canAddS = is_responsabile() || (!$slotS && $opPuoModificare); ?>
+      <div class="tp-slot <?= $slotS ? ($slotS['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
+        <span class="tp-slot-tag">S</span>
         <?php if ($slotS): ?>
           <span class="tp-slot-name"><?= $h($slotS['nome']) ?></span>
           <?php if (is_responsabile()): ?>
@@ -364,10 +383,20 @@ if ($migrationOk) {
             <button type="submit" class="tp-slot-del" title="Rimuovi">&times;</button>
           </form>
           <?php endif; ?>
-        <?php elseif (is_responsabile()): ?>
+        <?php elseif ($canAddS): ?>
+          <?php if (is_responsabile()): ?>
           <button type="button" class="tp-slot-add"
                   data-data="<?= $h($dc) ?>" data-n="2"
                   data-label="Sera <?= $g ?>/<?= $mese ?>">+</button>
+          <?php else: ?>
+          <form method="post" class="tp-del-form">
+            <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+            <input type="hidden" name="azione" value="programma">
+            <input type="hidden" name="data"   value="<?= $h($dc) ?>">
+            <input type="hidden" name="numero" value="2">
+            <button type="submit" class="tp-slot-add" title="Aggiungiti">+</button>
+          </form>
+          <?php endif; ?>
         <?php else: ?>
           <span class="tp-slot-vuoto">—</span>
         <?php endif; ?>

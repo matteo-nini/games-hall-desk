@@ -3546,3 +3546,576 @@ input[type="number"] {
     margin: 8px 16px 4px
   }
 }
+/* ============================================================
+   Sidebar — collassabile su desktop
+   ============================================================ */
+
+.sidebar {
+  transition: width .18s ease
+}
+
+.sb-head {
+  position: relative
+}
+
+.sb-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background .08s, color .08s, transform .18s ease
+}
+
+.sb-collapse-btn:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.sb-collapse-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block
+}
+
+.sidebar.sb-collapsed {
+  width: 56px
+}
+
+.sidebar.sb-collapsed .sb-title,
+.sidebar.sb-collapsed .sn-lbl,
+.sidebar.sb-collapsed .sn-cat,
+.sidebar.sb-collapsed .sf-name,
+.sidebar.sb-collapsed .sb-util .sn-lbl {
+  display: none
+}
+
+.sidebar.sb-collapsed .sb-head {
+  justify-content: center;
+  padding: 18px 8px 14px
+}
+
+.sidebar.sb-collapsed .sb-collapse-btn {
+  transform: rotate(180deg)
+}
+
+.sidebar.sb-collapsed .sn-link {
+  justify-content: center;
+  padding: 8px 0
+}
+
+.sidebar.sb-collapsed .sn-ico {
+  opacity: .8
+}
+
+.sidebar.sb-collapsed .sb-foot {
+  justify-content: center;
+  padding: 8px 0
+}
+
+.sidebar.sb-collapsed .sf-exit {
+  margin-left: 0
+}
+
+.sidebar.sb-collapsed .sb-util {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0
+}
+
+body.sb-collapsed {
+  margin-left: 56px
+}
+
+body {
+  transition: margin-left .18s ease
+}
+
+/* avatar clickable */
+.sf-avatar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0
+}
+
+.sf-avatar-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover
+}
+
+.sf-name {
+  text-decoration: none
+}
+
+/* ============================================================
+   Dashboard operatore
+   ============================================================ */
+
+.dash-page {
+  padding: 12px 24px 40px
+}
+
+.topbar-sub {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted)
+}
+
+/* Hero turno corrente */
+.dash-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--sh)
+}
+
+.dash-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px
+}
+
+.dash-hero-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--faint)
+}
+
+.dash-hero-turno {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.dash-hero-stato {
+  font-size: 13px
+}
+
+.dash-hero-actions {
+  flex-shrink: 0
+}
+
+.btn-dash-inizia {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rs);
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .1s
+}
+
+.btn-dash-inizia:hover {
+  background: var(--accent-ink)
+}
+
+.btn-dash-cassa {
+  display: inline-block;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .08s
+}
+
+.btn-dash-cassa:hover {
+  background: var(--surface3)
+}
+
+/* Grid sezioni */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  align-items: start
+}
+
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  box-shadow: var(--sh)
+}
+
+.dash-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin: 0 0 14px
+}
+
+.dash-card-link {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none
+}
+
+.dash-card-link:hover {
+  text-decoration: underline
+}
+
+/* Guadagni */
+.dash-earn-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  overflow: hidden
+}
+
+.dash-earn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--border)
+}
+
+.dash-earn-item:last-child {
+  border-right: none
+}
+
+.dash-earn-lbl {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--faint)
+}
+
+.dash-earn-val {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1.1
+}
+
+.dash-earn-muted {
+  color: var(--muted)
+}
+
+.dash-earn-count {
+  color: var(--accent)
+}
+
+.dash-earn-sub {
+  font-size: 10px;
+  color: var(--faint)
+}
+
+/* Prossimi turni */
+.dash-dow {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 26px
+}
+
+/* Accesso rapido */
+.dash-ql-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px
+}
+
+.dash-ql-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  transition: background .08s, color .08s, border-color .08s
+}
+
+.dash-ql-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0
+}
+
+.dash-ql-item:hover {
+  background: var(--accent-weak);
+  color: var(--accent);
+  border-color: transparent
+}
+
+/* ============================================================
+   Profilo
+   ============================================================ */
+
+.profilo-page {
+  padding: 16px 24px 40px
+}
+
+.profilo-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--sh)
+}
+
+.profilo-avatar-wrap {
+  flex-shrink: 0
+}
+
+.profilo-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border)
+}
+
+.profilo-avatar-initial {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800
+}
+
+.profilo-avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1
+}
+
+.profilo-avatar-info strong {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.profilo-foto-forms {
+  display: flex;
+  gap: 8px;
+  align-items: center
+}
+
+.btn-sm {
+  font-size: 12px;
+  padding: 6px 12px
+}
+
+.profilo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start
+}
+
+.profilo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  box-shadow: var(--sh)
+}
+
+.profilo-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin: 0 0 14px
+}
+
+/* ============================================================
+   Impostazioni
+   ============================================================ */
+
+.imp-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 24px 40px;
+  max-width: 640px
+}
+
+.imp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  box-shadow: var(--sh)
+}
+
+.imp-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin: 0 0 6px
+}
+
+.imp-card-desc {
+  font-size: 12px;
+  color: var(--faint);
+  margin: 0 0 14px;
+  line-height: 1.5
+}
+
+.imp-field-group {
+  margin-bottom: 12px
+}
+
+.imp-field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--muted);
+  margin-bottom: 6px
+}
+
+.imp-field-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px
+}
+
+.imp-sep {
+  font-size: 16px;
+  color: var(--faint);
+  padding-bottom: 8px
+}
+
+.imp-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer
+}
+
+.imp-toggle-label input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer
+}
+
+/* ============================================================
+   Calendario turni — restyling (no emoji, celle pulite)
+   ============================================================ */
+
+.tp-slot-icon { display: none }
+
+.tp-slot-tag {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0
+}
+
+.tp-slot-empty .tp-slot-tag {
+  background: var(--border);
+  color: var(--faint)
+}
+
+.tp-slot-other .tp-slot-tag {
+  background: var(--surface3);
+  color: var(--muted)
+}
+
+.tp-slot-mine .tp-slot-tag {
+  background: var(--accent);
+  color: #fff
+}
+
+/* ============================================================
+   Mobile — responsive
+   ============================================================ */
+
+@media (max-width: 760px) {
+  .dash-grid {
+    grid-template-columns: 1fr
+  }
+
+  .dash-hero {
+    flex-wrap: wrap;
+    gap: 12px
+  }
+
+  .profilo-grid {
+    grid-template-columns: 1fr
+  }
+
+  .profilo-avatar-section {
+    flex-wrap: wrap
+  }
+
+  .dash-earn-row {
+    flex-direction: column
+  }
+
+  .dash-earn-item {
+    border-right: none;
+    border-bottom: 1px solid var(--border)
+  }
+
+  .dash-earn-item:last-child {
+    border-bottom: none
+  }
+}
