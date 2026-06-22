@@ -8,6 +8,13 @@
 function fornitori(): array { return ['NOVO', 'INSPIRED', 'SPIELO']; }
 function tagli(): array     { return [5, 10, 20, 50, 100, 200, 500]; }
 
+/** Arrotonda il versamento al multiplo di 5 più vicino: su se resto > 2, giù altrimenti. */
+function arrotonda_versamento(float $v): float {
+    $v    = round($v, 2);
+    $base = floor($v / 5) * 5;
+    return ($v - $base) > 2.0 ? $base + 5.0 : $base;
+}
+
 function base_url(string $path = ''): string {
     static $base = null;
     if ($base === null) {

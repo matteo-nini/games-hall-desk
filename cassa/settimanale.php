@@ -86,7 +86,7 @@ foreach ($giorni as $d) {
         $tot[$f]['i'] += $ri['scass'][$f];
     }
     $tot_banc   += $ri['bancomat'];
-    $tot_vers   += $ri['versamento'];
+    $tot_vers   += arrotonda_versamento($ri['versamento']);
     $tot_ticket += $ri['ticket'];
 }
 $pct = fn($p, $g) => $g > 0 ? number_format($p / $g * 100, 1, ',', '.') . '%' : '—';
@@ -113,9 +113,9 @@ if (($_GET['export'] ?? '') === 'csv') {
                 number_format($bw[$f]['pagato'],  2, ',', '.'),
                 number_format($ri['scass'][$f],   2, ',', '.'),
                 $pct($bw[$f]['pagato'], $bw[$f]['giocato']),
-                $first ? number_format($ri['bancomat'],   2, ',', '.') : '',
-                $first ? number_format($ri['ticket'],     2, ',', '.') : '',
-                $first ? number_format($ri['versamento'], 2, ',', '.') : '',
+                $first ? number_format($ri['bancomat'],                      2, ',', '.') : '',
+                $first ? number_format($ri['ticket'],                        2, ',', '.') : '',
+                $first ? number_format(arrotonda_versamento($ri['versamento']), 2, ',', '.') : '',
             ];
             fputcsv($out, $row, ';');
             $first = false;
@@ -168,7 +168,8 @@ if (($_GET['export'] ?? '') === 'csv') {
     $dg  = 0; $dp = 0;
     foreach (fornitori() as $f) { $dg += $bw[$f]['giocato']; $dp += $bw[$f]['pagato']; }
     $ricavo  = $dg - $dp;
-    $cassa   = $ri['bancomat'] + $ri['versamento'];
+    $vers    = arrotonda_versamento($ri['versamento']);
+    $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
   <section class="turno t1" style="flex-basis:320px">
     <h2><?= $h(date('D d/m', strtotime($d))) ?></h2>
@@ -186,7 +187,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     </table>
     <table class="grid">
       <tr><td>Bancomat</td><td class="rt"><?= eur($ri['bancomat']) ?></td></tr>
-      <tr><td>Versamento</td><td class="rt"><?= eur($ri['versamento']) ?></td></tr>
+      <tr><td>Versamento</td><td class="rt"><?= eur($vers) ?></td></tr>
       <tr><td>Ricavo (G&minus;P)</td><td class="rt"><?= eur($ricavo) ?></td></tr>
       <tr class="<?= abs($margine) > 0.005 ? 'errore' : 'tot' ?>"><td>Margine</td><td class="rt"><?= eur($margine) ?></td></tr>
     </table>
