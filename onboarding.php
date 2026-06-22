@@ -212,6 +212,12 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
   </div>
   <?php endif; ?>
 
+  <div style="text-align:center; margin-top:32px; padding:20px 0 0; border-top:1px solid var(--border)">
+    <p style="font-size:13px; color:var(--muted); margin:0 0 10px">Vuoi rivedere il wizard di benvenuto?</p>
+    <button class="btnlink" id="btn-replay-wizard" type="button">Rivedi guida popup</button>
+    <p style="font-size:11px; color:var(--faint); margin:8px 0 0">Il popup riapparirà alla prossima apertura del giornaliero.</p>
+  </div>
+
   <div style="text-align:center; padding:24px 0 40px">
     <a class="btnlink" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero →</a>
   </div>
@@ -219,6 +225,11 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 </div>
 
 <script>
+document.getElementById('btn-replay-wizard')?.addEventListener('click', function() {
+  localStorage.removeItem('gp_wizard_done');
+  window.location.href = '<?= base_url('cassa/giornaliero.php') ?>';
+});
+
 document.querySelectorAll('.ob-tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.ob-tab-btn').forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
