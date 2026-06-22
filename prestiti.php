@@ -23,7 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$pid || !$tipo || $quantita <= 0) { header('Location: prestiti.php?err=campi'); exit; }
         $pdo->prepare('INSERT INTO prestiti_movimenti (data,persona_id,tipo,quantita,note,creato_da) VALUES (?,?,?,?,?,?)')
             ->execute([$data, $pid, $tipo, $quantita, $nota, $user['id']]);
-        audit('prestito_movimento','prestiti_movimenti',(int)$pdo->lastInsertId(),"$tipo €$quantita");
+        $mid = (int)$pdo->lastInsertId();
+        audit('prestito_movimento','prestiti_movimenti',$mid,"$tipo €$quantita");
+        // Rifletti sul turno giornaliero: prestito → differenze, rientro → rientri (turno sera)
+        $g = ensure_giornata($pdo, $data);
+        $t = ensure_turno($pdo, (int)$g['id'], 2);
+        if ($tipo === 'prestito') {
+            $pdo->prepare('UPDATE turni SET differenze = differenze + ? WHERE id=?')->execute([$quantita, (int)$t['id']]);
+        } else {
+            $pdo->prepare('UPDATE turni SET rientri = rientri + ? WHERE id=?')->execute([$quantita, (int)$t['id']]);
+        }
+        audit('prestito_sync_giornaliero','turni',(int)$t['id'],"$tipo $quantita su $data");
         header('Location: prestiti.php?ok=1'); exit;
     }
 
@@ -42,8 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* Elimina movimento (solo responsabile) */
     if ($az === 'del_movimento' && is_responsabile()) {
         $id = (int)($_POST['id'] ?? 0);
+        $s = $pdo->prepare('SELECT * FROM prestiti_movimenti WHERE id=?');
+        $s->execute([$id]);
+        $mov = $s->fetch();
         $pdo->prepare('DELETE FROM prestiti_movimenti WHERE id=?')->execute([$id]);
         audit('prestito_movimento_eliminato','prestiti_movimenti',$id);
+        if ($mov) {
+            $g = ensure_giornata($pdo, $mov['data']);
+            $t = ensure_turno($pdo, (int)$g['id'], 2);
+            if ($mov['tipo'] === 'prestito') {
+                $pdo->prepare('UPDATE turni SET differenze = differenze - ? WHERE id=?')->execute([(float)$mov['quantita'], (int)$t['id']]);
+            } else {
+                $pdo->prepare('UPDATE turni SET rientri = rientri - ? WHERE id=?')->execute([(float)$mov['quantita'], (int)$t['id']]);
+            }
+            audit('prestito_sync_undo_giornaliero','turni',(int)$t['id'],"{$mov['tipo']} -{$mov['quantita']} su {$mov['data']}");
+        }
         header('Location: prestiti.php?ok=1'); exit;
     }
 

@@ -100,62 +100,66 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 ?>
   <section class="turno" id="turno-<?= $n ?>" role="tabpanel" aria-labelledby="tab-<?= $n ?>" data-turno="<?= $n ?>" data-hidden="<?= $hide ?>" data-refill="<?= $h($T['sum_refill']) ?>" data-tol="<?= $h($TOL) ?>">
     <div class="entry">
-      <div class="panel cashpanel">
-        <h3>Cassa &amp; ticket</h3>
 
+      <div class="panel">
+        <h3>Cassa</h3>
         <div role="group" aria-labelledby="seg-valori-<?= $n ?>">
-        <div id="seg-valori-<?= $n ?>" class="seg">Valori cassa</div>
-        <div class="field"><label for="t<?= $n ?>-fondo">Fondo cassa</label><input id="t<?= $n ?>-fondo" type="number" inputmode="decimal" step="0.01" class="f-fondo_cassa" name="turno[<?= $n ?>][fondo_cassa]" value="<?= $h($nv($T['t']['fondo_cassa'])) ?>" <?= $ro ?>></div>
-        <div class="field"><label for="t<?= $n ?>-monete">Monete</label><input id="t<?= $n ?>-monete" type="number" inputmode="decimal" step="0.01" class="f-monete" name="turno[<?= $n ?>][monete]" value="<?= $h($nv($T['t']['monete'])) ?>" <?= $ro ?>></div>
-        <div class="field"><label for="t<?= $n ?>-bancomat">Bancomat</label><input id="t<?= $n ?>-bancomat" type="number" inputmode="decimal" step="0.01" class="f-bancomat" name="turno[<?= $n ?>][bancomat]" value="<?= $h($nv($T['t']['bancomat'])) ?>" <?= $ro ?>></div>
-        <details class="adv"><summary>Rettifiche</summary>
-          <div class="field"><label for="t<?= $n ?>-differenze">Differenze</label><input id="t<?= $n ?>-differenze" type="number" inputmode="decimal" step="0.01" class="f-differenze" name="turno[<?= $n ?>][differenze]" value="<?= $h($nv($T['t']['differenze'])) ?>" <?= $ro ?>></div>
-          <div class="field"><label for="t<?= $n ?>-ii">II cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
-          <div class="field"><label for="t<?= $n ?>-rientri">Rientri</label><input id="t<?= $n ?>-rientri" type="number" inputmode="decimal" step="0.01" class="f-rientri" name="turno[<?= $n ?>][rientri]" value="<?= $h($nv($T['t']['rientri'])) ?>" <?= $ro ?>></div>
-        </details>
+          <div id="seg-valori-<?= $n ?>" class="seg">Valori</div>
+          <div class="field"><label for="t<?= $n ?>-fondo">Fondo cassa</label><input id="t<?= $n ?>-fondo" type="number" inputmode="decimal" step="0.01" class="f-fondo_cassa" name="turno[<?= $n ?>][fondo_cassa]" value="<?= $h($nv($T['t']['fondo_cassa'])) ?>" <?= $ro ?>></div>
+          <div class="field"><label for="t<?= $n ?>-monete">Monete</label><input id="t<?= $n ?>-monete" type="number" inputmode="decimal" step="0.01" class="f-monete" name="turno[<?= $n ?>][monete]" value="<?= $h($nv($T['t']['monete'])) ?>" <?= $ro ?>></div>
+          <div class="field"><label for="t<?= $n ?>-bancomat">Bancomat</label><input id="t<?= $n ?>-bancomat" type="number" inputmode="decimal" step="0.01" class="f-bancomat" name="turno[<?= $n ?>][bancomat]" value="<?= $h($nv($T['t']['bancomat'])) ?>" <?= $ro ?>></div>
+          <details class="adv"><summary>Rettifiche</summary>
+            <div class="field"><label for="t<?= $n ?>-differenze">Differenze</label><input id="t<?= $n ?>-differenze" type="number" inputmode="decimal" step="0.01" class="f-differenze" name="turno[<?= $n ?>][differenze]" value="<?= $h($nv($T['t']['differenze'])) ?>" <?= $ro ?>></div>
+            <div class="field"><label for="t<?= $n ?>-ii">II cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
+            <div class="field"><label for="t<?= $n ?>-rientri">Rientri</label><input id="t<?= $n ?>-rientri" type="number" inputmode="decimal" step="0.01" class="f-rientri" name="turno[<?= $n ?>][rientri]" value="<?= $h($nv($T['t']['rientri'])) ?>" <?= $ro ?>></div>
+          </details>
         </div>
-
-        <div role="group" aria-labelledby="seg-contanti-<?= $n ?>">
-        <div id="seg-contanti-<?= $n ?>" class="seg">Contanti</div>
-        <?php foreach (tagli() as $tg): ?>
-        <div class="field"><label>&euro;<?= $tg ?> &times; <input type="number" inputmode="numeric" min="0" step="1" class="pezzi" data-taglio="<?= $tg ?>"
-             name="turno[<?= $n ?>][contanti][<?= $tg ?>]" value="<?= $h($T['cont'][$tg] ?? '') ?>" style="width:64px" <?= $ro ?>></label>
-          <span class="rr">0,00</span></div>
-        <?php endforeach; ?>
-        <div class="ptot"><span>Totale contanti</span><span class="v o-cont">0,00</span></div>
-        </div>
-
-        <div role="group" aria-labelledby="seg-ticket-<?= $n ?>">
-        <div id="seg-ticket-<?= $n ?>" class="seg">Ticket pagati</div>
-        <?php foreach (fornitori() as $f): $fid='t'.$n.'-tk-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($f)); ?>
-        <div class="field"><label for="<?= $fid ?>"><?= $h($f) ?></label><input id="<?= $fid ?>" type="number" inputmode="decimal" step="0.01" class="ticket" name="turno[<?= $n ?>][ticket][<?= $f ?>]" value="<?= $h($nv($T['tk'][$f] ?? 0)) ?>" <?= $ro ?>></div>
-        <?php endforeach; ?>
-        <div class="ptot"><span>Totale ticket</span><span class="v o-ticket">0,00</span></div>
-        </div>
-
         <div class="seg">Refill AWP</div>
-        <div class="field"><label>Totale refill</label><span class="hint"><?= eur($T['sum_refill']) ?> &middot; <a href="awp.php?data=<?= $h($data) ?>">scheda AWP</a></span></div>
+        <div class="field"><label>Totale</label><span class="hint"><?= eur($T['sum_refill']) ?> &middot; <a href="awp.php?data=<?= $h($data) ?>">scheda AWP</a></span></div>
+        <div class="panel-note">
+          <label class="notelbl" for="note<?= $n ?>">Note</label>
+          <textarea id="note<?= $n ?>" class="note" name="turno[<?= $n ?>][note]" rows="2" placeholder="Annotazioni&hellip;" <?= $ro ?>><?= $h($T['t']['note'] ?? '') ?></textarea>
+        </div>
       </div>
 
-      <div class="panel vltpanel">
+      <div class="panel">
+        <h3>Contanti &amp; Ticket</h3>
+        <div role="group" aria-labelledby="seg-contanti-<?= $n ?>">
+          <div id="seg-contanti-<?= $n ?>" class="seg">Contanti</div>
+          <div class="contanti-grid">
+          <?php foreach (tagli() as $tg): ?>
+            <div class="field"><label>&euro;<?= $tg ?> &times; <input type="number" inputmode="numeric" min="0" step="1" class="pezzi" data-taglio="<?= $tg ?>"
+               name="turno[<?= $n ?>][contanti][<?= $tg ?>]" value="<?= $h($T['cont'][$tg] ?? '') ?>" style="width:56px" <?= $ro ?>></label><span class="rr">0,00</span></div>
+          <?php endforeach; ?>
+          </div>
+          <div class="ptot"><span>Totale contanti</span><span class="v o-cont">0,00</span></div>
+        </div>
+        <div role="group" aria-labelledby="seg-ticket-<?= $n ?>">
+          <div id="seg-ticket-<?= $n ?>" class="seg">Ticket pagati</div>
+          <?php foreach (fornitori() as $f): $fid='t'.$n.'-tk-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($f)); ?>
+          <div class="field"><label for="<?= $fid ?>"><?= $h($f) ?></label><input id="<?= $fid ?>" type="number" inputmode="decimal" step="0.01" class="ticket" name="turno[<?= $n ?>][ticket][<?= $f ?>]" value="<?= $h($nv($T['tk'][$f] ?? 0)) ?>" <?= $ro ?>></div>
+          <?php endforeach; ?>
+          <div class="ptot"><span>Totale ticket</span><span class="v o-ticket">0,00</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
         <h3>Scassettamenti VLT</h3>
         <?php foreach ($byforn as $forn=>$list): $sgid='seg-'.$n.'-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($forn)); ?>
         <div role="group" aria-labelledby="<?= $sgid ?>">
-        <div id="<?= $sgid ?>" class="seg">&#9638; <?= $h($forn) ?> <span class="st" data-forn="<?= $h($forn) ?>">0,00</span></div>
-        <?php foreach ($list as $m): $mid='t'.$n.'-scass-'.(int)$m['id']; ?>
-        <div class="machrow"><label for="<?= $mid ?>"><?= $h($m['codice']) ?></label>
-          <input id="<?= $mid ?>" type="number" inputmode="decimal" step="0.01" class="scass" data-forn="<?= $h($m['fornitore']) ?>"
-                 name="turno[<?= $n ?>][scass][<?= $m['id'] ?>]" value="<?= $h($nv($T['sc'][$m['id']] ?? 0)) ?>" <?= $ro ?>></div>
-        <?php endforeach; ?>
+          <div id="<?= $sgid ?>" class="seg">&#9638; <?= $h($forn) ?> <span class="st" data-forn="<?= $h($forn) ?>">0,00</span></div>
+          <div class="machgrid">
+          <?php foreach ($list as $m): $mid='t'.$n.'-scass-'.(int)$m['id']; ?>
+          <div class="machrow"><label for="<?= $mid ?>"><?= $h($m['codice']) ?></label>
+            <input id="<?= $mid ?>" type="number" inputmode="decimal" step="0.01" class="scass" data-forn="<?= $h($m['fornitore']) ?>"
+                   name="turno[<?= $n ?>][scass][<?= $m['id'] ?>]" value="<?= $h($nv($T['sc'][$m['id']] ?? 0)) ?>" <?= $ro ?>></div>
+          <?php endforeach; ?>
+          </div>
         </div>
         <?php endforeach; ?>
         <div class="ptot"><span>Totale incasso VLT</span><span class="v o-scass">0,00</span></div>
       </div>
-    </div>
 
-    <div class="panel note-panel">
-      <label class="notelbl" for="note<?= $n ?>">Note turno</label>
-      <textarea id="note<?= $n ?>" class="note" name="turno[<?= $n ?>][note]" rows="2" placeholder="Annotazioni del turno: ammanchi, eventi, segnalazioni macchine&hellip;" <?= $ro ?>><?= $h($T['t']['note'] ?? '') ?></textarea>
     </div>
   </section>
 <?php
@@ -170,20 +174,43 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 <div class="stickyhead">
 
   <div class="sh-datebar">
-    <div class="sh-nav">
-      <a href="?data=<?= $prev ?>" aria-label="Giorno precedente">&#9664;</a>
-      <input type="date" value="<?= $h($data) ?>" aria-label="Seleziona data" onchange="location='?data='+this.value">
-      <a href="?data=<?= $next ?>" aria-label="Giorno successivo">&#9654;</a>
+    <div class="sh-top">
+      <div class="sh-nav">
+        <a href="?data=<?= $prev ?>" aria-label="Giorno precedente">&#9664;</a>
+        <input type="date" value="<?= $h($data) ?>" aria-label="Seleziona data" onchange="location='?data='+this.value">
+        <a href="?data=<?= $next ?>" aria-label="Giorno successivo">&#9654;</a>
+      </div>
+      <div class="sh-tabbar">
+      <div class="tabs" role="tablist" aria-label="Selezione turno">
+        <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
+        <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
+      </div>
+      <div class="sh-stats" style="margin-left: auto;" aria-label="Totali giornata">
+        <span class="ss-item"><span class="ss-l">Cassetto</span><span class="ss-v" id="m-cassetto">0,00</span></span>
+        <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">0,00</span></span>
+        <span class="ss-item"><span class="ss-l">VLT</span><span class="ss-v" id="g-incasso">0,00</span></span>
+        <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">0,00</span></span>
+        <span class="ss-sep" aria-hidden="true"></span>
+        <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">0,00</span></span>
+        <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">0,00</span></span>
+        <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">0,00</span></span>
+      </div>
+      <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span>
+      <?php if ($anyEdit): ?><button type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
+      <?php if (!$chiusa && $anyEdit): ?>
+        <form method="post" class="actions">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <button name="azione" value="chiudi" class="btn-close" onclick="return confirm('Chiudere la giornata?')">Chiudi giornata</button>
+        </form>
+        <?php endif; ?>
+        <?php if ($chiusa && is_responsabile()): ?>
+        <form method="post" class="actions">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <button name="azione" value="riapri" class="btn-reopen">Riapri giornata</button>
+        </form>
+      <?php endif; ?>
     </div>
-    <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span>
-
-    <div class="sh-tabbar">
-    <div class="tabs" role="tablist" aria-label="Selezione turno">
-      <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
-      <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
     </div>
-    <?php if ($anyEdit): ?><button style="margin-left: auto;" type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
-  </div>
   </div>
 
   <div class="sh-hero">
@@ -213,19 +240,6 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
     </div>
   </div>
 
-  <div class="day-metrics" aria-label="Riepilogo giornata">
-  <div class="dm-main">
-    <div class="dm-tile"><span class="dm-l">Cassetto</span><span class="dm-v" id="m-cassetto">0,00</span></div>
-    <div class="dm-tile"><span class="dm-l">Bancomat</span><span class="dm-v" id="g-bancomat">0,00</span></div>
-    <div class="dm-tile"><span class="dm-l">VLT</span><span class="dm-v" id="g-incasso">0,00</span></div>
-    <div class="dm-tile"><span class="dm-l">Ticket</span><span class="dm-v" id="g-ticket">0,00</span></div>
-  </div>
-  <div class="dm-detail">
-    <div class="dm-tile"><span class="dm-l">NOVO</span><span class="dm-v dm-v--sm" id="g-NOVO">0,00</span></div>
-    <div class="dm-tile"><span class="dm-l">INSPIRED</span><span class="dm-v dm-v--sm" id="g-INSPIRED">0,00</span></div>
-    <div class="dm-tile"><span class="dm-l">SPIELO</span><span class="dm-v dm-v--sm" id="g-SPIELO">0,00</span></div>
-  </div>
-</div>
 
 </div>
 <?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
@@ -235,19 +249,6 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 <input type="hidden" name="salva_turno" id="salva_turno" value="2">
 <?php $render(2); $render(1); ?>
 </form>
-
-<?php if (!$chiusa && $anyEdit): ?>
-<form method="post" class="actions">
-  <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-  <button name="azione" value="chiudi" class="btn-close" onclick="return confirm('Chiudere la giornata?')">Chiudi giornata</button>
-</form>
-<?php endif; ?>
-<?php if ($chiusa && is_responsabile()): ?>
-<form method="post" class="actions">
-  <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-  <button name="azione" value="riapri" class="btn-reopen">Riapri giornata</button>
-</form>
-<?php endif; ?>
 
 <?php if (isset($_GET['ok'])): ?>
 <div id="toast" class="toast" role="alert"><span class="tk">&#10003;</span> Salvato</div>
