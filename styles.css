@@ -1151,6 +1151,13 @@ table.grid {
   align-items: start;
 }
 
+.entry-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0
+}
+
 .entry .col {
   display: flex;
   flex-direction: column;
@@ -1215,38 +1222,56 @@ table.grid {
 }
 
 .machgrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px 16px
+  display: flex;
+  flex-direction: column;
+  gap: 2px
 }
 
 .machgrid .machrow {
-  margin: 1px 0
+  margin: 0
 }
 
 .machgrid .machrow label {
-  font-size: 12px;
-  color: var(--muted)
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: 500
 }
 
 .machgrid .machrow input {
-  width: 76px
+  width: 88px
 }
 
 .contanti-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px 10px
+  display: flex;
+  flex-direction: column;
+  gap: 0
 }
 
 .contanti-grid .field {
-  margin: 2px 0;
-  gap: 4px;
-  justify-content: flex-start
+  margin: 0;
+  padding: 3px 5px;
+  border-radius: var(--rxs);
+  justify-content: space-between
+}
+
+.contanti-grid .field:nth-child(odd) {
+  /* background: var(--surface2) */
+}
+
+.entry .contanti-grid .field label {
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  gap: 4px
 }
 
 .contanti-grid .rr {
-  display: none
+  min-width: 52px;
+  text-align: right;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0
 }
 
 .panel-note {
@@ -1256,6 +1281,23 @@ table.grid {
 }
 
 .panel-note .note {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical
+}
+
+/* Mini panels (Refill, Note) — reduced padding */
+.entry .panel-mini {
+  padding: 9px 13px
+}
+
+.entry .panel-mini h3 {
+  padding-bottom: 7px;
+  margin-bottom: 6px
+}
+
+.entry .panel-mini .note {
+  margin-top: 4px;
   width: 100%;
   box-sizing: border-box;
   resize: vertical
@@ -1399,29 +1441,40 @@ textarea.note:focus {
 
 .entry input {
   padding: 7px 9px;
-  font-size: 13px
+  font-size: 13px;
+  /* background: var(--surface3) */
 }
 
 .entry .machrow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 5px 0
+  padding: 4px 6px;
+  border-radius: var(--rxs);
+  margin: 1px 0;
+  gap: 8px
+}
+
+.entry .machrow:nth-child(odd) {
+  /* background: var(--surface2) */
 }
 
 .entry .machrow label {
   font-size: 13px;
   color: var(--text);
+  font-weight: 500;
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 8px
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em
 }
 
 .entry .machrow input {
-  width: 96px
+  width: 92px;
+  flex-shrink: 0
 }
 
 .ptot {
@@ -2746,9 +2799,11 @@ textarea.note:focus {
 .hb-versamento {
   background: var(--surface);
   border: 1px solid var(--border);
-  gap: 10px;
   border-radius: var(--rs);
   margin: 6px 14px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0
 }
 
 .hb-versamento .hb-ico {
