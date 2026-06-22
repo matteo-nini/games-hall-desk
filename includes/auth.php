@@ -78,3 +78,24 @@ function require_responsabile(): array {
     if ($u['ruolo'] !== 'responsabile') { http_response_code(403); exit('Riservato al responsabile.'); }
     return $u;
 }
+
+/* -------- Setup guard: redirect se l'app non è ancora configurata -------- */
+(function () {
+    $script = basename($_SERVER['SCRIPT_FILENAME'] ?? '');
+    if (in_array($script, ['setup.php', 'login.php'], true)) return;
+
+    try {
+        $cnt = db()->query('SELECT COUNT(*) FROM utenti WHERE ruolo="responsabile"')->fetchColumn();
+        if ((int)$cnt > 0) return;
+    } catch (Throwable) {
+        // DB non raggiungibile o tabelle mancanti
+    }
+
+    $appRoot   = realpath(dirname(__DIR__));
+    $scriptDir = realpath(dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $depth = ($appRoot && $scriptDir && $scriptDir !== $appRoot && str_starts_with($scriptDir, $appRoot))
+        ? substr_count(ltrim(str_replace($appRoot, '', $scriptDir), '/\\'), DIRECTORY_SEPARATOR) + 1
+        : 0;
+    header('Location: ' . str_repeat('../', $depth) . 'setup.php');
+    exit;
+})();
