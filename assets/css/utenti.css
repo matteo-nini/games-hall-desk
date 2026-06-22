@@ -2,12 +2,35 @@
    User list — utenti.php
    ============================================================ */
 
+/* Extra avatar color families not in core.css */
+:root {
+  --ava-purple-bg:  #f0ecfd;
+  --ava-purple-ink: #4a2380;
+  --ava-teal-bg:    #e8f8f9;
+  --ava-teal-ink:   #0a6b7c;
+  --ava-rose-bg:    #fce8f3;
+  --ava-rose-ink:   #8c1a5f;
+}
+
 .ul-page {
   padding: 16px 24px 48px
 }
 
-/* Count chip in topbar */
-.ul-count-chip {
+/* Topbar left section */
+.ul-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap
+}
+
+.ul-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px
+}
+
+.ul-chip {
   display: inline-flex;
   align-items: center;
   padding: 2px 9px;
@@ -19,7 +42,13 @@
   color: var(--muted)
 }
 
-/* Table wrapper */
+.ul-chip-accent {
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+  border-color: transparent
+}
+
+/* Table */
 .ul-table-wrap {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -46,8 +75,8 @@
   white-space: nowrap
 }
 
-.ul-th-ava { width: 52px }
-.ul-th-act { text-align: right; width: 1%; white-space: nowrap }
+.ul-th-ava  { width: 52px }
+.ul-th-menu { width: 44px }
 
 .ul-table tbody tr + tr {
   border-top: 1px solid var(--border)
@@ -63,7 +92,7 @@
 }
 
 .ul-row-off {
-  opacity: .55
+  opacity: .45
 }
 
 /* Avatar */
@@ -90,31 +119,28 @@
   object-fit: cover
 }
 
-.ul-ava-active {
-  background: var(--accent-weak);
-  color: var(--accent-ink)
-}
+/* Deterministic avatar colors (crc32 % 6) */
+.ul-ava-c0 { background: var(--accent-weak); color: var(--accent-ink) }
+.ul-ava-c1 { background: var(--green-bg);    color: var(--green-ink) }
+.ul-ava-c2 { background: var(--amber-bg);    color: var(--amber-ink) }
+.ul-ava-c3 { background: #f0ecfd;            color: #4a2380 }
+.ul-ava-c4 { background: #e8f8f9;            color: #0a6b7c }
+.ul-ava-c5 { background: #fce8f3;            color: #8c1a5f }
 
-.ul-ava-inactive {
-  background: var(--surface3);
-  color: var(--faint)
+.ul-row-off .ul-ava {
+  background: var(--surface3) !important;
+  color: var(--faint) !important
 }
 
 /* User name column */
 .ul-td-user {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   min-width: 140px
 }
 
-/* Override: td flex needs to become block when inside table */
-.ul-table td.ul-td-user {
-  display: table-cell
-}
-
 .ul-nome {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-weight: 600;
   font-size: 13px;
   color: var(--text)
@@ -123,20 +149,21 @@
 .ul-username {
   display: block;
   font-size: 11px;
-  color: var(--faint)
+  color: var(--faint);
+  margin-top: 2px
 }
 
 .ul-you {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 0 5px;
   border-radius: var(--rpill);
   background: var(--accent-weak);
   color: var(--accent-ink);
   font-size: 10px;
   font-weight: 700;
-  margin-left: 5px;
-  vertical-align: middle;
-  line-height: 16px
+  line-height: 16px;
+  flex-shrink: 0
 }
 
 /* Badges */
@@ -173,65 +200,104 @@
   border: 1px solid var(--border)
 }
 
-/* Actions column */
-.ul-td-act {
-  text-align: right
+/* 3-dot action menu */
+.ul-td-menu {
+  padding-right: 12px !important;
+  width: 44px
 }
 
-.ul-act-row {
+.ul-action {
+  display: inline-block
+}
+
+.ul-menu-btn {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  flex-wrap: wrap
-}
-
-.ul-inline-form {
-  display: contents
-}
-
-.ul-btn {
-  display: inline-flex;
-  align-items: center;
+  justify-content: center;
+  width: 30px;
   height: 30px;
-  padding: 0 11px;
-  border: 1px solid var(--border);
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: var(--rxs);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
+  background: transparent;
+  color: var(--faint);
   cursor: pointer;
-  white-space: nowrap;
   transition: background .08s, color .08s, border-color .08s
 }
 
-.ul-btn:hover:not(:disabled) {
+.ul-menu-btn:hover,
+.ul-menu-btn.active {
   background: var(--surface2);
   color: var(--text);
-  border-color: var(--border2)
+  border-color: var(--border)
 }
 
-.ul-btn:disabled {
+/* Dropdown — position:fixed applied inline by JS to escape overflow:hidden */
+.ul-menu {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  box-shadow: 0 4px 20px rgba(20, 30, 55, .12), 0 1px 4px rgba(20, 30, 55, .08);
+  padding: 4px;
+  min-width: 180px
+}
+
+.ul-menu.open {
+  display: block
+}
+
+.ul-menu-form {
+  display: contents
+}
+
+.ul-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--rxs);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background .07s, color .07s
+}
+
+.ul-menu-item:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.ul-menu-item:disabled {
   opacity: .4;
   cursor: not-allowed
 }
 
-.ul-btn-off:not(:disabled):hover {
-  background: var(--red-bg);
-  color: var(--red-ink);
-  border-color: var(--red-bd)
+.ul-menu-danger:hover:not(:disabled) {
+  background: var(--red-bg) !important;
+  color: var(--red-ink) !important
 }
 
-.ul-btn-on:not(:disabled) {
-  border-color: var(--green-bd);
+.ul-menu-ok:not(:disabled) {
   color: var(--green-ink)
 }
 
-.ul-btn-on:not(:disabled):hover {
-  background: var(--green-bg);
-  border-color: var(--green-bd);
-  color: var(--green-ink)
+.ul-menu-ok:hover:not(:disabled) {
+  background: var(--green-bg) !important;
+  color: var(--green-ink) !important
+}
+
+.ul-menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0
 }
 
 /* Empty state */
@@ -239,22 +305,56 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   padding: 64px 24px;
   color: var(--faint);
-  font-size: 14px;
   text-align: center
 }
 
 .ul-empty-icon {
-  color: var(--border2)
+  color: var(--border2);
+  margin-bottom: 8px
 }
 
-/* Dialog specifics */
+.ul-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0
+}
+
+.ul-empty-sub {
+  font-size: 13px;
+  margin: 0
+}
+
+/* Dialog form fields — vertical layout, full-width inputs */
 .ul-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px
+}
+
+.ul-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px
+}
+
+.ul-field-full {
+  grid-column: 1 / -1
+}
+
+.ul-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted)
+}
+
+.ul-field input,
+.ul-field select {
+  width: 100%;
+  text-align: left
 }
 
 .ul-req {
@@ -262,7 +362,7 @@
   font-size: 10px
 }
 
-.ul-reset-for {
+.ul-reset-ctx {
   margin: 0 0 14px;
   font-size: 12px;
   color: var(--muted);
@@ -278,12 +378,9 @@
   }
 
   .ul-table thead th:nth-child(3),
-  .ul-table tbody td:nth-child(3) {
+  .ul-table tbody td:nth-child(3),
+  .ul-table thead th:nth-child(4),
+  .ul-table tbody td:nth-child(4) {
     display: none
-  }
-
-  .ul-act-row {
-    flex-direction: column;
-    align-items: flex-end
   }
 }
