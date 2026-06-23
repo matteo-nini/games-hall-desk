@@ -110,8 +110,8 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
           <div class="field"><label for="t<?= $n ?>-bancomat">Bancomat</label><input id="t<?= $n ?>-bancomat" type="number" inputmode="decimal" step="0.01" class="f-bancomat" name="turno[<?= $n ?>][bancomat]" value="<?= $h($nv($T['t']['bancomat'])) ?>" <?= $ro ?>></div>
           <details class="adv"><summary>Rettifiche</summary>
             <div class="field"><label for="t<?= $n ?>-differenze">Differenze</label><input id="t<?= $n ?>-differenze" type="number" inputmode="decimal" step="0.01" class="f-differenze" name="turno[<?= $n ?>][differenze]" value="<?= $h($nv($T['t']['differenze'])) ?>" <?= $ro ?>></div>
-            <div class="field"><label for="t<?= $n ?>-ii">II cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
             <div class="field"><label for="t<?= $n ?>-rientri">Rientri</label><input id="t<?= $n ?>-rientri" type="number" inputmode="decimal" step="0.01" class="f-rientri" name="turno[<?= $n ?>][rientri]" value="<?= $h($nv($T['t']['rientri'])) ?>" <?= $ro ?>></div>
+            <div class="field"><label for="t<?= $n ?>-ii">2ª cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
           </details>
         </div>
         <div class="panel panel-mini">
