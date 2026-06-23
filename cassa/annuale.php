@@ -57,13 +57,30 @@ foreach ($st as $r) $bancM[(int)$r['m']] = (float)$r['v'];
 $st = $pdo->prepare('
     SELECT MONTH(g.data) m, COUNT(DISTINCT g.data) v
     FROM giornate g
-    JOIN turni t ON t.giornata_id = g.id
+    JOIN turni t ON t.giornata_id = g.id AND t.numero = 2
     WHERE YEAR(g.data) = ?
     GROUP BY MONTH(g.data)
 ');
 $st->execute([$anno]);
 $giorniM = array_fill(1, 12, 0);
 foreach ($st as $r) $giorniM[(int)$r['m']] = (int)$r['v'];
+
+/* Versamento mensile = sum(vers_cassa) per giorno sera = sum(cassetto+monete-fondo) */
+$st = $pdo->prepare('
+    SELECT MONTH(g.data) m,
+           SUM(
+               (SELECT COALESCE(SUM(c.taglio * c.pezzi), 0) FROM contanti c WHERE c.turno_id = t.id)
+               + (SELECT COALESCE(SUM(r.euro), 0) FROM refill_awp r WHERE r.turno_id = t.id)
+               + t.differenze - t.ii_cassa - t.rientri + t.monete - t.fondo_cassa
+           ) v
+    FROM giornate g
+    JOIN turni t ON t.giornata_id = g.id AND t.numero = 2
+    WHERE YEAR(g.data) = ?
+    GROUP BY MONTH(g.data)
+');
+$st->execute([$anno]);
+$versM = array_fill(1, 12, 0.0);
+foreach ($st as $r) $versM[(int)$r['m']] = (float)$r['v'];
 
 /* CSV export */
 if (($_GET['export'] ?? '') === 'csv') {
@@ -73,14 +90,13 @@ if (($_GET['export'] ?? '') === 'csv') {
     $out = fopen('php://output', 'w');
     fputcsv($out, ['Mese', 'Giorni', 'Incasso VLT', 'Ticket', 'Bancomat', 'Versamento'], ';');
     for ($m = 1; $m <= 12; $m++) {
-        $vers = arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
         fputcsv($out, [
             $mesi[$m],
             $giorniM[$m],
             number_format($scassM[$m],  2, ',', '.'),
             number_format($ticketM[$m], 2, ',', '.'),
             number_format($bancM[$m],   2, ',', '.'),
-            number_format($vers,         2, ',', '.'),
+            number_format($versM[$m],   2, ',', '.'),
         ], ';');
     }
     fclose($out);
@@ -90,10 +106,7 @@ if (($_GET['export'] ?? '') === 'csv') {
 $totScass  = array_sum($scassM);
 $totTicket = array_sum($ticketM);
 $totBanc   = array_sum($bancM);
-$totVers = 0;
-for ($m = 1; $m <= 12; $m++) {
-    $totVers += arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
-}
+$totVers   = array_sum($versM);
 $totGiorni = array_sum($giorniM);
 ?>
 <!doctype html><html lang="it"><head>
@@ -160,7 +173,7 @@ $totGiorni = array_sum($giorniM);
       </thead>
       <tbody>
         <?php for ($m = 1; $m <= 12; $m++):
-          $vers    = arrotonda_versamento($scassM[$m] - $bancM[$m] - $ticketM[$m]);
+          $vers    = $versM[$m];
           $hasData = $giorniM[$m] > 0;
         ?>
         <tr class="<?= $hasData ? '' : 'ann-row-empty' ?>">

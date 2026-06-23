@@ -112,7 +112,7 @@ function riepilogo_giornata(PDO $pdo, string $data): array {
             'contanti'=>$s['contanti'],'refill'=>$s['refill'],'scass'=>$s['scass'],'ticket'=>$s['ticket'],
         ]);
         $z['bancomat']   += (float)$t['bancomat'];
-        $z['versamento'] += $c['vers_vlt'];
+        $z['versamento'] += $c['vers_cassa'];  // vers_cassa = cassetto+monete-fondo, identico alla formula Excel
         $z['ticket']     += $s['ticket'];
         $z['incasso_vlt']+= $s['scass'];
         foreach (['NOVO','INSPIRED','SPIELO'] as $f) $z['scass'][$f] += $s['scass_forn'][$f];

@@ -22,7 +22,7 @@ for ($d = 1; $d <= $ngiorni; $d++) {
     $tot['incasso']    += $r['incasso_vlt'];
     $tot['ticket']     += $r['ticket'];
     $tot['bancomat']   += $r['bancomat'];
-    $tot['versamento'] += arrotonda_versamento($r['versamento']);
+    $tot['versamento'] += $r['versamento'];
 }
 // bet/win per fornitore (mese)
 $primo = sprintf('%04d-%02d-01', $anno, $mese);
@@ -61,7 +61,7 @@ $mesi = nomi_mesi();
     <tr><th>G.</th><th class="rt">Incasso VLT</th><th class="rt">Ticket</th><th class="rt">Bancomat</th><th class="rt">Versamento</th></tr>
     <?php for ($d=1;$d<=$ngiorni;$d++): $r=$righe[$d]; ?>
     <tr><td><?= $d ?></td><td class="rt"><?= eur($r['incasso_vlt']) ?></td><td class="rt"><?= eur($r['ticket']) ?></td>
-        <td class="rt"><?= eur($r['bancomat']) ?></td><td class="rt"><?= eur(arrotonda_versamento($r['versamento'])) ?></td></tr>
+        <td class="rt"><?= eur($r['bancomat']) ?></td><td class="rt"><?= eur($r['versamento']) ?></td></tr>
     <?php endfor; ?>
     <tr class="tot"><td>TOT</td><td class="rt"><?= eur($tot['incasso']) ?></td><td class="rt"><?= eur($tot['ticket']) ?></td>
         <td class="rt"><?= eur($tot['bancomat']) ?></td><td class="rt"><?= eur($tot['versamento']) ?></td></tr>

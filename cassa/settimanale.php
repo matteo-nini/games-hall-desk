@@ -86,7 +86,7 @@ foreach ($giorni as $d) {
         $tot[$f]['i'] += $ri['scass'][$f];
     }
     $tot_banc   += $ri['bancomat'];
-    $tot_vers   += arrotonda_versamento($ri['versamento']);
+    $tot_vers   += $ri['versamento'];
     $tot_ticket += $ri['ticket'];
 }
 $pct = fn($p, $g) => $g > 0 ? number_format($p / $g * 100, 1, ',', '.') . '%' : '—';
@@ -115,7 +115,7 @@ if (($_GET['export'] ?? '') === 'csv') {
                 $pct($bw[$f]['pagato'], $bw[$f]['giocato']),
                 $first ? number_format($ri['bancomat'],                      2, ',', '.') : '',
                 $first ? number_format($ri['ticket'],                        2, ',', '.') : '',
-                $first ? number_format(arrotonda_versamento($ri['versamento']), 2, ',', '.') : '',
+                $first ? number_format($ri['versamento'], 2, ',', '.') : '',
             ];
             fputcsv($out, $row, ';');
             $first = false;
@@ -168,7 +168,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $dg  = 0; $dp = 0;
     foreach (fornitori() as $f) { $dg += $bw[$f]['giocato']; $dp += $bw[$f]['pagato']; }
     $ricavo  = $dg - $dp;
-    $vers    = arrotonda_versamento($ri['versamento']);
+    $vers    = $ri['versamento'];
     $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
   <section class="turno t1" style="flex-basis:320px">
