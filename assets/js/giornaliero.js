@@ -20,10 +20,10 @@ function recalcTurno(sec){
   var scost=totale-fondo;
   function set(c,v){var e=sec.querySelector(c);if(e)e.textContent=eur(v);}
   set('.o-cont',cont);set('.o-scass',scass);set('.o-ticket',ticket);
-  var vers_cassa=cassetto+f('monete')-fondo;
+  var monete=f('monete'), vers_cassa=cassetto+monete-fondo;
   return {bancomat:f('bancomat'),versamento:versvlt,vers_cassa:vers_cassa,ticket:ticket,incasso:scass,forn:forn,
           cassetto:cassetto,incassato:incassato,totale:totale,fondo:fondo,scost:scost,
-          cont:cont,tol:(parseFloat(sec.dataset.tol)||0)};
+          cont:cont,monete:monete,tol:(parseFloat(sec.dataset.tol)||0)};
 }
 function updateActive(){
   var r=RES[ACTIVE]; if(!r)return;
@@ -38,7 +38,10 @@ function updateActive(){
   document.getElementById('v-fondo').textContent='€ '+eur(r.fondo);
   document.getElementById('v-sign').textContent=isGood?'=':'≠';
   var el;
+  el=document.getElementById('m-fondo');    if(el) el.textContent=eur(r.fondo);
+  el=document.getElementById('m-cont');     if(el) el.textContent=eur(r.cont);
   el=document.getElementById('m-cassetto'); if(el) el.textContent=eur(r.cassetto);
+  el=document.getElementById('m-monete');   if(el) el.textContent=eur(r.monete);
   el=document.getElementById('m-vers-reale'); if(el) el.textContent='€ '+eur(r.cont-r.fondo);
   el=document.getElementById('m-versamento'); if(el) el.textContent='€ '+eur(r.vers_cassa);
 }

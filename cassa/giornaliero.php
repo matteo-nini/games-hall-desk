@@ -179,43 +179,47 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 
 <div class="stickyhead">
 
-  <div class="sh-datebar">
-    <div class="sh-top">
-      <div class="sh-nav">
-        <a href="?data=<?= $prev ?>" aria-label="Giorno precedente">&#9664;</a>
-        <input type="date" value="<?= $h($data) ?>" aria-label="Seleziona data" onchange="location='?data='+this.value">
-        <a href="?data=<?= $next ?>" aria-label="Giorno successivo">&#9654;</a>
-      </div>
-      <div class="sh-tabbar">
+  <div class="sh-top">
+    <div class="sh-nav">
+      <a href="?data=<?= $prev ?>" aria-label="Giorno precedente">&#9664;</a>
+      <input type="date" value="<?= $h($data) ?>" aria-label="Seleziona data" onchange="location='?data='+this.value">
+      <a href="?data=<?= $next ?>" aria-label="Giorno successivo">&#9654;</a>
+    </div>
+    <div class="sh-tabbar">
       <div class="tabs" role="tablist" aria-label="Selezione turno">
         <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
         <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
       </div>
-      <div class="sh-stats" style="margin-left: auto;" aria-label="Totali giornata">
-        <span class="ss-item"><span class="ss-l">Cassetto</span><span class="ss-v" id="m-cassetto">0,00</span></span>
-        <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">0,00</span></span>
-        <span class="ss-item"><span class="ss-l">VLT</span><span class="ss-v" id="g-incasso">0,00</span></span>
-        <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">0,00</span></span>
-        <span class="ss-sep" aria-hidden="true"></span>
-        <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">0,00</span></span>
-        <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">0,00</span></span>
-        <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">0,00</span></span>
+      <div class="sh-stats" aria-label="Dati chiusura turno">
+        <span class="ss-item"><span class="ss-l">Fondo</span><span class="ss-v" id="m-fondo">—</span></span>
+        <span class="ss-item"><span class="ss-l">Contanti</span><span class="ss-v" id="m-cont">—</span></span>
+        <span class="ss-item"><span class="ss-l">Cassetto</span><span class="ss-v" id="m-cassetto">—</span></span>
+        <span class="ss-item"><span class="ss-l">Monete</span><span class="ss-v" id="m-monete">—</span></span>
+        <!-- <span class="ss-sep" aria-hidden="true"></span> -->
+        <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">—</span></span>
+        <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">—</span></span>
+        <!-- <span class="ss-sep" aria-hidden="true"></span> -->
+        <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">—</span></span>
+        <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">—</span></span>
+        <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">—</span></span>
+        <span class="ss-item"><span class="ss-l">VLT tot.</span><span class="ss-v" id="g-incasso">—</span></span>
       </div>
+    </div>
+    <div class="sh-actions">
       <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span>
       <?php if ($anyEdit): ?><button type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
       <?php if (!$chiusa && $anyEdit): ?>
         <form method="post" class="actions">
           <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <button name="azione" value="chiudi" class="btn-close" onclick="return confirm('Chiudere la giornata?')">Chiudi giornata</button>
-        </form>
-        <?php endif; ?>
-        <?php if ($chiusa && is_responsabile()): ?>
-        <form method="post" class="actions">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <button name="azione" value="riapri" class="btn-reopen">Riapri giornata</button>
+          <button name="azione" value="chiudi" class="btn-close" onclick="return confirm('Chiudere la giornata?')">Chiudi</button>
         </form>
       <?php endif; ?>
-    </div>
+      <?php if ($chiusa && is_responsabile()): ?>
+        <form method="post" class="actions">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <button name="azione" value="riapri" class="btn-reopen">Riapri</button>
+        </form>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -242,7 +246,6 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
         <div class="hb-num-wrap hb-num-wrap--left">
           <span class="hb-num" id="m-versamento">&euro;&nbsp;0,00</span>
           <span class="hb-lbl">Versamento</span>
-          <span class="hb-sub">arrotondato ai 5&euro;</span>
         </div>
       </div>
       <div class="hb-formula">
@@ -251,7 +254,6 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
       </div>
     </div>
   </div>
-
 
 </div>
 <?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>

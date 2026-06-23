@@ -234,14 +234,6 @@ details.adv[open]>summary::before {
     width: 100%;
     justify-content: space-between
   }
-
-  .entry {
-    grid-template-columns: 1fr
-  }
-
-  .sh-stats {
-    display: none
-  }
 }
 
 /* ---- tab turno + toast (giornaliero) ---- */
@@ -368,20 +360,6 @@ details.adv[open]>summary::before {
   margin-right: 10px
 }
 
-/* ---- riga tab + salva ---- */
-.tabbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin: 12px 24px 4px;
-  flex-wrap: wrap
-}
-
-.tabbar .tabs {
-  margin: 0
-}
-
 .save-btn {
   white-space: nowrap
 }
@@ -392,16 +370,6 @@ details.adv[open]>summary::before {
   top: var(--topbar-h);
   z-index: 30;
   background: var(--bg)
-}
-
-.sh-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 4px 24px;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap
 }
 
 .sh-nav {
@@ -418,38 +386,6 @@ details.adv[open]>summary::before {
   min-width: 44px;
   min-height: 44px;
   padding: 0
-}
-
-.sh-right {
-  display: flex;
-  align-items: center;
-  gap: 14px
-}
-
-.sh-right .switch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px
-}
-
-.sh-metric {
-  text-align: right
-}
-
-.sh-ml {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  color: var(--muted)
-}
-
-.sh-mv {
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums
 }
 
 .stickyhead .tabs {
@@ -753,67 +689,48 @@ textarea.note:focus {
 .adv {
   margin-top: 14px
 }
+
 /* ============ Nuovo layout Cassa giornaliera ============ */
 
-/* ---- datebar (riga 1 stickyhead) ---- */
-.sh-datebar {
-  display: flex;
-  flex-direction: column
-}
-
+/* ---- riga unica: nav + tabbar(tab+stats) + azioni ---- */
 .sh-top {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 24px;
-  border-bottom: 1px solid var(--border)
+  padding: 5px 16px 5px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap
+}
+
+.sh-tabbar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0
 }
 
 .sh-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto
-}
-
-.sh-actions .switch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 18px
-}
-
-/* ---- tabbar (riga 2 stickyhead) ---- */
-.sh-tabbar {
-  display: flex;
-  align-items: center;
-  /* padding: 0 12px 0 16px; */
-  /* border-bottom: 1px solid var(--border); */
-  width: 100%;
-  gap: 12px;
-}
-
-.sh-tabbar .tabs {
-  /* margin: 5px 0 */
-}
-
-.sh-tabbar .save-btn {
   flex-shrink: 0
 }
 
-/* ---- stats strip in tabbar ---- */
+/* ---- strip dati chiusura (dentro sh-tabbar) ---- */
 .sh-stats {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   overflow-x: auto;
   min-width: 0;
-  /* padding: 0 8px; */
-  scrollbar-width: none
+  scrollbar-width: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 5px;
+  gap: 5px;
+  /* overflow:hidden non serve: border-radius cosmetico, contenuto scorre */
 }
 
 .sh-stats::-webkit-scrollbar {
@@ -823,9 +740,17 @@ textarea.note:focus {
 .ss-item {
   display: flex;
   flex-direction: column;
-  padding: 3px 11px;
+  justify-content: center;
+  /* padding: 6px 13px; */
   border-right: 1px solid var(--border);
-  flex-shrink: 0
+  flex-shrink: 0;
+  padding: 9px 18px;
+  border-radius: 9px;
+}
+
+.ss-item:hover {
+  background: var(--surface2);
+  box-shadow: var(--sh)
 }
 
 .ss-l {
@@ -1096,7 +1021,11 @@ textarea.note:focus {
 
 @media (max-width: 760px) {
   .sh-top {
-    padding: 6px 16px
+    padding: 5px 16px
+  }
+
+  .entry {
+    grid-template-columns: 1fr
   }
 
   .verdict {
@@ -1118,6 +1047,64 @@ textarea.note:focus {
 
   .daily-summary {
     padding: 0
+  }
+}
+
+/* Mobile: nav+azioni su riga 1, tabbar (tab+stats) su riga 2 piena */
+@media (max-width: 640px) {
+  .sh-top {
+    display: grid;
+    grid-template-areas: "nav actions" "tabbar tabbar";
+    grid-template-columns: auto 1fr;
+    gap: 6px;
+    padding: 6px 16px
+  }
+
+  .sh-nav {
+    grid-area: nav
+  }
+
+  .sh-actions {
+    grid-area: actions;
+    justify-self: end;
+    margin-left: 0
+  }
+
+  .sh-tabbar {
+    grid-area: tabbar;
+    width: 100%
+  }
+
+  .tab {
+    min-width: 88px;
+    padding: 7px 12px;
+    font-size: 13px
+  }
+
+  .entry {
+    grid-template-columns: 1fr
+  }
+
+  /* Hero boxes affiancati compatti */
+  .sh-hero {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .hero-box {
+    margin: 4px 6px;
+    padding: 6px 8px
+  }
+
+  .hb-num {
+    font-size: 16px
+  }
+
+  .hb-msg {
+    font-size: 12px
+  }
+
+  .hb-formula {
+    display: none
   }
 }
 
@@ -1452,4 +1439,3 @@ textarea.note:focus {
     font-size: 15px
   }
 }
-
