@@ -40,6 +40,15 @@ function is_responsabile(): bool {
     return $u && $u['ruolo'] === 'responsabile';
 }
 
+function is_revisore(): bool {
+    $u = current_user();
+    return $u && $u['ruolo'] === 'revisore';
+}
+
+function require_not_revisore(): void {
+    if (is_revisore()) render_403('Questa sezione non è accessibile ai revisori.');
+}
+
 function rate_limit_check(string $ip): bool {
     try {
         $pdo = db();

@@ -32,9 +32,13 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
   </div>
 
   <div class="ob-tabs" role="tablist">
+    <?php if ($role === 'revisore'): ?>
+    <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="rev">Revisore</button>
+    <?php else: ?>
     <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="op">Operatori</button>
     <?php if ($role === 'responsabile'): ?>
     <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="res">Responsabile</button>
+    <?php endif; ?>
     <?php endif; ?>
   </div>
 
@@ -212,6 +216,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
   </div>
   <?php endif; ?>
 
+  <?php if ($role !== 'revisore'): ?>
   <div style="text-align:center; margin-top:32px; padding:20px 0 0; border-top:1px solid var(--border)">
     <p style="font-size:13px; color:var(--muted); margin:0 0 10px">Vuoi rivedere il wizard di benvenuto?</p>
     <button class="btnlink" id="btn-replay-wizard" type="button">Rivedi guida popup</button>
@@ -220,6 +225,42 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
   <div style="text-align:center; padding:24px 0 40px">
     <a class="btnlink" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero →</a>
+  </div>
+  <?php endif; ?>
+
+  <!-- Tab revisore -->
+  <div class="ob-panel <?= $role === 'revisore' ? 'active' : '' ?>" id="ob-panel-rev">
+    <div class="ob-steps">
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">1</div>
+        <div class="ob-body">
+          <h3>Il ruolo revisore</h3>
+          <p>Come revisore hai accesso in sola lettura ai report finanziari della sala. Non puoi effettuare operazioni di cassa né modificare dati.</p>
+          <p style="margin-top:8px">Le sezioni disponibili sono:</p>
+          <ul>
+            <li><strong>Settimanale</strong> — dati Bet/Win SNAI per ogni settimana del mese, con versamenti e bancomat.</li>
+            <li><strong>Mensile</strong> — riepilogo cassa giorno per giorno e tabella fornitori per il mese.</li>
+            <li><strong>Annuale</strong> — panoramica incassi e versamenti mese per mese per l'intero anno.</li>
+          </ul>
+          <a class="ob-panel-link" href="<?= base_url('cassa/settimanale.php') ?>">Vai al settimanale →</a>
+        </div>
+      </div>
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">2</div>
+        <div class="ob-body">
+          <h3>Come navigare i report</h3>
+          <ul>
+            <li>Usa le frecce ← → nell'header per spostarti tra settimane, mesi o anni.</li>
+            <li>Clicca il nome di un mese nella pagina annuale per aprire il dettaglio mensile.</li>
+            <li>Usa i pulsanti <strong>CSV</strong> o <strong>Stampa</strong> per esportare i dati in formato foglio di calcolo o PDF.</li>
+          </ul>
+          <div class="ob-tip">I dati sono in sola lettura: le tabelle Bet/Win mostrano i valori inseriti dagli operatori ma non possono essere modificati da te.</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 </div>

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
+require_not_revisore();
 $cfg  = config();
 $pdo  = db();
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -12,6 +13,12 @@ if ((get_settings($pdo)['modulo_assistenze'] ?? '1') !== '1') {
 
 $macchine_list = $pdo->query('SELECT codice FROM macchine WHERE attiva=1 ORDER BY tipo,ordine')
                       ->fetchAll(PDO::FETCH_COLUMN);
+
+$sett       = get_settings($pdo);
+$aNumero    = $sett['assistenza_numero']   ?? '';
+$aLock      = $sett['assistenza_lock']     ?? '';
+$aPassword  = $sett['assistenza_password'] ?? '';
+$hasAssInfo = $aNumero !== '' || $aLock !== '' || $aPassword !== '';
 
 /* ---- POST ---- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -92,6 +99,17 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     <strong>Apri nuovo ticket</strong>
     <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
   </div>
+  <?php if ($hasAssInfo): ?>
+  <div class="tk-ass-info">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 5 5l.72-.85a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 20.5 15l.42 1.92z"/></svg>
+    <span class="tk-ass-label">Contatti assistenza tecnica</span>
+    <div class="tk-ass-fields">
+      <?php if ($aNumero !== ''): ?><span class="tk-ass-item"><span class="tk-ass-key">Tel.</span> <strong><?= $h($aNumero) ?></strong></span><?php endif; ?>
+      <?php if ($aLock !== ''): ?><span class="tk-ass-item"><span class="tk-ass-key">Lock</span> <strong><?= $h($aLock) ?></strong></span><?php endif; ?>
+      <?php if ($aPassword !== ''): ?><span class="tk-ass-item"><span class="tk-ass-key">Password</span> <strong><?= $h($aPassword) ?></strong></span><?php endif; ?>
+    </div>
+  </div>
+  <?php endif; ?>
   <form method="post" class="ticket-new-form">
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="nuovo">

@@ -55,6 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'assistenza') {
+        $keys = ['assistenza_numero','assistenza_lock','assistenza_password'];
+        $st   = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        foreach ($keys as $k) {
+            $v = mb_substr(trim($_POST[$k] ?? ''), 0, 200);
+            $st->execute([$k, $v]);
+        }
+        audit('impostazioni_assistenza', null, null, null);
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     if ($az === 'retention') {
         $rd = max(7, min(3650, (int)($_POST['retention_giorni'] ?? 90)));
         $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
@@ -237,6 +248,42 @@ $ps = $prezzi['sera']    ?? 70.0;
     </form>
   </section>
 
+
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 5 5l.72-.85a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 20.5 15l.42 1.92z"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Assistenza tecnica</h2>
+        <p class="imp-card-desc">Numero di telefono, codice lock e password da mostrare agli operatori quando aprono un ticket di assistenza.</p>
+      </div>
+    </div>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="assistenza">
+      <div class="imp-price-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="imp-field">
+          <label for="imp-atel">Numero assistenza</label>
+          <input id="imp-atel" type="text" name="assistenza_numero" maxlength="200"
+                 value="<?= $h($sett['assistenza_numero'] ?? '') ?>" placeholder="es. 800-123-456">
+        </div>
+        <div class="imp-field">
+          <label for="imp-alock">N° Lock</label>
+          <input id="imp-alock" type="text" name="assistenza_lock" maxlength="200"
+                 value="<?= $h($sett['assistenza_lock'] ?? '') ?>" placeholder="es. 123456">
+        </div>
+        <div class="imp-field">
+          <label for="imp-apwd">Password</label>
+          <input id="imp-apwd" type="text" name="assistenza_password" maxlength="200"
+                 value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123">
+        </div>
+      </div>
+      <div class="imp-form-footer">
+        <button type="submit">Salva dati assistenza</button>
+      </div>
+    </form>
+  </section>
 
   <section class="imp-card">
     <div class="imp-card-head">

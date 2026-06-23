@@ -27,19 +27,30 @@ function top_menu(array $user): void {
         'profilo'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
     ];
 
-    $cassaItems = [
-        'cassa/giornaliero.php' => ['label' => 'Giornaliero', 'ico' => 'giornaliero'],
-        'cassa/settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
-        'cassa/mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
-        'cassa/annuale.php'     => ['label' => 'Annuale',     'ico' => 'annuale'],
-    ];
+    $isRevisore = $role === 'revisore';
 
-    $salaItems = [
-        'sala/awp.php'   => ['label' => 'AWP',   'ico' => 'awp'],
-        'sala/turni.php' => ['label' => 'Turni', 'ico' => 'turni'],
-    ];
-    if ($modAssistenze) $salaItems['sala/ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
-    if ($modPrestiti)   $salaItems['sala/prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
+    $cassaItems = $isRevisore
+        ? [
+            'cassa/settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
+            'cassa/mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
+            'cassa/annuale.php'     => ['label' => 'Annuale',     'ico' => 'annuale'],
+          ]
+        : [
+            'cassa/giornaliero.php' => ['label' => 'Giornaliero', 'ico' => 'giornaliero'],
+            'cassa/settimanale.php' => ['label' => 'Settimanale', 'ico' => 'settimanale'],
+            'cassa/mensile.php'     => ['label' => 'Mensile',     'ico' => 'mensile'],
+            'cassa/annuale.php'     => ['label' => 'Annuale',     'ico' => 'annuale'],
+          ];
+
+    $salaItems = [];
+    if (!$isRevisore) {
+        $salaItems = [
+            'sala/awp.php'   => ['label' => 'AWP',   'ico' => 'awp'],
+            'sala/turni.php' => ['label' => 'Turni', 'ico' => 'turni'],
+        ];
+        if ($modAssistenze) $salaItems['sala/ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
+        if ($modPrestiti)   $salaItems['sala/prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
+    }
 
     $adminItems = ($role === 'responsabile') ? [
         'account/admin/macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
@@ -74,24 +85,28 @@ function top_menu(array $user): void {
 
   <nav class="sb-nav" aria-label="Menu principale">
 
+    <?php if (!$isRevisore): ?>
     <!-- Dashboard -->
     <div class="sn-group">
       <?php $renderLink($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
     </div>
+    <?php endif; ?>
 
     <div class="sn-group">
-      <span class="sn-cat">Cassa</span>
+      <span class="sn-cat"><?= $isRevisore ? 'Report' : 'Cassa' ?></span>
       <?php foreach ($cassaItems as $file => $item): ?>
         <?php $renderLink($file, $item); ?>
       <?php endforeach; ?>
     </div>
 
+    <?php if (!empty($salaItems)): ?>
     <div class="sn-group">
       <span class="sn-cat">Sala</span>
       <?php foreach ($salaItems as $file => $item): ?>
         <?php $renderLink($file, $item); ?>
       <?php endforeach; ?>
     </div>
+    <?php endif; ?>
 
     <?php if (!empty($adminItems)): ?>
     <div class="sn-group">

@@ -155,3 +155,49 @@
   color: var(--muted)
 }
 
+
+/* ---- banner info assistenza tecnica nel dialog ---- */
+.tk-ass-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--accent-subtle, color-mix(in srgb, var(--accent) 8%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: var(--radius, 8px);
+  padding: 10px 14px;
+  margin: 0 20px 12px;
+  color: var(--ink)
+}
+
+.tk-ass-info > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  display: none
+}
+
+.tk-ass-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--accent)
+}
+
+.tk-ass-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px
+}
+
+.tk-ass-item {
+  font-size: 13px;
+  display: flex;
+  gap: 5px;
+  align-items: baseline
+}
+
+.tk-ass-key {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500
+}

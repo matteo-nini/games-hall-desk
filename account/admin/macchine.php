@@ -7,19 +7,27 @@ $cfg  = config();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $msg  = '';
 
+/* Auto-migrazione colonne seriale/civ */
+try {
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS seriale VARCHAR(100) NULL AFTER fornitore');
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS civ VARCHAR(100) NULL AFTER seriale');
+} catch (Throwable) {}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     $az = $_POST['azione'] ?? '';
 
     if ($az === 'add') {
-        $codice = trim($_POST['codice'] ?? '');
-        $tipo   = ($_POST['tipo'] ?? 'VLT') === 'AWP' ? 'AWP' : 'VLT';
-        $forn   = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
-        $ord    = (int)($_POST['ordine'] ?? 0);
+        $codice  = trim($_POST['codice'] ?? '');
+        $tipo    = ($_POST['tipo'] ?? 'VLT') === 'AWP' ? 'AWP' : 'VLT';
+        $forn    = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
+        $ord     = (int)($_POST['ordine'] ?? 0);
+        $seriale = mb_substr(trim($_POST['seriale'] ?? ''), 0, 100) ?: null;
+        $civ     = mb_substr(trim($_POST['civ'] ?? ''), 0, 100) ?: null;
         if ($codice !== '') {
             try {
-                $pdo->prepare('INSERT INTO macchine (codice,tipo,fornitore,ordine) VALUES (?,?,?,?)')
-                    ->execute([$codice, $tipo, $forn, $ord]);
+                $pdo->prepare('INSERT INTO macchine (codice,tipo,fornitore,seriale,civ,ordine) VALUES (?,?,?,?,?,?)')
+                    ->execute([$codice, $tipo, $forn, $seriale, $civ, $ord]);
                 audit('macchina_add', 'macchine', null, $codice);
                 header('Location: macchine.php?ok=add'); exit;
             } catch (Throwable) {
@@ -32,10 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         audit('macchina_toggle', 'macchine', $id, null);
         header('Location: macchine.php?ok=toggle'); exit;
     } elseif ($az === 'edit') {
-        $id   = (int)$_POST['id'];
-        $forn = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
-        $pdo->prepare('UPDATE macchine SET codice=?, fornitore=?, ordine=? WHERE id=?')
-            ->execute([trim($_POST['codice'] ?? ''), $forn, (int)($_POST['ordine'] ?? 0), $id]);
+        $id      = (int)$_POST['id'];
+        $forn    = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
+        $seriale = mb_substr(trim($_POST['seriale'] ?? ''), 0, 100) ?: null;
+        $civ     = mb_substr(trim($_POST['civ'] ?? ''), 0, 100) ?: null;
+        $pdo->prepare('UPDATE macchine SET codice=?, fornitore=?, seriale=?, civ=?, ordine=? WHERE id=?')
+            ->execute([trim($_POST['codice'] ?? ''), $forn, $seriale, $civ, (int)($_POST['ordine'] ?? 0), $id]);
         audit('macchina_edit', 'macchine', $id, null);
         header('Location: macchine.php?ok=edit'); exit;
     }
@@ -121,6 +131,14 @@ $okMsg = match ($_GET['ok'] ?? '') {
         <label for="add-ord">Ordine visualizzazione</label>
         <input id="add-ord" type="number" name="ordine" min="0" value="0">
       </div>
+      <div class="ul-field">
+        <label for="add-ser">Seriale</label>
+        <input id="add-ser" type="text" name="seriale" maxlength="100" placeholder="es. SN123456">
+      </div>
+      <div class="ul-field">
+        <label for="add-civ">CIV</label>
+        <input id="add-civ" type="text" name="civ" maxlength="100" placeholder="es. CIV-ABC">
+      </div>
     </div>
     <div class="dlg-actions">
       <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
@@ -148,6 +166,8 @@ $okMsg = match ($_GET['ok'] ?? '') {
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="edit">
     <input type="hidden" name="id" value="<?= $mid ?>">
+    <input type="hidden" id="mef-ser-<?= $mid ?>" name="seriale" value="<?= $h($m['seriale'] ?? '') ?>">
+    <input type="hidden" id="mef-civ-<?= $mid ?>" name="civ" value="<?= $h($m['civ'] ?? '') ?>">
   </form>
   <form id="mtf-<?= $mid ?>" method="post" hidden>
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
@@ -192,7 +212,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <input type="number" class="mach-input mach-ord" name="ordine" form="mef-<?= $mid ?>"
              value="<?= (int)$m['ordine'] ?>" min="0" aria-label="Ordine">
       <span class="mach-status-badge mach-status-<?= $isActive ? 'on' : 'off' ?>"><?= $isActive ? 'Attiva' : 'Off' ?></span>
-      <button type="submit" class="mach-btn mach-btn-save" form="mef-<?= $mid ?>">Salva</button>
+      <button type="submit" class="mach-btn mach-btn-save" form="mef-<?= $mid ?>" title="Salva tutte le modifiche">Salva</button>
       <button type="submit" class="mach-btn <?= $isActive ? 'mach-btn-off' : 'mach-btn-on' ?>"
               form="mtf-<?= $mid ?>"
               <?= $isActive ? 'data-confirm="Disattivare ' . $h($m['codice']) . '?"' : '' ?>>
@@ -207,6 +227,20 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <?php else: ?>
       <span class="mach-tk-empty" aria-hidden="true">—</span>
       <?php endif; ?>
+    </div>
+    <div class="mach-serial-row">
+      <span class="mach-serial-lbl">Seriale</span>
+      <input class="mach-serial-input" type="text" maxlength="100"
+             placeholder="—"
+             value="<?= $h($m['seriale'] ?? '') ?>"
+             aria-label="Seriale <?= $h($m['codice']) ?>"
+             oninput="document.getElementById('mef-ser-<?= $mid ?>').value=this.value">
+      <span class="mach-serial-lbl">CIV</span>
+      <input class="mach-serial-input" type="text" maxlength="100"
+             placeholder="—"
+             value="<?= $h($m['civ'] ?? '') ?>"
+             aria-label="CIV <?= $h($m['codice']) ?>"
+             oninput="document.getElementById('mef-civ-<?= $mid ?>').value=this.value">
     </div>
     <?php if ($mTkCount > 0): ?>
     <details class="mach-history" id="mh-<?= $mid ?>">

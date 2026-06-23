@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = mb_substr(trim($_POST['username'] ?? ''), 0, 60);
         $nome     = mb_substr(trim($_POST['nome']     ?? ''), 0, 80) ?: null;
         $pw       = $_POST['password'] ?? '';
-        $ruolo    = ($_POST['ruolo'] ?? '') === 'responsabile' ? 'responsabile' : 'operatore';
+        $ruolo    = in_array($_POST['ruolo'] ?? '', ['responsabile','revisore'], true) ? $_POST['ruolo'] : 'operatore';
         if ($username === '' || strlen($pw) < 8) {
             $err = 'Username obbligatorio e password di almeno 8 caratteri.';
         } else {
@@ -75,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $utenti   = $pdo->query('SELECT * FROM utenti ORDER BY attivo DESC, ruolo DESC, username')->fetchAll();
 $n_attivi = count(array_filter($utenti, fn($u) => (int)$u['attivo'] === 1));
 $n_resp   = count(array_filter($utenti, fn($u) => $u['ruolo'] === 'responsabile'));
+$n_rev    = count(array_filter($utenti, fn($u) => $u['ruolo'] === 'revisore'));
 
 $okMsg = match ($_GET['ok'] ?? '') {
     'add'    => 'Utente creato.',
@@ -99,6 +100,9 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <span class="ul-chip"><?= $n_attivi ?> <?= $n_attivi === 1 ? 'attivo' : 'attivi' ?></span>
       <?php if ($n_resp > 0): ?>
       <span class="ul-chip ul-chip-accent"><?= $n_resp ?> <?= $n_resp === 1 ? 'responsabile' : 'responsabili' ?></span>
+      <?php endif; ?>
+      <?php if ($n_rev > 0): ?>
+      <span class="ul-chip"><?= $n_rev ?> <?= $n_rev === 1 ? 'revisore' : 'revisori' ?></span>
       <?php endif; ?>
     </div>
   </div>
@@ -129,12 +133,14 @@ $okMsg = match ($_GET['ok'] ?? '') {
         <label for="nu-user">Username <span class="ul-req">*</span></label>
         <input id="nu-user" type="text" name="username" required placeholder="es. mario.rossi" maxlength="60" autocomplete="off">
       </div>
-      <div class="ul-field">
+      <div class="ul-field ul-field-full">
         <label for="nu-ruolo">Ruolo</label>
-        <select id="nu-ruolo" name="ruolo">
+        <select id="nu-ruolo" name="ruolo" onchange="document.getElementById('ruolo-desc').textContent=({operatore:'Accesso completo alla cassa giornaliera e alle sezioni operative.',responsabile:'Accesso completo incluse impostazioni, gestione utenti e macchine.',revisore:'Solo visualizzazione report settimanali, mensili e annuali. Nessun accesso alle operazioni di cassa.'})[this.value]||''">
           <option value="operatore">Operatore</option>
           <option value="responsabile">Responsabile</option>
+          <option value="revisore">Revisore</option>
         </select>
+        <p id="ruolo-desc" class="ul-field-hint">Accesso completo alla cassa giornaliera e alle sezioni operative.</p>
       </div>
       <div class="ul-field">
         <label for="nu-pw">Password <span class="ul-req">*</span></label>
@@ -232,6 +238,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
           $isMe     = (int)$u['id'] === (int)$user['id'];
           $isActive = (bool)(int)$u['attivo'];
           $isResp   = $u['ruolo'] === 'responsabile';
+          $isRev    = $u['ruolo'] === 'revisore';
           $displayN = $u['nome'] ?: $u['username'];
           $initial  = mb_strtoupper(mb_substr($displayN, 0, 1, 'UTF-8'), 'UTF-8');
           $foto     = $u['foto'] ?? null;
@@ -258,8 +265,8 @@ $okMsg = match ($_GET['ok'] ?? '') {
           </td>
 
           <td>
-            <span class="ul-badge ul-role-<?= $isResp ? 'resp' : 'op' ?>">
-              <?= $isResp ? 'Responsabile' : 'Operatore' ?>
+            <span class="ul-badge ul-role-<?= $isResp ? 'resp' : ($isRev ? 'rev' : 'op') ?>">
+              <?= $isResp ? 'Responsabile' : ($isRev ? 'Revisore' : 'Operatore') ?>
             </span>
           </td>
 

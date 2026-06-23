@@ -342,3 +342,38 @@
   text-overflow: ellipsis;
   white-space: nowrap
 }
+/* ---- riga seriale/CIV sotto ogni macchina ---- */
+.mach-serial-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 6px;
+  background: var(--bg);
+  border-top: 1px dashed var(--border)
+}
+
+.mach-serial-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap
+}
+
+.mach-serial-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  background: var(--surface);
+  color: var(--text);
+  font-family: monospace
+}
+
+.mach-serial-input:focus {
+  outline: none;
+  border-color: var(--accent)
+}

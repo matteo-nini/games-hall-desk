@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
+require_not_revisore();
 $cfg  = config();
 $pdo  = db();
 $REFILL_ROWS = (int)($cfg['refill_rows'] ?? 10);

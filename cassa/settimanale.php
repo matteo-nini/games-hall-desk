@@ -48,7 +48,7 @@ $nomiGiorniBr = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 /* =========================================================
    POST — salva dati bet/win
    ========================================================= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_revisore()) {
     check_csrf();
     $up = $pdo->prepare('INSERT INTO snai_betwin (data, fornitore, giocato, pagato) VALUES (?,?,?,?)
                          ON DUPLICATE KEY UPDATE giocato=VALUES(giocato), pagato=VALUES(pagato)');
@@ -95,6 +95,66 @@ $tg = array_sum(array_column($tot, 'g'));
 $tp = array_sum(array_column($tot, 'p'));
 
 /* =========================================================
+   Export stampa (HTML print-friendly)
+   ========================================================= */
+if (($_GET['export'] ?? '') === 'print') {
+    $nomiMesiP = nomi_mesi();
+    header('Content-Type: text/html; charset=utf-8');
+?><!doctype html><html lang="it"><head>
+<meta charset="utf-8"><title>Settimanale <?= $anno ?>/<?= sprintf('%02d',$mese) ?> Sett.<?= $sett ?></title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:12px/1.4 system-ui,sans-serif;color:#111;padding:16px}
+h1{font-size:14px;margin-bottom:12px}
+h2{font-size:12px;margin:14px 0 4px;border-bottom:1px solid #ccc;padding-bottom:2px}
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+th,td{border:1px solid #ccc;padding:3px 6px;text-align:left}
+th{background:#f4f4f4;font-weight:600}
+.rt{text-align:right}
+.tot{font-weight:700;background:#f9f9f9}
+.day-sep{height:10px;background:none;border:none}
+@media print{
+  body{padding:0}
+  .no-print{display:none}
+}
+</style>
+</head><body>
+<h1><?= $h($cfg['nome_sala'] ?? '') ?> — Settimanale <?= $h($nomiMesiP[$mese]) ?> <?= $anno ?> · Settimana <?= $sett ?> (<?= $dayStart ?>–<?= $dayEnd ?>)</h1>
+<table>
+<thead><tr><th>Data</th><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Inserito</th><th class="rt">Payout</th><th class="rt">Bancomat</th><th class="rt">Ticket</th><th class="rt">Versamento</th></tr></thead>
+<tbody>
+<?php foreach ($giorni as $d):
+    $bw = $rows[$d]['bw']; $ri = $rows[$d]['ri']; $first = true;
+    foreach (['INSPIRED','SPIELO','NOVO'] as $f):
+        $g=$bw[$f]['giocato'];$p=$bw[$f]['pagato'];$ins=$ri['scass'][$f]; ?>
+<tr>
+  <td><?= $first ? $h(date('d/m/Y',strtotime($d))) : '' ?></td>
+  <td><?= $f ?></td>
+  <td class="rt"><?= eur($g) ?></td>
+  <td class="rt"><?= eur($p) ?></td>
+  <td class="rt"><?= eur($ins) ?></td>
+  <td class="rt"><?= $pct($p,$g) ?></td>
+  <td class="rt"><?= $first ? eur($ri['bancomat']) : '' ?></td>
+  <td class="rt"><?= $first ? eur($ri['ticket']) : '' ?></td>
+  <td class="rt"><?= $first ? eur($ri['versamento']) : '' ?></td>
+</tr>
+<?php $first=false; endforeach; ?>
+<tr class="day-sep"><td colspan="9"></td></tr>
+<?php endforeach; ?>
+<tr class="tot"><td colspan="2">TOTALI SETTIMANA</td>
+  <td class="rt"><?= eur($tg) ?></td><td class="rt"><?= eur($tp) ?></td>
+  <td class="rt"><?= eur(array_sum(array_column($tot,'i'))) ?></td>
+  <td class="rt"><?= $pct($tp,$tg) ?></td>
+  <td class="rt"><?= eur($tot_banc) ?></td>
+  <td class="rt"><?= eur($tot_ticket) ?></td>
+  <td class="rt"><?= eur($tot_vers) ?></td>
+</tr>
+</tbody></table>
+<script>window.print()</script>
+</body></html>
+<?php exit; }
+
+/* =========================================================
    Export CSV
    ========================================================= */
 if (($_GET['export'] ?? '') === 'csv') {
@@ -108,19 +168,20 @@ if (($_GET['export'] ?? '') === 'csv') {
         $bw = $rows[$d]['bw'];
         $ri = $rows[$d]['ri'];
         $first = true;
-        foreach (fornitori() as $f) {
+        foreach (['INSPIRED', 'SPIELO', 'NOVO'] as $f) {
             $row = [$d, $f,
                 number_format($bw[$f]['giocato'], 2, ',', '.'),
                 number_format($bw[$f]['pagato'],  2, ',', '.'),
                 number_format($ri['scass'][$f],   2, ',', '.'),
                 $pct($bw[$f]['pagato'], $bw[$f]['giocato']),
-                $first ? number_format($ri['bancomat'],                      2, ',', '.') : '',
-                $first ? number_format($ri['ticket'],                        2, ',', '.') : '',
-                $first ? number_format($ri['versamento'], 2, ',', '.') : '',
+                $first ? number_format($ri['bancomat'],    2, ',', '.') : '',
+                $first ? number_format($ri['ticket'],      2, ',', '.') : '',
+                $first ? number_format($ri['versamento'],  2, ',', '.') : '',
             ];
             fputcsv($out, $row, ';');
             $first = false;
         }
+        fputcsv($out, [], ';'); // riga vuota tra giorni
     }
     fputcsv($out, [], ';');
     fputcsv($out, ['TOTALI', '', number_format($tg, 2, ',', '.'), number_format($tp, 2, ',', '.'), '', $pct($tp, $tg),
@@ -155,6 +216,7 @@ if (($_GET['export'] ?? '') === 'csv') {
        href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $s ?>"><?= $ds ?>&ndash;<?= $de ?></a>
     <?php endfor; ?>
     <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
+    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
   </div>
 </header>
 
@@ -178,8 +240,13 @@ if (($_GET['export'] ?? '') === 'csv') {
       <tr><th>Fornitore</th><th>Giocato</th><th>Pagato</th><th>Inserito</th><th>Payout</th></tr>
       <?php foreach (fornitori() as $f): $g = $bw[$f]['giocato']; $p = $bw[$f]['pagato']; $ins = $ri['scass'][$f]; ?>
       <tr><td><?= $f ?></td>
+        <?php if (!is_revisore()): ?>
         <td><input type="number" step="0.01" name="bw[<?= $d ?>][<?= $f ?>][giocato]" value="<?= $h($nv($g)) ?>"></td>
         <td><input type="number" step="0.01" name="bw[<?= $d ?>][<?= $f ?>][pagato]"  value="<?= $h($nv($p)) ?>"></td>
+        <?php else: ?>
+        <td class="rt"><?= eur($g) ?></td>
+        <td class="rt"><?= eur($p) ?></td>
+        <?php endif; ?>
         <td class="rt"><?= eur($ins) ?></td>
         <td class="rt"><?= $pct($p, $g) ?></td></tr>
       <?php endforeach; ?>
@@ -195,7 +262,7 @@ if (($_GET['export'] ?? '') === 'csv') {
   </section>
 <?php endforeach; ?>
 </div>
-<div class="actions"><button type="submit">Salva settimana</button></div>
+<?php if (!is_revisore()): ?><div class="actions"><button type="submit">Salva settimana</button></div><?php endif; ?>
 </form>
 
 <div class="riepilogo" style="max-width:640px">
