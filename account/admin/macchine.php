@@ -47,6 +47,10 @@ $awp      = array_values(array_filter($macchine, fn($m) => $m['tipo'] === 'AWP')
 $nVlt     = count(array_filter($vlt, fn($m) => (bool)$m['attiva']));
 $nAwp     = count(array_filter($awp, fn($m) => (bool)$m['attiva']));
 
+$allTickets = $pdo->query('SELECT macchina, problema, stato, data_apertura, data_chiusura FROM ticket_assistenza ORDER BY data_apertura DESC')->fetchAll();
+$ticketsByMach = [];
+foreach ($allTickets as $tk) { $ticketsByMach[$tk['macchina']][] = $tk; }
+
 $okMsg = match ($_GET['ok'] ?? '') {
     'add'    => 'Macchina aggiunta.',
     'toggle' => 'Stato aggiornato.',
@@ -160,6 +164,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <span>Stato</span>
       <span></span>
       <span></span>
+      <span>Guasti</span>
     </div>
 
     <?php foreach ([['VLT', $vlt, $nVlt], ['AWP', $awp, $nAwp]] as [$tipo, $list, $n]):
@@ -172,7 +177,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
 
     <?php foreach ($list as $m):
       $isActive = (bool)$m['attiva'];
-      $mid = (int)$m['id']; ?>
+      $mid = (int)$m['id'];
+      $mTk      = $ticketsByMach[$m['codice']] ?? [];
+      $mTkCount = count($mTk);
+      $mTkOpen  = count(array_filter($mTk, fn($t) => $t['stato'] === 'aperto')); ?>
     <div class="mach-row<?= $isActive ? '' : ' mach-row-off' ?>">
       <input class="mach-input" name="codice" form="mef-<?= $mid ?>"
              value="<?= $h($m['codice']) ?>" placeholder="Codice" required aria-label="Codice macchina">
@@ -190,7 +198,34 @@ $okMsg = match ($_GET['ok'] ?? '') {
               <?= $isActive ? 'data-confirm="Disattivare ' . $h($m['codice']) . '?"' : '' ?>>
         <?= $isActive ? 'Disattiva' : 'Attiva' ?>
       </button>
+      <?php if ($mTkCount > 0): ?>
+      <button type="button" class="mach-btn mach-tk-btn<?= $mTkOpen > 0 ? ' mach-tk-open' : '' ?>"
+              onclick="var d=document.getElementById('mh-<?= $mid ?>');if(d)d.open=!d.open;"
+              aria-label="Storico guasti <?= $h($m['codice']) ?>">
+        <?= $mTkCount ?>
+      </button>
+      <?php else: ?>
+      <span class="mach-tk-empty" aria-hidden="true">—</span>
+      <?php endif; ?>
     </div>
+    <?php if ($mTkCount > 0): ?>
+    <details class="mach-history" id="mh-<?= $mid ?>">
+      <summary>
+        Storico guasti · <?= $mTkCount ?> <?= $mTkCount === 1 ? 'guasto' : 'guasti' ?>
+        <?php if ($mTkOpen > 0): ?><span class="badge open"><?= $mTkOpen ?> aper<?= $mTkOpen === 1 ? 'to' : 'ti' ?></span><?php endif; ?>
+      </summary>
+      <div class="mach-history-list">
+        <?php foreach ($mTk as $tk): ?>
+        <div class="mach-hist-row">
+          <span class="mach-hist-date"><?= $h(date('d/m/Y', strtotime($tk['data_apertura']))) ?></span>
+          <span class="mach-hist-prob"><?= $h(mb_substr($tk['problema'] ?? '', 0, 80)) ?></span>
+          <span class="badge <?= $tk['stato'] === 'aperto' ? 'open' : 'closed' ?>"><?= $tk['stato'] === 'aperto' ? 'Aperto' : 'Risolto' ?></span>
+          <span class="mach-hist-date"><?= $tk['data_chiusura'] ? $h(date('d/m/Y', strtotime($tk['data_chiusura']))) : '—' ?></span>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </details>
+    <?php endif; ?>
     <?php endforeach; ?>
     <?php endforeach; ?>
   </div>

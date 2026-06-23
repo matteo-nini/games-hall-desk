@@ -227,3 +227,20 @@
   .dash-earn-item { border-right: none; border-bottom: 1px solid var(--border) }
   .dash-earn-item:last-child { border-bottom: none }
 }
+
+/* Analytics charts */
+.dash-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 0 24px 24px
+}
+
+.dash-chart-wrap {
+  position: relative;
+  height: 200px
+}
+
+@media (max-width: 760px) {
+  .dash-charts { grid-template-columns: 1fr }
+}

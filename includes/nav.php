@@ -133,5 +133,6 @@ function top_menu(array $user): void {
 <script src="<?= base_url('assets/js/sidebar.js') ?>"></script>
 <script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';</script>
 <script src="<?= base_url('assets/js/ob-banners.js') ?>" defer></script>
+<script>(function(){var l=document.createElement('link');l.rel='manifest';l.href='<?= addslashes(base_url('manifest.php')) ?>';document.head.appendChild(l);var m=document.createElement('meta');m.name='theme-color';m.content='#2563eb';document.head.appendChild(m);if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');})()</script>
 <?php
 }

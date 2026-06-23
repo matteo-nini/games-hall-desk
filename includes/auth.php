@@ -40,7 +40,37 @@ function is_responsabile(): bool {
     return $u && $u['ruolo'] === 'responsabile';
 }
 
+function rate_limit_check(string $ip): bool {
+    try {
+        $pdo = db();
+        $pdo->exec('CREATE TABLE IF NOT EXISTS login_attempts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ip VARCHAR(45) NOT NULL,
+            attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_ip_time (ip, attempted_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+        $window = date('Y-m-d H:i:s', time() - 900);
+        $st = $pdo->prepare('SELECT COUNT(*) FROM login_attempts WHERE ip=? AND attempted_at > ?');
+        $st->execute([$ip, $window]);
+        return (int)$st->fetchColumn() >= 5;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+function rate_limit_record(string $ip): void {
+    try {
+        $pdo = db();
+        $pdo->prepare('INSERT INTO login_attempts (ip) VALUES (?)')->execute([$ip]);
+        if (random_int(1, 30) === 1) {
+            $old = date('Y-m-d H:i:s', time() - 3600);
+            $pdo->prepare('DELETE FROM login_attempts WHERE attempted_at < ?')->execute([$old]);
+        }
+    } catch (Throwable) {}
+}
+
 function login(string $username, string $password): bool {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     start_session();
     $st = db()->prepare('SELECT * FROM utenti WHERE username = ? AND attivo = 1');
     $st->execute([$username]);
@@ -48,8 +78,10 @@ function login(string $username, string $password): bool {
     if ($u && password_verify($password, $u['password_hash'])) {
         session_regenerate_id(true);
         $_SESSION['uid'] = (int)$u['id'];
+        try { db()->prepare('DELETE FROM login_attempts WHERE ip=?')->execute([$ip]); } catch (Throwable) {}
         return true;
     }
+    rate_limit_record($ip);
     return false;
 }
 

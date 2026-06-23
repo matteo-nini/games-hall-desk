@@ -1485,3 +1485,16 @@ textarea.note:focus {
     font-size: 15px
   }
 }
+
+/* Auto-save indicator */
+.as-ind {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber-ink);
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--rpill);
+  padding: 3px 10px;
+  white-space: nowrap;
+  align-self: center
+}
