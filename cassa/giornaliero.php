@@ -190,19 +190,23 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
         <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
         <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
       </div>
-      <div class="sh-stats" aria-label="Dati chiusura turno">
-        <span class="ss-item"><span class="ss-l">Fondo</span><span class="ss-v" id="m-fondo">—</span></span>
-        <span class="ss-item"><span class="ss-l">Contanti</span><span class="ss-v" id="m-cont">—</span></span>
-        <span class="ss-item"><span class="ss-l">Cassetto</span><span class="ss-v" id="m-cassetto">—</span></span>
-        <span class="ss-item"><span class="ss-l">Monete</span><span class="ss-v" id="m-monete">—</span></span>
-        <!-- <span class="ss-sep" aria-hidden="true"></span> -->
-        <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">—</span></span>
-        <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">—</span></span>
-        <!-- <span class="ss-sep" aria-hidden="true"></span> -->
-        <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">—</span></span>
-        <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">—</span></span>
-        <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">—</span></span>
-        <span class="ss-item"><span class="ss-l">VLT tot.</span><span class="ss-v" id="g-incasso">—</span></span>
+      <div class="sh-stats-wrap">
+        <div class="sh-stats" aria-label="Dati chiusura turno">
+          <span class="ss-item"><span class="ss-l">Fondo</span><span class="ss-v" id="m-fondo">—</span></span>
+          <span class="ss-item"><span class="ss-l">Contanti</span><span class="ss-v" id="m-cont">—</span></span>
+          <span class="ss-item"><span class="ss-l">Cassetto</span><span class="ss-v" id="m-cassetto">—</span></span>
+          <span class="ss-item"><span class="ss-l">Monete</span><span class="ss-v" id="m-monete">—</span></span>
+          <!-- <span class="ss-sep" aria-hidden="true"></span> -->
+          <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">—</span></span>
+          <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">—</span></span>
+          <!-- <span class="ss-sep" aria-hidden="true"></span> -->
+          <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">—</span></span>
+          <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">—</span></span>
+          <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">—</span></span>
+          <span class="ss-item"><span class="ss-l">VLT tot.</span><span class="ss-v" id="g-incasso">—</span></span>
+        </div>
+        <button class="ss-arr ss-arr-l" aria-hidden="true" tabindex="-1">&#8249;</button>
+        <button class="ss-arr ss-arr-r" aria-hidden="true" tabindex="-1">&#8250;</button>
       </div>
     </div>
     <div class="sh-actions">

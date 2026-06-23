@@ -63,6 +63,22 @@ function showTab(n){
   document.querySelectorAll('.tab[role="tab"]').forEach(function(t){var a=+t.dataset.tab===n;t.classList.toggle('active',a);t.setAttribute('aria-selected',a?'true':'false');});
   updateActive();
 }
+(function(){
+  var stats=document.querySelector('.sh-stats');
+  var prev=document.querySelector('.ss-arr-l');
+  var next=document.querySelector('.ss-arr-r');
+  if(!stats)return;
+  function sync(){
+    var atL=stats.scrollLeft<=0;
+    var atR=stats.scrollLeft>=stats.scrollWidth-stats.clientWidth-1;
+    if(prev){prev.classList.toggle('ss-arr-edge',atL);}
+    if(next){next.classList.toggle('ss-arr-edge',atR);}
+  }
+  if(prev)prev.addEventListener('click',function(){stats.scrollBy({left:-180,behavior:'smooth'});});
+  if(next)next.addEventListener('click',function(){stats.scrollBy({left:180,behavior:'smooth'});});
+  stats.addEventListener('scroll',sync,{passive:true});
+  sync();
+})();
 document.addEventListener('input',function(e){if(e.target.closest('#frm'))recalcAll();});
 document.getElementById('frm')?.addEventListener('submit',function(){
   var btn=document.querySelector('.save-btn');
