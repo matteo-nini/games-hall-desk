@@ -73,9 +73,39 @@ function check_csrf(): void {
     }
 }
 
+function render_403(string $msg = 'Non hai i permessi per accedere a questa pagina.'): void {
+    http_response_code(403);
+    $appRoot   = realpath(dirname(__DIR__));
+    $scriptDir = realpath(dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $depth = ($appRoot && $scriptDir && $scriptDir !== $appRoot && str_starts_with($scriptDir, $appRoot))
+        ? substr_count(ltrim(str_replace($appRoot, '', $scriptDir), '/\\'), DIRECTORY_SEPARATOR) + 1
+        : 0;
+    $pre = str_repeat('../', $depth);
+    $m = htmlspecialchars($msg, ENT_QUOTES);
+    echo '<!doctype html><html lang="it"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>403 — Accesso negato</title>
+<link rel="stylesheet" href="' . $pre . 'assets/css/core.css">
+<link rel="stylesheet" href="' . $pre . 'assets/css/error.css">
+</head><body>
+<div class="err-wrap">
+  <div class="err-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+  <p class="err-code">403</p>
+  <h1 class="err-title">Accesso negato</h1>
+  <p class="err-desc">' . $m . '</p>
+  <div class="err-actions">
+    <a href="javascript:history.back()" class="err-back err-back-ghost">&#8592; Indietro</a>
+    <a href="' . $pre . 'index.php" class="err-back">Vai alla home</a>
+  </div>
+  <p class="err-brand">Games Palace · Gestione cassa</p>
+</div>
+</body></html>';
+    exit;
+}
+
 function require_responsabile(): array {
     $u = require_login();
-    if ($u['ruolo'] !== 'responsabile') { http_response_code(403); exit('Riservato al responsabile.'); }
+    if ($u['ruolo'] !== 'responsabile') render_403('Questa sezione è riservata al responsabile.');
     return $u;
 }
 

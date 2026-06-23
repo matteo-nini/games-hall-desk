@@ -663,7 +663,7 @@ table.grid {
 }
 
 .dash-kpi {
-  margin: 16px 24px 0
+  margin: 16px 24px;
 }
 
 .dash-section {
@@ -717,6 +717,7 @@ table.grid {
   font-size: 20px;
   line-height: 1
 }
+
 /* ---- utilities ---- */
 .sr-only {
   position: absolute;
@@ -1158,7 +1159,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--r);
   background: var(--surface);
-  box-shadow: 0 12px 48px rgba(0,0,0,.22);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, .22);
   padding: 0;
   width: min(520px, 94vw);
   max-height: 92vh;
@@ -1166,7 +1167,7 @@ body {
 }
 
 .form-dialog::backdrop {
-  background: rgba(0,0,0,.45);
+  background: rgba(0, 0, 0, .45);
   backdrop-filter: blur(2px)
 }
 
@@ -1218,7 +1219,7 @@ body {
   border-color: var(--border)
 }
 
-.form-dialog > form,
+.form-dialog>form,
 .form-dialog .ticket-new-form {
   padding: 20px 20px 4px
 }
@@ -1257,6 +1258,7 @@ body {
   background: var(--accent-ink);
   color: #fff
 }
+
 /* ============================================================
    Topbar sub-text utility
    ============================================================ */
@@ -1264,4 +1266,3 @@ body {
 .topbar-sub strong {
   color: var(--text)
 }
-

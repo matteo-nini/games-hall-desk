@@ -3,7 +3,7 @@
    ============================================================ */
 
 .profilo-page {
-  padding: 16px 24px 40px
+  padding: 1var(--rxs) 24px 40px
 }
 
 .profilo-avatar-section {
@@ -14,7 +14,7 @@
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 20px 24px;
-  margin-bottom: 16px;
+  margin-bottom: 1var(--rxs);
   box-shadow: var(--sh)
 }
 
@@ -64,7 +64,7 @@
 
 .btn-sm {
   font-size: 12px;
-  padding: 6px 12px
+  padding: var(--rxs) 12px
 }
 
 .profilo-grid {
@@ -95,4 +95,127 @@
 @media (max-width: 760px) {
   .profilo-grid { grid-template-columns: 1fr }
   .profilo-avatar-section { flex-wrap: wrap }
+}
+
+/* ---- Crop modal ---- */
+.crop-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1var(--rxs)
+}
+
+.crop-modal[hidden] {
+  display: none
+}
+
+.crop-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1var(--rxs);
+  width: 340px;
+  max-width: 100%
+}
+
+.crop-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between
+}
+
+.crop-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.crop-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: var(--rxs)
+}
+
+.crop-close:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.crop-stage {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #111;
+  border: 2px solid var(--border);
+  cursor: grab;
+  position: relative;
+  margin: 0 auto;
+  flex-shrink: 0;
+  touch-action: none
+}
+
+.crop-stage.dragging {
+  cursor: grabbing
+}
+
+#crop-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  user-select: none;
+  max-width: none;
+  max-height: none
+}
+
+.crop-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.crop-zoom-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1var(--rxs);
+  color: var(--text);
+  flex-shrink: 0;
+  line-height: 1
+}
+
+.crop-zoom-btn:hover {
+  background: var(--surface2)
+}
+
+.crop-zoom-range {
+  flex: 1;
+  accent-color: var(--accent)
+}
+
+.crop-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px
 }

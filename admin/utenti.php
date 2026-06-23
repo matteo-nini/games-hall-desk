@@ -241,7 +241,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
 
           <td class="ul-td-ava">
             <?php if ($foto): ?>
-              <img src="<?= base_url('uploads/profili/') . $h($foto) ?>" class="ul-ava ul-ava-img" alt="">
+              <img src="<?= base_url('account/uploads/profili/') . $h($foto) ?>" class="ul-ava ul-ava-img" alt="">
             <?php else: ?>
               <div class="ul-ava ul-ava-c<?= $cIdx ?>" aria-hidden="true"><?= $h($initial) ?></div>
             <?php endif; ?>

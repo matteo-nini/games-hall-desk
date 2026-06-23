@@ -51,35 +51,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* Upload foto profilo */
     if ($az === 'foto') {
+        $isXhr = !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
         $file = $_FILES['foto'] ?? null;
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
             $err = 'Errore nel caricamento del file.';
         } else {
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-            if (!in_array($ext, $allowed)) {
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
                 $err = 'Formato non supportato. Usa JPG, PNG o WebP.';
             } elseif ($file['size'] > 2 * 1024 * 1024) {
                 $err = 'File troppo grande. Massimo 2 MB.';
             } else {
-                $dir = __DIR__ . '/uploads/profili/';
+                $dir = __DIR__ . '/account/uploads/profili/';
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
                 $fname = $uid . '_' . time() . '.' . $ext;
                 if (move_uploaded_file($file['tmp_name'], $dir . $fname)) {
-                    /* rimuovi vecchia foto se presente */
                     $old = $pdo->prepare('SELECT foto FROM utenti WHERE id=?');
                     $old->execute([$uid]);
                     $oldFoto = ($old->fetch())['foto'] ?? null;
                     if ($oldFoto && file_exists($dir . $oldFoto)) @unlink($dir . $oldFoto);
-
                     $pdo->prepare('UPDATE utenti SET foto=? WHERE id=?')->execute([$fname, $uid]);
                     audit('profilo_foto', 'utenti', $uid);
+                    if ($isXhr) { header('Content-Type: application/json'); echo json_encode(['ok' => true, 'src' => 'uploads/profili/' . $fname]); exit; }
                     header('Location: profilo.php?ok=foto'); exit;
                 } else {
                     $err = 'Impossibile salvare il file.';
                 }
             }
         }
+        if ($isXhr && $err) { header('Content-Type: application/json'); echo json_encode(['err' => $err]); exit; }
     }
 
     /* Rimuovi foto */
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $old = $pdo->prepare('SELECT foto FROM utenti WHERE id=?');
         $old->execute([$uid]);
         $oldFoto = ($old->fetch())['foto'] ?? null;
-        $dir = __DIR__ . '/uploads/profili/';
+        $dir = __DIR__ . '/account/uploads/profili/';
         if ($oldFoto && file_exists($dir . $oldFoto)) @unlink($dir . $oldFoto);
         $pdo->prepare('UPDATE utenti SET foto=NULL WHERE id=?')->execute([$uid]);
         audit('profilo_foto_rimossa', 'utenti', $uid);
@@ -109,11 +109,12 @@ $okMsg = match ($_GET['ok'] ?? '') {
     default => ''
 };
 
-$fotoUrl = ($me['foto'] ?? null) ? 'uploads/profili/' . $me['foto'] : null;
+$fotoUrl = ($me['foto'] ?? null) ? 'account/uploads/profili/' . $me['foto'] : null;
 $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'), 'UTF-8');
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf" content="<?= csrf_token() ?>">
 <title>Profilo</title>
 <link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= base_url('assets/css/profilo.css') ?>">
@@ -148,7 +149,7 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
         <input type="hidden" name="azione" value="foto">
         <label class="btn ghost btn-sm" style="cursor:pointer">
           Cambia foto
-          <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="this.form.submit()">
+          <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" style="display:none">
         </label>
       </form>
       <?php if ($fotoUrl): ?>
@@ -205,4 +206,28 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
 
   </div>
 </div>
+
+<div id="crop-modal" class="crop-modal" role="dialog" aria-modal="true" aria-label="Ritaglia foto profilo" hidden>
+  <div class="crop-panel">
+    <div class="crop-hd">
+      <span class="crop-title">Posiziona la foto</span>
+      <button class="crop-close" id="crop-close" aria-label="Chiudi">&#x2715;</button>
+    </div>
+    <div id="crop-stage" class="crop-stage">
+      <img id="crop-img" alt="" draggable="false">
+    </div>
+    <div class="crop-zoom-row">
+      <button class="crop-zoom-btn" id="crop-zoom-out" aria-label="Riduci zoom" tabindex="-1">&#x2212;</button>
+      <input type="range" id="crop-zoom" class="crop-zoom-range" min="100" max="300" value="100" aria-label="Zoom">
+      <button class="crop-zoom-btn" id="crop-zoom-in" aria-label="Aumenta zoom" tabindex="-1">&#x2b;</button>
+    </div>
+    <div class="crop-foot">
+      <button class="btn ghost btn-sm" id="crop-cancel">Annulla</button>
+      <button class="btn btn-sm" id="crop-confirm">Usa questa foto</button>
+    </div>
+  </div>
+  <canvas id="crop-canvas" width="256" height="256" hidden></canvas>
+</div>
+
+<script src="<?= base_url('assets/js/profilo.js') ?>"></script>
 </body></html>
