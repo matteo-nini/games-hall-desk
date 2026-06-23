@@ -1,0 +1,8 @@
+# Impedisce la lista dei file nelle directory
+Options -Indexes
+
+# Pagine di errore personalizzate
+# Se l'app è in una sottodirectory (es. /games-palace/),
+# sostituire /404.php con /games-palace/404.php
+ErrorDocument 404 /404.php
+ErrorDocument 403 /403.php
