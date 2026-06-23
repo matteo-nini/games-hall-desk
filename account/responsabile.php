@@ -133,15 +133,15 @@ $ultime = $pdo->query('
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 16l2-2 3 2 3-3"/></svg>
           <span>Annuale</span>
         </a>
-        <a href="<?= base_url('admin/utenti.php') ?>" class="dash-ql-item">
+        <a href="<?= base_url('account/admin/utenti.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Utenti</span>
         </a>
-        <a href="<?= base_url('admin/macchine.php') ?>" class="dash-ql-item">
+        <a href="<?= base_url('account/admin/macchine.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2M7 11h5"/></svg>
           <span>Macchine</span>
         </a>
-        <a href="<?= base_url('admin/impostazioni.php') ?>" class="dash-ql-item">
+        <a href="<?= base_url('account/admin/impostazioni.php') ?>" class="dash-ql-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
           <span>Impostazioni</span>
         </a>

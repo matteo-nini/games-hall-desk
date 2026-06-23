@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($file['size'] > 2 * 1024 * 1024) {
                 $err = 'File troppo grande. Massimo 2 MB.';
             } else {
-                $dir = __DIR__ . '/account/uploads/profili/';
+                $dir = __DIR__ . '/uploads/profili/';
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
                 $fname = $uid . '_' . time() . '.' . $ext;
                 if (move_uploaded_file($file['tmp_name'], $dir . $fname)) {
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $old = $pdo->prepare('SELECT foto FROM utenti WHERE id=?');
         $old->execute([$uid]);
         $oldFoto = ($old->fetch())['foto'] ?? null;
-        $dir = __DIR__ . '/account/uploads/profili/';
+        $dir = __DIR__ . '/uploads/profili/';
         if ($oldFoto && file_exists($dir . $oldFoto)) @unlink($dir . $oldFoto);
         $pdo->prepare('UPDATE utenti SET foto=NULL WHERE id=?')->execute([$uid]);
         audit('profilo_foto_rimossa', 'utenti', $uid);
@@ -109,7 +109,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
     default => ''
 };
 
-$fotoUrl = ($me['foto'] ?? null) ? 'account/uploads/profili/' . $me['foto'] : null;
+$fotoUrl = ($me['foto'] ?? null) ? 'uploads/profili/' . $me['foto'] : null;
 $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'), 'UTF-8');
 ?>
 <!doctype html><html lang="it"><head>

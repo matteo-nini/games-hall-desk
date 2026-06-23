@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/lib.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
 $role = $user['ruolo'] ?? 'operatore';
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -19,7 +19,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 .ob-panel-link { display:inline-block; margin-top:4px; font-size:13px; font-weight:600; color:var(--accent); }
 </style>
 </head><body>
-<?php require __DIR__ . '/includes/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <div class="ob-wrap">
 
@@ -145,7 +145,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
             <li><strong>Permessi</strong>: stabilisci se gli operatori possono modificare i turni programmati.</li>
             <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza e Prestiti secondo le necessità della sala.</li>
           </ul>
-          <a class="ob-panel-link" href="<?= base_url('admin/impostazioni.php') ?>">Vai alle impostazioni →</a>
+          <a class="ob-panel-link" href="<?= base_url('account/admin/impostazioni.php') ?>">Vai alle impostazioni →</a>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
             <li><strong>Ordine</strong>: sequenza di visualizzazione nella pagina giornaliero.</li>
           </ul>
           <div class="ob-tip">Le macchine disattivate non compaiono nel giornaliero ma rimangono nello storico. Non eliminarle: usa il toggle attiva/disattiva.</div>
-          <a class="ob-panel-link" href="<?= base_url('admin/macchine.php') ?>">Vai alle macchine →</a>
+          <a class="ob-panel-link" href="<?= base_url('account/admin/macchine.php') ?>">Vai alle macchine →</a>
         </div>
       </div>
 
@@ -175,7 +175,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
             <li>Ruolo <strong>responsabile</strong>: accesso completo incluse le funzioni admin.</li>
           </ul>
           <div class="ob-tip">Cambia le password periodicamente. Il reset password va fatto dalla pagina Utenti (solo responsabile).</div>
-          <a class="ob-panel-link" href="<?= base_url('admin/utenti.php') ?>">Vai agli utenti →</a>
+          <a class="ob-panel-link" href="<?= base_url('account/admin/utenti.php') ?>">Vai agli utenti →</a>
         </div>
       </div>
 
@@ -204,7 +204,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
             <li>La <strong>politica di retention</strong> (configurabile in Impostazioni) definisce per quanti giorni mantenere i log. Il pulsante «Applica retention» nella pagina Audit elimina i record più vecchi del limite impostato.</li>
           </ul>
           <div class="ob-tip">La retention è un'operazione irreversibile. Prima di applicarla verifica il conteggio dei record mostrato nel pannello.</div>
-          <a class="ob-panel-link" href="<?= base_url('admin/audit.php') ?>">Vai all'audit log →</a>
+          <a class="ob-panel-link" href="<?= base_url('account/admin/audit.php') ?>">Vai all'audit log →</a>
         </div>
       </div>
 

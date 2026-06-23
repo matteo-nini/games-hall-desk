@@ -29,7 +29,7 @@ function require_login(): array {
         $depth     = ($appRoot && $scriptDir && $scriptDir !== $appRoot && str_starts_with($scriptDir, $appRoot))
             ? substr_count(ltrim(str_replace($appRoot, '', $scriptDir), '/\\'), DIRECTORY_SEPARATOR) + 1
             : 0;
-        header('Location: ' . str_repeat('../', $depth) . 'login.php');
+        header('Location: ' . str_repeat('../', $depth) . 'account/login.php');
         exit;
     }
     return $u;
@@ -126,6 +126,6 @@ function require_responsabile(): array {
     $depth = ($appRoot && $scriptDir && $scriptDir !== $appRoot && str_starts_with($scriptDir, $appRoot))
         ? substr_count(ltrim(str_replace($appRoot, '', $scriptDir), '/\\'), DIRECTORY_SEPARATOR) + 1
         : 0;
-    header('Location: ' . str_repeat('../', $depth) . 'setup.php');
+    header('Location: ' . str_repeat('../', $depth) . 'install/setup.php');
     exit;
 })();

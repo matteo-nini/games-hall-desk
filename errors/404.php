@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/lib.php';
+require_once __DIR__ . '/../includes/lib.php';
 http_response_code(404);
 ?>
 <!doctype html><html lang="it"><head>

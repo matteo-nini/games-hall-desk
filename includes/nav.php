@@ -42,10 +42,10 @@ function top_menu(array $user): void {
     if ($modPrestiti)   $salaItems['sala/prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
 
     $adminItems = ($role === 'responsabile') ? [
-        'admin/macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
-        'admin/utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
-        'admin/impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
-        'admin/audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],
+        'account/admin/macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
+        'account/admin/utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
+        'account/admin/impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
+        'account/admin/audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],
     ] : [];
 
     $renderLink = function(string $file, array $item) use ($cur, $ico): void {
@@ -105,7 +105,7 @@ function top_menu(array $user): void {
   </nav>
 
   <div class="sb-util">
-    <?php $renderLink('onboarding.php', ['label' => 'Guida', 'ico' => 'onboarding']); ?>
+    <?php $renderLink('utils/onboarding.php', ['label' => 'Guida', 'ico' => 'onboarding']); ?>
   </div>
 
   <div class="sb-foot">
@@ -117,7 +117,7 @@ function top_menu(array $user): void {
       <?php endif; ?>
     </a>
     <a href="<?= base_url('account/profilo.php') ?>" class="sf-name" title="Profilo"><?= $nome ?></a>
-    <a href="<?= base_url('logout.php') ?>" class="sf-exit" aria-label="Esci" title="Esci">
+    <a href="<?= base_url('account/logout.php') ?>" class="sf-exit" aria-label="Esci" title="Esci">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>

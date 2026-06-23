@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/lib.php';
+require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/lib.php';
 $user = require_responsabile();
 $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
@@ -83,7 +83,7 @@ $base = base_url();
 <link rel="stylesheet" href="<?= $base ?>assets/css/core.css">
 <link rel="stylesheet" href="<?= $base ?>assets/css/audit.css">
 </head><body>
-<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar sh-top">
   <strong>Audit log</strong>

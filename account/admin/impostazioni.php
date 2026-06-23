@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/lib.php';
+require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/lib.php';
 $user = require_responsabile();
 $pdo  = db();
 $cfg  = config();
@@ -81,7 +81,7 @@ $ps = $prezzi['sera']    ?? 70.0;
 <link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= base_url('assets/css/impostazioni.css') ?>">
 </head><body>
-<?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
+<?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar sh-top">
   <strong>Impostazioni</strong>

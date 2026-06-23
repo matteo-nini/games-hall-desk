@@ -2,8 +2,8 @@
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>403 — Accesso negato</title>
-<link rel="stylesheet" href="assets/css/core.css">
-<link rel="stylesheet" href="assets/css/error.css">
+<link rel="stylesheet" href="../assets/css/core.css">
+<link rel="stylesheet" href="../assets/css/error.css">
 </head><body>
 <div class="err-wrap">
   <div class="err-icon" aria-hidden="true">
@@ -14,7 +14,7 @@
   <p class="err-desc">Non hai i permessi per accedere a questa pagina. Se ritieni sia un errore, contatta il responsabile.</p>
   <div class="err-actions">
     <a href="javascript:history.back()" class="err-back err-back-ghost">← Indietro</a>
-    <a href="index.php" class="err-back">Vai alla home</a>
+    <a href="../index.php" class="err-back">Vai alla home</a>
   </div>
   <p class="err-brand">Games Palace · Gestione cassa</p>
 </div>

@@ -3,7 +3,7 @@
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $cfg = require __DIR__ . '/../config.php';
+        $cfg = require __DIR__ . '/../install/config.php';
         $d = $cfg['db'];
         $dsn = "mysql:host={$d['host']};dbname={$d['name']};charset={$d['charset']}";
         $pdo = new PDO($dsn, $d['user'], $d['pass'], [
@@ -17,6 +17,6 @@ function db(): PDO {
 
 function config(): array {
     static $cfg = null;
-    if ($cfg === null) $cfg = require __DIR__ . '/../config.php';
+    if ($cfg === null) $cfg = require __DIR__ . '/../install/config.php';
     return $cfg;
 }

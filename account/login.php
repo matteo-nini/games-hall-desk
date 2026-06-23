@@ -1,12 +1,12 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 start_session();
 $cfg = config();
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     if (login(trim($_POST['username'] ?? ''), $_POST['password'] ?? '')) {
-        $dest = is_responsabile() ? 'account/responsabile.php' : 'account/dashboard.php';
+        $dest = is_responsabile() ? 'responsabile.php' : 'dashboard.php';
         header('Location: ' . $dest); exit;
     }
     $err = 'Credenziali non valide.';
@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accesso &middot; <?= htmlspecialchars($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="assets/css/core.css">
-<link rel="stylesheet" href="assets/css/login.css">
+<link rel="stylesheet" href="../assets/css/core.css">
+<link rel="stylesheet" href="../assets/css/login.css">
 </head><body class="login-page">
 <div class="login-wrap">
   <div class="login-box">

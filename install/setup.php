@@ -42,7 +42,7 @@ if ($pdo) {
     try {
         $nResp = (int)$pdo->query('SELECT COUNT(*) FROM utenti WHERE ruolo="responsabile"')->fetchColumn();
         if ($nResp > 0 && ($_GET['force'] ?? '') !== '1') {
-            header('Location: login.php'); exit;
+            header('Location: ../account/login.php'); exit;
         }
     } catch (Throwable) { /* tabelle non ancora create */ }
 }
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db   = setup_connect($c['name']);
             foreach (['schema','002_ticket_assistenza','003_prestiti',
                       '004_turni_programmati','005_profilo_impostazioni','006_moduli'] as $f) {
-                $path = __DIR__ . "/sql/{$f}.sql";
+                $path = __DIR__ . "/../sql/{$f}.sql";
                 if (file_exists($path)) setup_run_file($db, $path);
             }
             $_SESSION['setup_step'] = 2;
@@ -170,7 +170,7 @@ $steps = ['Schema DB', 'Utente admin', 'Sala e moduli', 'Macchine', 'Completato'
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Setup — Games Palace Desk</title>
-<link rel="stylesheet" href="assets/css/core.css">
+<link rel="stylesheet" href="../assets/css/core.css">
 <style>
 body { margin: 0; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; background: var(--bg); padding: 40px 16px 60px }
 
@@ -475,7 +475,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
     </div>
 
     <div class="sw-actions" style="justify-content:center">
-      <a href="login.php" class="sw-btn">
+      <a href="../account/login.php" class="sw-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
         Vai al login
       </a>
