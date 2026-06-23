@@ -136,12 +136,12 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     </div>
     <div class="tc-prob"><?= $h($t['problema']) ?></div>
     <div class="tc-meta">
-      <span>Apertura: <?= $h($t['data_apertura']) ?></span>
+      <span>Apertura: <?= $h(date('d/m/Y', strtotime($t['data_apertura']))) ?></span>
       <?php if ($t['id_ticket']): ?><span>&middot; <?= $h($t['id_ticket']) ?></span><?php endif; ?>
       <?php if ($t['op']): ?><span>&middot; <?= $h($t['op']) ?></span><?php endif; ?>
     </div>
     <?php if ($t['stato'] === 'risolto'): ?>
-    <div class="tc-ris">&#10003; <?= $h($t['risoluzione'] ?? '—') ?><?php if ($t['data_chiusura']): ?> &middot; <span class="tc-dch">chiuso <?= $h($t['data_chiusura']) ?></span><?php endif; ?></div>
+    <div class="tc-ris">&#10003; <?= $h($t['risoluzione'] ?? '—') ?><?php if ($t['data_chiusura']): ?> &middot; <span class="tc-dch">chiuso <?= $h(date('d/m/Y', strtotime($t['data_chiusura']))) ?></span><?php endif; ?></div>
     <?php else: ?>
     <details class="tc-chiudi">
       <summary>Chiudi ticket</summary>

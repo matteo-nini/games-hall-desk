@@ -42,7 +42,8 @@ $nextSett = $sett < $numSettimane
         ? ['anno' => $anno,   'mese' => $mese + 1, 'sett' => 1]
         : ['anno' => $anno+1, 'mese' => 1,         'sett' => 1]);
 
-$nomiMesi = nomi_mesi();
+$nomiMesi    = nomi_mesi();
+$nomiGiorniBr = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 
 /* =========================================================
    POST — salva dati bet/win
@@ -172,7 +173,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
   <section class="turno t1" style="flex-basis:320px">
-    <h2><?= $h(date('D d/m', strtotime($d))) ?></h2>
+    <h2><?= $h($nomiGiorniBr[(int)date('w', strtotime($d))] . ' ' . date('d/m', strtotime($d))) ?></h2>
     <table class="grid">
       <tr><th>Fornitore</th><th>Giocato</th><th>Pagato</th><th>Inserito</th><th>Payout</th></tr>
       <?php foreach (fornitori() as $f): $g = $bw[$f]['giocato']; $p = $bw[$f]['pagato']; $ins = $ri['scass'][$f]; ?>

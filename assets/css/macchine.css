@@ -99,7 +99,7 @@
 /* Column header row */
 .mach-head {
   display: grid;
-  grid-template-columns: 1fr 1fr 130px 90px 72px 80px;
+  grid-template-columns: 1fr 1fr 130px 90px 72px 80px 52px;
   gap: 8px;
   padding: 8px 14px;
   background: var(--surface2);
@@ -131,7 +131,7 @@
 /* Machine row — uses display:contents on child forms so inputs flow into the grid */
 .mach-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 130px 90px 72px 80px;
+  grid-template-columns: 1fr 1fr 130px 90px 72px 80px 52px;
   gap: 8px;
   padding: 8px 14px;
   align-items: center;
@@ -255,6 +255,90 @@
 
   .mach-head,
   .mach-row {
-    min-width: 580px
+    min-width: 640px
   }
+}
+
+/* Ticket count button (7th column) */
+.mach-tk-btn {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border)
+}
+
+.mach-tk-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2)
+}
+
+.mach-tk-open {
+  color: var(--amber-ink);
+  border-color: var(--amber-border);
+  background: var(--amber-bg)
+}
+
+.mach-tk-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 12px;
+  color: var(--faint)
+}
+
+/* Storico guasti collapsible */
+.mach-history {
+  background: var(--surface2);
+  border-top: 1px dashed var(--border)
+}
+
+.mach-history > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.mach-history > summary::-webkit-details-marker { display: none }
+
+.mach-history[open] > summary {
+  border-bottom: 1px solid var(--border)
+}
+
+.mach-history-list {
+  padding: 4px 14px 10px
+}
+
+.mach-hist-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 66px 76px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px
+}
+
+.mach-hist-row:first-child {
+  border-top: none
+}
+
+.mach-hist-date {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap
+}
+
+.mach-hist-prob {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
 }

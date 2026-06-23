@@ -120,8 +120,9 @@ $orarioN = [
     1 => $mInizio . ' – ' . $mFine,
     2 => $sInizio . ' – ' . $sFine,
 ];
-$nomiGiorni = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
-$nomiMesi   = nomi_mesi();
+$nomiGiorni     = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+$nomiGiorniFull = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+$nomiMesi       = nomi_mesi();
 
 $assegnatoAme = $assegnazioneOggi && (int)$assegnazioneOggi['operatore_id'] === $uid;
 $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]) : null;
@@ -137,7 +138,7 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
 <header class="topbar">
   <div>
     <strong>Ciao, <?= $h($user['nome'] ?: $user['username']) ?></strong>
-    <span class="topbar-sub"><?= $h(date('l', strtotime($oggi))) ?>, <?= (int)date('j') ?> <?= $h($nomiMesi[(int)date('n')]) ?></span>
+    <span class="topbar-sub"><?= $h($nomiGiorniFull[(int)date('w', strtotime($oggi))]) ?>, <?= (int)date('j') ?> <?= $h($nomiMesi[(int)date('n')]) ?></span>
   </div>
 </header>
 
