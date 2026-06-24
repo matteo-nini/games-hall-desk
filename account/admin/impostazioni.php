@@ -15,8 +15,38 @@ try {
 } catch (PDOException) {}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
+    /* Logo upload usa multipart — check_csrf() legge lo stesso campo hidden */
     check_csrf();
     $az = $_POST['azione'] ?? '';
+
+    if ($az === 'logo') {
+        $file = $_FILES['logo_file'] ?? null;
+        if ($file && $file['error'] === UPLOAD_ERR_OK && $file['size'] <= 2 * 1024 * 1024) {
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp','svg'], true)) {
+                $dir = dirname(__DIR__, 2) . '/account/uploads/sala/';
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $fname = 'logo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                if (move_uploaded_file($file['tmp_name'], $dir . $fname)) {
+                    $old = $pdo->query("SELECT valore FROM impostazioni WHERE chiave='logo_path'")->fetchColumn();
+                    if ($old && file_exists($dir . $old)) @unlink($dir . $old);
+                    $pdo->prepare("INSERT INTO impostazioni (chiave,valore) VALUES ('logo_path',?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)")
+                        ->execute([$fname]);
+                    audit('impostazioni_logo', null, null, $fname);
+                }
+            }
+        }
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
+    if ($az === 'logo_del') {
+        $old = $pdo->query("SELECT valore FROM impostazioni WHERE chiave='logo_path'")->fetchColumn();
+        $dir = dirname(__DIR__, 2) . '/account/uploads/sala/';
+        if ($old && file_exists($dir . $old)) @unlink($dir . $old);
+        $pdo->exec("DELETE FROM impostazioni WHERE chiave='logo_path'");
+        audit('impostazioni_logo_rimosso', null, null, null);
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
 
     if ($az === 'turni') {
         $n  = max(1, min(3, (int)($_POST['num_turni'] ?? 2)));
@@ -173,6 +203,40 @@ $ps = $prezzi['sera']    ?? 70.0;
       </div>
       <div class="imp-form-footer">
         <button type="submit">Salva nome</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="16" height="12" rx="2"/><circle cx="7" cy="9" r="1.5"/><path d="M2 15l4-4 3 3 3-4 4 5"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Logo sala</h2>
+        <p class="imp-card-desc">Appare nella barra laterale al posto delle iniziali. Ideale per personalizzare l'app con il brand della sala (max 2 MB, formati: jpg, png, webp, svg).</p>
+      </div>
+    </div>
+    <?php $logoPath = $sett['logo_path'] ?? null; ?>
+    <?php if ($logoPath): ?>
+    <div class="imp-logo-preview">
+      <img src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo sala attuale">
+      <form method="post">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="logo_del">
+        <button type="submit" class="ghost btn-sm">Rimuovi logo</button>
+      </form>
+    </div>
+    <?php endif; ?>
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="logo">
+      <div class="imp-field">
+        <label for="imp-logo"><?= $logoPath ? 'Sostituisci logo' : 'Carica logo' ?></label>
+        <input id="imp-logo" type="file" name="logo_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" required>
+      </div>
+      <div class="imp-form-footer">
+        <button type="submit">Carica</button>
       </div>
     </form>
   </section>

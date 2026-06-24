@@ -144,6 +144,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <h3>Configurazione iniziale</h3>
           <p>Prima di avviare le operazioni, accedi a <strong>Impostazioni</strong> e configura:</p>
           <ul>
+            <li><strong>Logo</strong>: carica il logo della sala — comparirà nella barra laterale di tutti gli utenti, sostituendo le iniziali. Formati supportati: JPG, PNG, WebP, SVG (max 2 MB).</li>
             <li><strong>Turni</strong>: scegli quanti turni al giorno (1–3), personalizza il nome (es. Mattino / Sera / Notte) e gli orari di inizio e fine per il riconoscimento automatico del turno corrente.</li>
             <li><strong>Fuso orario</strong>: seleziona il timezone della sala — importante per le sale fuori dall'Italia.</li>
             <li><strong>Costo turni</strong>: importo corrisposto per turno, visibile nel riepilogo guadagni degli operatori.</li>
