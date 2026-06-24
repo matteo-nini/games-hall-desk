@@ -1,9 +1,24 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/lib.php';
 start_session();
+
 $cfg    = config();
 $ip     = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $locked = rate_limit_check($ip);
+$h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+
+$migrationOk = false;
+$pdo  = db();
+
+try {
+    $pdo->query('SELECT 1 FROM impostazioni LIMIT 0');
+    $pdo->query('SELECT 1 FROM prezzi_turni LIMIT 0');
+    $migrationOk = true;
+} catch (PDOException) {}
+$sett   = $migrationOk ? get_settings($pdo) : [];
+$logoPath = $sett['logo_path'] ?? null;
+
 $err    = '';
 if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
@@ -26,7 +41,11 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
 </head><body class="login-page">
 <div class="login-wrap">
   <div class="login-box">
-    <div class="login-brand">&#9654;</div>
+    <?php if ($logoPath): ?>
+      <img class='login-logo' src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo">
+    <?php else: ?>
+      <div class="login-brand">&#9654;</div>
+    <?php endif; ?>
     <h1><?= htmlspecialchars($cfg['nome_sala'] ?? 'Cassa Sala') ?></h1>
     <p class="login-sub">Accesso area riservata</p>
     <?php if ($locked): ?>
