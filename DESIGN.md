@@ -26,6 +26,12 @@ colors:
   status-warn-ink: "#8a5708"
   status-bad-ink: "#9c2222"
   status-warn-border: "#f0d59a"
+  ava-purple-bg: "#f0ecfd"
+  ava-purple-ink: "#4a2380"
+  ava-teal-bg: "#e8f8f9"
+  ava-teal-ink: "#0a6b7c"
+  ava-rose-bg: "#fce8f3"
+  ava-rose-ink: "#8c1a5f"
 typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"

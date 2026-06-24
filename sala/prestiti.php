@@ -201,27 +201,122 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
     </h3>
     <?php if ($filtro_pid): ?><a href="prestiti.php" class="prest-reset-filter">&times; Mostra tutti</a><?php endif; ?>
   </div>
-  <div class="recent-list">
-    <?php foreach ($movimenti as $m): ?>
-    <div class="recent-row prest-row">
-      <span class="recent-date prest-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></span>
-      <span class="prest-persona"><?= $h($m['pnome']) ?></span>
-      <span class="badge prest-tipo <?= $m['tipo']==='prestito'?'ptype-out':'ptype-in' ?>"><?= strtoupper($m['tipo']) ?></span>
-      <span class="prest-qta"><?= $nv($m['quantita']) ?> €</span>
-      <?php if ($m['note']): ?><span class="prest-note"><?= $h($m['note']) ?></span><?php endif; ?>
-      <?php if (is_responsabile()): ?>
-      <form method="post" onsubmit="return confirm('Eliminare?')" class="prest-del-form">
-        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-        <input type="hidden" name="azione" value="del_movimento">
-        <input type="hidden" name="id" value="<?= $h($m['id']) ?>">
-        <button type="submit" class="ghost prest-del-btn">&#10005;</button>
-      </form>
-      <?php endif; ?>
-    </div>
-    <?php endforeach; ?>
+  <div class="pm-table-wrap">
     <?php if (empty($movimenti)): ?>
-    <p class="ticket-empty">Nessun movimento registrato.</p>
+    <div class="pm-empty">Nessun movimento registrato.</div>
+    <?php else: ?>
+    <table class="pm-table">
+      <thead>
+        <tr>
+          <th class="pm-th-ava" aria-hidden="true"></th>
+          <th>Data</th>
+          <th>Persona</th>
+          <th>Tipo</th>
+          <th class="pm-th-num">Importo</th>
+          <th class="pm-th-note">Note</th>
+          <?php if (is_responsabile()): ?><th class="pm-th-menu" aria-hidden="true"></th><?php endif; ?>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($movimenti as $m):
+          $cIdx    = abs(crc32($m['pnome'])) % 6;
+          $initial = mb_strtoupper(mb_substr($m['pnome'], 0, 1, 'UTF-8'), 'UTF-8');
+        ?>
+        <tr class="pm-row">
+          <td class="pm-td-ava">
+            <div class="pm-ava pm-ava-c<?= $cIdx ?>" aria-hidden="true"><?= $h($initial) ?></div>
+          </td>
+          <td class="pm-td-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></td>
+          <td class="pm-td-persona">
+            <?php if ($filtro_pid === 0): ?>
+            <a href="?p=<?= (int)$m['persona_id'] ?>" class="pm-persona-link"><?= $h($m['pnome']) ?></a>
+            <?php else: ?>
+            <?= $h($m['pnome']) ?>
+            <?php endif; ?>
+          </td>
+          <td>
+            <span class="pm-badge <?= $m['tipo']==='prestito'?'pm-out':'pm-in' ?>">
+              <?= $m['tipo']==='prestito' ? 'Prestito' : 'Rientro' ?>
+            </span>
+          </td>
+          <td class="pm-td-num"><?= $nv($m['quantita']) ?> €</td>
+          <td class="pm-td-note"><?= $m['note'] ? $h($m['note']) : '' ?></td>
+          <?php if (is_responsabile()): ?>
+          <td class="pm-td-menu">
+            <div class="pm-action">
+              <button type="button" class="pm-menu-btn" aria-label="Azioni per movimento">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true">
+                  <circle cx="7.5" cy="2.5" r="1.5"/>
+                  <circle cx="7.5" cy="7.5" r="1.5"/>
+                  <circle cx="7.5" cy="12.5" r="1.5"/>
+                </svg>
+              </button>
+              <div class="pm-menu" role="menu">
+                <form method="post" class="pm-menu-form"
+                      data-qta="<?= $nv($m['quantita']) ?>"
+                      data-nome="<?= $h($m['pnome']) ?>">
+                  <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+                  <input type="hidden" name="azione" value="del_movimento">
+                  <input type="hidden" name="id" value="<?= $h($m['id']) ?>">
+                  <button type="submit" role="menuitem" class="pm-menu-item pm-menu-danger">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="3 6 5 6 13 6"/>
+                      <path d="M14 6l-1 9H3L2 6"/><path d="M9 10V8M7 10V8"/>
+                      <path d="M6.5 6l.5-3h2l.5 3"/>
+                    </svg>
+                    Elimina movimento
+                  </button>
+                </form>
+              </div>
+            </div>
+          </td>
+          <?php endif; ?>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
     <?php endif; ?>
   </div>
 </div>
+
+<script>
+<?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-movimento').showModal();<?php endif; ?>
+(function () {
+  function closeAll() {
+    document.querySelectorAll('.pm-menu.open').forEach(function (m) {
+      m.classList.remove('open');
+      m.removeAttribute('style');
+    });
+    document.querySelectorAll('.pm-menu-btn.active').forEach(function (b) {
+      b.classList.remove('active');
+    });
+  }
+
+  document.querySelectorAll('.pm-menu-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var menu   = btn.nextElementSibling;
+      var isOpen = menu.classList.contains('open');
+      closeAll();
+      if (isOpen) return;
+      var rect = btn.getBoundingClientRect();
+      menu.style.top   = (rect.bottom + 4) + 'px';
+      menu.style.right = (window.innerWidth - rect.right) + 'px';
+      menu.classList.add('open');
+      btn.classList.add('active');
+    });
+  });
+
+  document.addEventListener('click', closeAll);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+  document.querySelectorAll('.pm-menu-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (!confirm('Eliminare il movimento di ' + f.dataset.qta + ' € per ' + f.dataset.nome + '?')) {
+        e.preventDefault();
+      }
+    });
+  });
+}());
+</script>
 </body></html>

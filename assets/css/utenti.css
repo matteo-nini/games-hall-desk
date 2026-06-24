@@ -2,15 +2,6 @@
    User list — utenti.php
    ============================================================ */
 
-/* Extra avatar color families not in core.css */
-:root {
-  --ava-purple-bg:  #f0ecfd;
-  --ava-purple-ink: #4a2380;
-  --ava-teal-bg:    #e8f8f9;
-  --ava-teal-ink:   #0a6b7c;
-  --ava-rose-bg:    #fce8f3;
-  --ava-rose-ink:   #8c1a5f;
-}
 
 .ul-page {
   padding: 16px 24px 48px
@@ -123,9 +114,9 @@
 .ul-ava-c0 { background: var(--accent-weak); color: var(--accent-ink) }
 .ul-ava-c1 { background: var(--green-bg);    color: var(--green-ink) }
 .ul-ava-c2 { background: var(--amber-bg);    color: var(--amber-ink) }
-.ul-ava-c3 { background: #f0ecfd;            color: #4a2380 }
-.ul-ava-c4 { background: #e8f8f9;            color: #0a6b7c }
-.ul-ava-c5 { background: #fce8f3;            color: #8c1a5f }
+.ul-ava-c3 { background: var(--ava-purple-bg); color: var(--ava-purple-ink) }
+.ul-ava-c4 { background: var(--ava-teal-bg);   color: var(--ava-teal-ink) }
+.ul-ava-c5 { background: var(--ava-rose-bg);   color: var(--ava-rose-ink) }
 
 .ul-row-off .ul-ava {
   background: var(--surface3) !important;
@@ -252,7 +243,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--rs);
-  box-shadow: 0 4px 20px rgba(20, 30, 55, .12), 0 1px 4px rgba(20, 30, 55, .08);
+  box-shadow: var(--sh-popup);
   padding: 4px;
   min-width: 180px
 }

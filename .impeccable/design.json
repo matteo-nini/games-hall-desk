@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-06-18T00:00:00Z",
+  "generatedAt": "2026-06-25T00:00:00Z",
   "title": "Design System: Games Palace Desk",
   "extensions": {
     "colorMeta": {
@@ -135,6 +135,42 @@
           "oklch(85% 0.06 60)",
           "oklch(94% 0.03 60)"
         ]
+      },
+      "ava-purple-bg": {
+        "role": "neutral",
+        "displayName": "Avatar Purple (bg)",
+        "canonical": "oklch(94% 0.03 292)",
+        "tonalRamp": []
+      },
+      "ava-purple-ink": {
+        "role": "neutral",
+        "displayName": "Avatar Purple (ink)",
+        "canonical": "oklch(25% 0.16 292)",
+        "tonalRamp": []
+      },
+      "ava-teal-bg": {
+        "role": "neutral",
+        "displayName": "Avatar Teal (bg)",
+        "canonical": "oklch(94% 0.03 203)",
+        "tonalRamp": []
+      },
+      "ava-teal-ink": {
+        "role": "neutral",
+        "displayName": "Avatar Teal (ink)",
+        "canonical": "oklch(42% 0.12 203)",
+        "tonalRamp": []
+      },
+      "ava-rose-bg": {
+        "role": "neutral",
+        "displayName": "Avatar Rose (bg)",
+        "canonical": "oklch(94% 0.03 345)",
+        "tonalRamp": []
+      },
+      "ava-rose-ink": {
+        "role": "neutral",
+        "displayName": "Avatar Rose (ink)",
+        "canonical": "oklch(30% 0.16 345)",
+        "tonalRamp": []
       }
     },
     "typographyMeta": {
@@ -149,7 +185,12 @@
       {
         "name": "ambient-panel",
         "value": "0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05)",
-        "purpose": "The only shadow in the system. Applied to panels, cards, statusbar, login box. Never varied or escalated."
+        "purpose": "The base shadow. Applied to panels, cards, statusbar, login box. Never varied or escalated."
+      },
+      {
+        "name": "popup",
+        "value": "0 4px 20px rgba(20,30,55,.12), 0 1px 4px rgba(20,30,55,.08)",
+        "purpose": "Dropdown menus and fixed-position popups (action menus, tooltips). More pronounced than ambient-panel to lift the overlay clearly above the panel layer."
       }
     ],
     "motion": [
@@ -171,7 +212,7 @@
     ],
     "breakpoints": [
       { "name": "mobile", "value": "640px", "purpose": "Status bar comparison cluster wraps to full width." },
-      { "name": "tablet", "value": "760px", "purpose": "Entry grid collapses from 2-column to 1-column." }
+      { "name": "tablet", "value": "760px", "purpose": "Entry grid and table auxiliary columns collapse." }
     ]
   },
   "components": [
@@ -248,6 +289,14 @@
       "css": ".ds-tabs { display: inline-flex; background: #eef2f8; border: 1px solid #e4e8f0; border-radius: 12px; padding: 5px; gap: 5px; } .ds-tab { border: 0; background: transparent; color: #69748a; font-weight: 600; padding: 9px 18px; border-radius: 9px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; min-width: 120px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-tab small { font-size: 11px; font-weight: 500; color: #98a2b3; text-transform: uppercase; letter-spacing: .4px; } .ds-tab-active { background: #ffffff; box-shadow: 0 1px 2px rgba(20,30,55,.05), 0 2px 8px rgba(20,30,55,.05); } .ds-tab-active.ds-tab-matt { color: #a96a09; } .ds-tab-active.ds-tab-matt small { color: #a96a09; } .ds-tab-active.ds-tab-sera { color: #3b5bdb; } .ds-tab-active.ds-tab-sera small { color: #3b5bdb; }"
     },
     {
+      "name": "Avatar (deterministic)",
+      "kind": "custom",
+      "refersTo": "button-ghost",
+      "description": "User/person initial avatar. Color family chosen via crc32(name) % 6 — consistent per entity across sessions.",
+      "html": "<div class=\"ds-ava ds-ava-c0\">M</div> <div class=\"ds-ava ds-ava-c1\">F</div> <div class=\"ds-ava ds-ava-c2\">L</div> <div class=\"ds-ava ds-ava-c3\">P</div> <div class=\"ds-ava ds-ava-c4\">G</div> <div class=\"ds-ava ds-ava-c5\">A</div>",
+      "css": ".ds-ava { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; user-select: none; } .ds-ava-c0 { background: #e9edfd; color: #26368f; } .ds-ava-c1 { background: #e6f6ec; color: #0f6b3a; } .ds-ava-c2 { background: #fdf2dd; color: #8a5708; } .ds-ava-c3 { background: #f0ecfd; color: #4a2380; } .ds-ava-c4 { background: #e8f8f9; color: #0a6b7c; } .ds-ava-c5 { background: #fce8f3; color: #8c1a5f; }"
+    },
+    {
       "name": "Toast (Success)",
       "kind": "custom",
       "refersTo": "button-primary",
@@ -269,10 +318,11 @@
     "rules": [
       { "name": "The State Vocabulary Rule", "body": "Green, amber, and red are reserved for reconciliation state, status indicators, and feedback — never decoration. Each semantic color is always deployed as a trio: foreground + *-bg + *-border.", "section": "colors" },
       { "name": "The One Voice Rule", "body": "Blu Operativo (#3b5bdb) covers ≤10% of any given screen surface. Reserve it strictly for: primary action buttons, active navigation underlines, focus rings, active tab labels, and text links.", "section": "colors" },
+      { "name": "The Avatar Palette Rule", "body": "Avatar colors (ava-purple, ava-teal, ava-rose, plus accent, green, amber families) are assigned deterministically via crc32(name) % 6. Never assign manually. Never use semantic colors (status-ok, status-bad) for avatars.", "section": "colors" },
       { "name": "The Tabular Numbers Rule", "body": "Every monetary value, count, percentage, or quantity uses font-variant-numeric: tabular-nums without exception.", "section": "typography" },
       { "name": "The Scale Ceiling Rule", "body": "No heading on this interface exceeds 26px. Typographic scale is a function of information hierarchy, not visual impact.", "section": "typography" },
       { "name": "The Flat-By-Default Rule", "body": "Elements at the same depth level differentiate themselves through surface color steps, not shadow variations. Shadow exclusively signals a depth-level change.", "section": "elevation" },
-      { "name": "The One Shadow Rule", "body": "There is one shadow token (--sh). It does not vary by component type, state, or context.", "section": "elevation" }
+      { "name": "The Two Shadow Rule", "body": "The system has two shadow tokens: --sh (ambient-panel, very low opacity) for structural elements, and --sh-popup for fixed-position dropdown menus and overlays. Never add a third; never escalate --sh on hover.", "section": "elevation" }
     ],
     "dos": [
       "Do use font-variant-numeric: tabular-nums on every monetary value, count, or metric.",
@@ -281,7 +331,8 @@
       "Do use 44px minimum height for all interactive elements.",
       "Do maintain the three-level surface stack: page → panel → sub-panel metric.",
       "Do keep the statusbar sticky — operators need reconciliation state visible while scrolling.",
-      "Do apply text-wrap: balance on h2–h3 headings."
+      "Do apply text-wrap: balance on h2–h3 headings.",
+      "Do assign avatar colors via crc32(name) % 6 for deterministic, consistent identity."
     ],
     "donts": [
       "Don't reproduce the ERP/gestionale aesthetic: no equal-weight text, no zero-whitespace density.",
@@ -291,7 +342,8 @@
       "Don't introduce a second accent hue.",
       "Don't build metric/KPI hero layouts with big number + small label + gradient accent.",
       "Don't display monetary values without tabular-nums.",
-      "Don't put muted or faint text on semantic tinted backgrounds."
+      "Don't put muted or faint text on semantic tinted backgrounds.",
+      "Don't use status-ok/warn/bad colors for avatar backgrounds — use the ava-* palette instead."
     ]
   }
 }
