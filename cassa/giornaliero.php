@@ -109,11 +109,11 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
           <div class="field"><label for="t<?= $n ?>-fondo">Fondo cassa</label><input id="t<?= $n ?>-fondo" type="number" inputmode="decimal" step="0.01" class="f-fondo_cassa" name="turno[<?= $n ?>][fondo_cassa]" value="<?= $h($nv($T['t']['fondo_cassa'])) ?>" <?= $ro ?>></div>
           <div class="field"><label for="t<?= $n ?>-monete">Monete</label><input id="t<?= $n ?>-monete" type="number" inputmode="decimal" step="0.01" class="f-monete" name="turno[<?= $n ?>][monete]" value="<?= $h($nv($T['t']['monete'])) ?>" <?= $ro ?>></div>
           <div class="field"><label for="t<?= $n ?>-bancomat">Bancomat</label><input id="t<?= $n ?>-bancomat" type="number" inputmode="decimal" step="0.01" class="f-bancomat" name="turno[<?= $n ?>][bancomat]" value="<?= $h($nv($T['t']['bancomat'])) ?>" <?= $ro ?>></div>
-          <details class="adv"><summary>Rettifiche</summary>
-            <div class="field"><label for="t<?= $n ?>-differenze">Differenze</label><input id="t<?= $n ?>-differenze" type="number" inputmode="decimal" step="0.01" class="f-differenze" name="turno[<?= $n ?>][differenze]" value="<?= $h($nv($T['t']['differenze'])) ?>" <?= $ro ?>></div>
-            <div class="field"><label for="t<?= $n ?>-rientri">Rientri</label><input id="t<?= $n ?>-rientri" type="number" inputmode="decimal" step="0.01" class="f-rientri" name="turno[<?= $n ?>][rientri]" value="<?= $h($nv($T['t']['rientri'])) ?>" <?= $ro ?>></div>
-            <div class="field"><label for="t<?= $n ?>-ii">2ª cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
-          </details>
+          <!-- <details class="adv"><summary>Rettifiche</summary> -->
+          <div class="field"><label for="t<?= $n ?>-differenze">Differenze</label><input id="t<?= $n ?>-differenze" type="number" inputmode="decimal" step="0.01" class="f-differenze" name="turno[<?= $n ?>][differenze]" value="<?= $h($nv($T['t']['differenze'])) ?>" <?= $ro ?>></div>
+          <div class="field"><label for="t<?= $n ?>-rientri">Rientri</label><input id="t<?= $n ?>-rientri" type="number" inputmode="decimal" step="0.01" class="f-rientri" name="turno[<?= $n ?>][rientri]" value="<?= $h($nv($T['t']['rientri'])) ?>" <?= $ro ?>></div>
+          <div class="field"><label for="t<?= $n ?>-ii">2ª cassa</label><input id="t<?= $n ?>-ii" type="number" inputmode="decimal" step="0.01" class="f-ii_cassa" name="turno[<?= $n ?>][ii_cassa]" value="<?= $h($nv($T['t']['ii_cassa'])) ?>" <?= $ro ?>></div>
+          <!-- </details> -->
         </div>
         <div class="panel panel-mini">
           <h3>Refill AWP</h3>
@@ -173,8 +173,8 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/giornaliero.css') ?>"></head><body>
+<title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <h1 class="sr-only">Cassa del <?= $h(date('d/m/Y', strtotime($data))) ?></h1>
 
@@ -270,8 +270,8 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 </form>
 
 <?php if (isset($_GET['ok'])): ?>
-<div id="toast" class="toast" role="alert"><span class="tk">&#10003;</span> Salvato</div>
+<div class="ok">Salvato</div>
 <?php endif; ?>
 
-<script src="<?= base_url('assets/js/giornaliero.js') ?>"></script>
+<script src="<?= asset_url('assets/js/giornaliero.js') ?>"></script>
 </body></html>

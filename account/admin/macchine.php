@@ -9,8 +9,8 @@ $msg  = '';
 
 /* Auto-migrazione colonne seriale/civ */
 try {
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS seriale VARCHAR(100) NULL AFTER fornitore');
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS civ VARCHAR(100) NULL AFTER seriale');
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN seriale VARCHAR(100) NULL AFTER fornitore');
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN civ VARCHAR(100) NULL AFTER seriale');
 } catch (Throwable) {}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -71,9 +71,9 @@ $okMsg = match ($_GET['ok'] ?? '') {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Macchine · <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/utenti.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/macchine.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/utenti.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/macchine.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
@@ -166,8 +166,6 @@ $okMsg = match ($_GET['ok'] ?? '') {
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="azione" value="edit">
     <input type="hidden" name="id" value="<?= $mid ?>">
-    <input type="hidden" id="mef-ser-<?= $mid ?>" name="seriale" value="<?= $h($m['seriale'] ?? '') ?>">
-    <input type="hidden" id="mef-civ-<?= $mid ?>" name="civ" value="<?= $h($m['civ'] ?? '') ?>">
   </form>
   <form id="mtf-<?= $mid ?>" method="post" hidden>
     <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
@@ -180,8 +178,9 @@ $okMsg = match ($_GET['ok'] ?? '') {
     <div class="mach-head" aria-hidden="true">
       <span>Codice</span>
       <span>Fornitore</span>
-      <span class="mach-col-ord">Ord.</span>
-      <span>Stato</span>
+      <span>Ord.</span>
+      <span>Seriale</span>
+      <span>CIV</span>
       <span></span>
       <span></span>
       <span>Guasti</span>
@@ -211,8 +210,11 @@ $okMsg = match ($_GET['ok'] ?? '') {
       </select>
       <input type="number" class="mach-input mach-ord" name="ordine" form="mef-<?= $mid ?>"
              value="<?= (int)$m['ordine'] ?>" min="0" aria-label="Ordine">
-      <span class="mach-status-badge mach-status-<?= $isActive ? 'on' : 'off' ?>"><?= $isActive ? 'Attiva' : 'Off' ?></span>
-      <button type="submit" class="mach-btn mach-btn-save" form="mef-<?= $mid ?>" title="Salva tutte le modifiche">Salva</button>
+      <input type="text" class="mach-input mach-mono" name="seriale" form="mef-<?= $mid ?>"
+             value="<?= $h($m['seriale'] ?? '') ?>" placeholder="—" maxlength="100" aria-label="Seriale <?= $h($m['codice']) ?>">
+      <input type="text" class="mach-input mach-mono" name="civ" form="mef-<?= $mid ?>"
+             value="<?= $h($m['civ'] ?? '') ?>" placeholder="—" maxlength="100" aria-label="CIV <?= $h($m['codice']) ?>">
+      <button type="submit" class="mach-btn mach-btn-save" form="mef-<?= $mid ?>" title="Salva modifiche">Salva</button>
       <button type="submit" class="mach-btn <?= $isActive ? 'mach-btn-off' : 'mach-btn-on' ?>"
               form="mtf-<?= $mid ?>"
               <?= $isActive ? 'data-confirm="Disattivare ' . $h($m['codice']) . '?"' : '' ?>>
@@ -227,20 +229,6 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <?php else: ?>
       <span class="mach-tk-empty" aria-hidden="true">—</span>
       <?php endif; ?>
-    </div>
-    <div class="mach-serial-row">
-      <span class="mach-serial-lbl">Seriale</span>
-      <input class="mach-serial-input" type="text" maxlength="100"
-             placeholder="—"
-             value="<?= $h($m['seriale'] ?? '') ?>"
-             aria-label="Seriale <?= $h($m['codice']) ?>"
-             oninput="document.getElementById('mef-ser-<?= $mid ?>').value=this.value">
-      <span class="mach-serial-lbl">CIV</span>
-      <input class="mach-serial-input" type="text" maxlength="100"
-             placeholder="—"
-             value="<?= $h($m['civ'] ?? '') ?>"
-             aria-label="CIV <?= $h($m['codice']) ?>"
-             oninput="document.getElementById('mef-civ-<?= $mid ?>').value=this.value">
     </div>
     <?php if ($mTkCount > 0): ?>
     <details class="mach-history" id="mh-<?= $mid ?>">

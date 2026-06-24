@@ -49,7 +49,7 @@ $next = date('Y-m-d', strtotime("$data +1 day"));
 ?>
 <!doctype html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Refill AWP — <?= $h($data) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>"></head><body>
+<title>Refill AWP — <?= $h($data) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar">
   <div><strong>Refill AWP</strong> · operazioni rare</div>

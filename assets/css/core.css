@@ -1057,7 +1057,7 @@ input[type="number"] {
   width: 22px;
   height: 22px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--rxs);
   background: transparent;
   color: var(--faint);
   cursor: pointer;
@@ -1091,12 +1091,16 @@ input[type="number"] {
 }
 
 .sidebar.sb-collapsed .sb-head {
+  flex-direction: column;
   justify-content: center;
-  padding: 18px 8px 14px
+  align-items: center;
+  gap: 2px;
+  padding: 12px 0 10px
 }
 
 .sidebar.sb-collapsed .sb-collapse-btn {
-  transform: rotate(180deg)
+  transform: rotate(180deg);
+  margin-left: 0
 }
 
 .sidebar.sb-collapsed .sn-link {
@@ -1109,12 +1113,11 @@ input[type="number"] {
 }
 
 .sidebar.sb-collapsed .sb-foot {
+  flex-direction: column;
   justify-content: center;
-  padding: 8px 0
-}
-
-.sidebar.sb-collapsed .sf-exit {
-  margin-left: 0
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0
 }
 
 .sidebar.sb-collapsed .sb-util {
@@ -1265,4 +1268,64 @@ body {
 
 .topbar-sub strong {
   color: var(--text)
+}
+
+/* ============================================================
+   Toast notifications
+   ============================================================ */
+
+#gp-toast-wrap {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none
+}
+
+.gp-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 15px;
+  border-radius: var(--rs);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  max-width: 300px;
+  pointer-events: all;
+  cursor: pointer;
+  box-shadow: var(--sh), 0 4px 16px rgba(20,30,55,.12);
+  transform: translateX(calc(100% + 18px));
+  opacity: 0;
+  transition: transform .26s cubic-bezier(.16,1,.3,1), opacity .2s ease
+}
+
+.gp-toast.gp-toast-in {
+  transform: translateX(0);
+  opacity: 1
+}
+
+.gp-toast.gp-toast-out {
+  transform: translateX(calc(100% + 18px));
+  opacity: 0;
+  transition: transform .2s ease, opacity .15s ease
+}
+
+.gp-toast-ok    { background: var(--green-bg); color: var(--green-ink); border: 1px solid var(--green-bd) }
+.gp-toast-warn  { background: var(--amber-bg); color: var(--amber-ink); border: 1px solid var(--amber-border) }
+.gp-toast-error { background: var(--red-bg);   color: var(--red-ink);   border: 1px solid var(--red-bd) }
+
+.gp-toast-ico { flex-shrink: 0; display: flex }
+.gp-toast-msg { flex: 1; min-width: 0 }
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-toast {
+    transform: none;
+    transition: opacity .15s
+  }
+  .gp-toast.gp-toast-in  { opacity: 1 }
+  .gp-toast.gp-toast-out { opacity: 0 }
 }

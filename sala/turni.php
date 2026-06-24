@@ -193,6 +193,20 @@ if ($migrationOk) {
     /* Permesso operatori da impostazioni */
     $opPuoModificare = setting($pdo, 'operatori_modifica_turni', '1') === '1';
 
+    /* Operatori riepilogo (usato in CSV e print) */
+    $stOp = $pdo->prepare(
+        'SELECT COALESCE(NULLIF(u.nome,""), u.username) AS nome,
+                SUM(CASE WHEN tp.numero=1 THEN 1 ELSE 0 END) AS n_mattino,
+                SUM(CASE WHEN tp.numero=2 THEN 1 ELSE 0 END) AS n_sera
+         FROM turni_programmati tp
+         JOIN utenti u ON u.id = tp.operatore_id
+         WHERE tp.data BETWEEN ? AND ?
+         GROUP BY u.id, u.nome, u.username
+         ORDER BY nome'
+    );
+    $stOp->execute([$primoGiorno, $ultimoGiorno]);
+    $opStats = $stOp->fetchAll();
+
     /* CSV export mensile */
     if (($_GET['export'] ?? '') === 'csv') {
         $fname = "turni_{$anno}_{$mese}.csv";
@@ -215,7 +229,100 @@ if ($migrationOk) {
             $dc = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
             fputcsv($f, [$dc, $byDay[$dc][1] ?? '', $byDay[$dc][2] ?? ''], ';');
         }
+        fputcsv($f, [], ';');
+        fputcsv($f, ['Riepilogo operatori'], ';');
+        fputcsv($f, ['Operatore', 'Turni mattina', 'Turni sera', 'Tot. mattina (€)', 'Tot. sera (€)', 'Totale (€)'], ';');
+        foreach ($opStats as $op) {
+            $totM = (float)$op['n_mattino'] * $prezzoMattino;
+            $totS = (float)$op['n_sera']    * $prezzoSera;
+            fputcsv($f, [
+                $op['nome'],
+                (int)$op['n_mattino'],
+                (int)$op['n_sera'],
+                number_format($totM, 2, ',', '.'),
+                number_format($totS, 2, ',', '.'),
+                number_format($totM + $totS, 2, ',', '.'),
+            ], ';');
+        }
         fclose($f); exit;
+    }
+
+    /* Print export mensile */
+    if (($_GET['export'] ?? '') === 'print') {
+        $st = $pdo->prepare(
+            'SELECT tp.data, tp.numero, COALESCE(NULLIF(u.nome,""), u.username) AS nome
+             FROM turni_programmati tp
+             JOIN utenti u ON u.id = tp.operatore_id
+             WHERE tp.data BETWEEN ? AND ?
+             ORDER BY tp.data, tp.numero'
+        );
+        $st->execute([$primoGiorno, $ultimoGiorno]);
+        $byDay = [];
+        foreach ($st as $r) $byDay[$r['data']][(int)$r['numero']] = $r['nome'];
+        $h2 = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+        $titolo = $nomiMesi[$mese] . ' ' . $anno;
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!doctype html><html lang="it"><head>';
+        echo '<meta charset="utf-8"><title>Turni &mdash; ' . $h2($titolo) . '</title>';
+        echo '<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;font-size:12px;color:#111;background:#fff;padding:20px}
+h1{font-size:15px;font-weight:700;margin-bottom:16px}
+.tp-export-wrap{display:flex;gap:32px;align-items:flex-start}
+table{border-collapse:collapse;min-width:220px}
+th,td{border:1px solid #c0c0c0;padding:5px 9px;text-align:left;white-space:nowrap}
+th{background:#f0f3ff;font-weight:700;font-size:11px}
+td.num{text-align:right}
+.op-table th:first-child{min-width:120px}
+.op-total td{font-weight:700;background:#f8f9ff;border-top:2px solid #7b93e0}
+tr:nth-child(even) td{background:#fafbff}
+.op-total td{background:#eef0fb}
+@media print{body{padding:8px}@page{margin:12mm}}
+</style></head><body>';
+        echo '<h1>Turni &mdash; ' . $h2($titolo) . '</h1>';
+        echo '<div class="tp-export-wrap">';
+
+        /* Tabella giornaliera */
+        echo '<table><thead><tr><th>Data</th><th>Mattino</th><th>Sera</th></tr></thead><tbody>';
+        for ($g = 1; $g <= $giorniMese; $g++) {
+            $dc  = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
+            $dow = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'][(int)date('N', strtotime($dc)) - 1];
+            echo '<tr><td>' . $h2(date('d/m', strtotime($dc))) . ' <span style="color:#666">' . $dow . '</span></td>';
+            echo '<td>' . $h2($byDay[$dc][1] ?? '') . '</td>';
+            echo '<td>' . $h2($byDay[$dc][2] ?? '') . '</td></tr>';
+        }
+        echo '</tbody></table>';
+
+        /* Tabella operatori */
+        $totAllM = 0.0; $totAllS = 0.0;
+        echo '<table class="op-table"><thead><tr>';
+        echo '<th>Operatore</th><th class="num">Mattine</th><th class="num">Sere</th>';
+        echo '<th class="num">Tot. mattina</th><th class="num">Tot. sera</th><th class="num">Totale</th>';
+        echo '</tr></thead><tbody>';
+        foreach ($opStats as $op) {
+            $totM    = (float)$op['n_mattino'] * $prezzoMattino;
+            $totS    = (float)$op['n_sera']    * $prezzoSera;
+            $totAllM += $totM; $totAllS += $totS;
+            echo '<tr>';
+            echo '<td>' . $h2($op['nome']) . '</td>';
+            echo '<td class="num">' . (int)$op['n_mattino'] . '</td>';
+            echo '<td class="num">' . (int)$op['n_sera'] . '</td>';
+            echo '<td class="num">' . number_format($totM, 2, ',', '.') . ' &euro;</td>';
+            echo '<td class="num">' . number_format($totS, 2, ',', '.') . ' &euro;</td>';
+            echo '<td class="num">' . number_format($totM + $totS, 2, ',', '.') . ' &euro;</td>';
+            echo '</tr>';
+        }
+        echo '<tr class="op-total">';
+        echo '<td><strong>Totale</strong></td><td class="num"></td><td class="num"></td>';
+        echo '<td class="num"><strong>' . number_format($totAllM, 2, ',', '.') . ' &euro;</strong></td>';
+        echo '<td class="num"><strong>' . number_format($totAllS, 2, ',', '.') . ' &euro;</strong></td>';
+        echo '<td class="num"><strong>' . number_format($totAllM + $totAllS, 2, ',', '.') . ' &euro;</strong></td>';
+        echo '</tr>';
+        echo '</tbody></table>';
+        echo '</div>';
+        echo '<script>window.onload=function(){window.print();}</script>';
+        echo '</body></html>';
+        exit;
     }
 
 } /* end if migrationOk */
@@ -227,8 +334,8 @@ if ($migrationOk) {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Turni — <?= $h($nomiMesi[$mese]) ?> <?= $anno ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/turni.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/turni.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
@@ -242,7 +349,11 @@ if ($migrationOk) {
   <?php if ($migrationOk): ?>
   <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=csv" class="topbar-action-btn btnlink">
     <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14M10 3v10M6 9l4 4 4-4"/></svg>
-    Esporta CSV
+    CSV
+  </a>
+  <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=print" target="_blank" class="topbar-action-btn btnlink">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7V3h10v4M5 15H3a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M5 11h10v6H5v-6z"/></svg>
+    Stampa
   </a>
   <?php endif; ?>
 </header>
@@ -547,7 +658,7 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
 
 </div><!-- /.tp-layout -->
 
-<script src="<?= base_url('assets/js/turni.js') ?>"></script>
+<script src="<?= asset_url('assets/js/turni.js') ?>"></script>
 
 <?php endif; /* migrationOk */ ?>
 </body></html>

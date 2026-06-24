@@ -106,8 +106,8 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prestiti e rientri</title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/prestiti.css') ?>"></head><body>
+<title>Prestiti e rientri</title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/prestiti.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">

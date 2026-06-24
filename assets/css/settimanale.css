@@ -14,7 +14,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--rxs);
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--text);
@@ -63,5 +63,31 @@
   background: var(--accent);
   border-color: var(--accent);
   color: #fff
+}
+
+/* Topbar right group: week tabs + export buttons */
+.sett-topbar-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap
+}
+
+/* Visual separation between the two mini-tables inside each turno card */
+.turni .turno table.grid + table.grid {
+  margin-top: 10px;
+  border-top: 1px solid var(--border)
+}
+
+/* Save button row */
+.sett-save {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 24px 20px
+}
+
+/* Riepilogo totali settimana */
+.riepilogo-main {
+  max-width: 680px
 }
 

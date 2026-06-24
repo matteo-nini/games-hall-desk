@@ -37,7 +37,7 @@ $mesi = nomi_mesi();
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>"></head><body>
+<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar no-print">
   <div><strong><?= $h($cfg['nome_sala']) ?></strong> · Riepilogo mensile</div>

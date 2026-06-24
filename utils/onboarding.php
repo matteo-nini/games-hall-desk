@@ -8,8 +8,8 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guida operativa</title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/onboarding.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/onboarding.css') ?>">
 <style>
 .ob-tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:8px; }
 .ob-tab-btn { padding:8px 18px; font-size:14px; font-weight:600; color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; margin-bottom:-1px; transition:color .1s; }

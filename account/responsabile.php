@@ -81,8 +81,8 @@ for ($i = 5; $i >= 0; $i--) {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard — <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/dashboard.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/dashboard.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
@@ -135,9 +135,19 @@ for ($i = 5; $i >= 0; $i--) {
     </div>
   </div>
 
-  <div class="dash-grid">
+  <div class="resp-cols">
 
-    <!-- ===== Ultime giornate ===== -->
+    <div class="resp-charts">
+      <section class="dash-card">
+        <h2 class="dash-card-title">Incasso VLT · ultimi 30 giorni</h2>
+        <div class="dash-chart-wrap"><canvas id="chart-30d"></canvas></div>
+      </section>
+      <section class="dash-card">
+        <h2 class="dash-card-title">Andamento mensile · ultimi 6 mesi</h2>
+        <div class="dash-chart-wrap"><canvas id="chart-6m"></canvas></div>
+      </section>
+    </div>
+
     <section class="dash-card">
       <h2 class="dash-card-title">Ultime giornate</h2>
       <?php if ($ultime): ?>
@@ -157,49 +167,7 @@ for ($i = 5; $i >= 0; $i--) {
       <a href="<?= base_url('cassa/settimanale.php') ?>" class="dash-card-link">Riepilogo settimanale &rarr;</a>
     </section>
 
-    <!-- ===== Accesso rapido ===== -->
-    <section class="dash-card dash-quicklinks">
-      <h2 class="dash-card-title">Accesso rapido</h2>
-      <div class="dash-ql-grid">
-        <a href="<?= base_url('cassa/settimanale.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-          <span>Settimanale</span>
-        </a>
-        <a href="<?= base_url('cassa/mensile.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
-          <span>Mensile</span>
-        </a>
-        <a href="<?= base_url('cassa/annuale.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 16l2-2 3 2 3-3"/></svg>
-          <span>Annuale</span>
-        </a>
-        <a href="<?= base_url('account/admin/utenti.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Utenti</span>
-        </a>
-        <a href="<?= base_url('account/admin/macchine.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2M7 11h5"/></svg>
-          <span>Macchine</span>
-        </a>
-        <a href="<?= base_url('account/admin/impostazioni.php') ?>" class="dash-ql-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-          <span>Impostazioni</span>
-        </a>
-      </div>
-    </section>
-
   </div>
-</div>
-
-<div class="dash-charts">
-  <section class="dash-card">
-    <h2 class="dash-card-title">Incasso VLT · ultimi 30 giorni</h2>
-    <div class="dash-chart-wrap"><canvas id="chart-30d"></canvas></div>
-  </section>
-  <section class="dash-card">
-    <h2 class="dash-card-title">Andamento mensile · ultimi 6 mesi</h2>
-    <div class="dash-chart-wrap"><canvas id="chart-6m"></canvas></div>
-  </section>
 </div>
 
 
