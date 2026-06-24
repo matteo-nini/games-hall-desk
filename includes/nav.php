@@ -72,7 +72,7 @@ function top_menu(array $user): void {
     $foto    = $user['foto'] ?? null;
     $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
 ?>
-<link rel="stylesheet" href="<?= base_url('assets/css/ob-banners.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/ob-banners.css') ?>">
 <aside class="sidebar" id="sidebar" data-role="<?= htmlspecialchars($role) ?>" aria-label="Navigazione principale">
 
   <div class="sb-head">
@@ -145,9 +145,10 @@ function top_menu(array $user): void {
 </button>
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
-<script src="<?= base_url('assets/js/sidebar.js') ?>"></script>
+<script src="<?= asset_url('assets/js/sidebar.js') ?>"></script>
 <script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';</script>
-<script src="<?= base_url('assets/js/ob-banners.js') ?>" defer></script>
+<script src="<?= asset_url('assets/js/ob-banners.js') ?>" defer></script>
+<script src="<?= asset_url('assets/js/toast.js') ?>" defer></script>
 <script>(function(){var l=document.createElement('link');l.rel='manifest';l.href='<?= addslashes(base_url('manifest.php')) ?>';document.head.appendChild(l);var m=document.createElement('meta');m.name='theme-color';m.content='#2563eb';document.head.appendChild(m);if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');})()</script>
 <?php
 }

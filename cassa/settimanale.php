@@ -193,8 +193,8 @@ if (($_GET['export'] ?? '') === 'csv') {
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Settimanale GP</title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/settimanale.css') ?>"></head><body>
+<title>Settimanale GP</title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/settimanale.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">

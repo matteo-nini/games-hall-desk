@@ -5,8 +5,8 @@ http_response_code(404);
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>404 — Pagina non trovata</title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/error.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/error.css') ?>">
 </head><body>
 <div class="err-wrap">
   <div class="err-icon" aria-hidden="true">

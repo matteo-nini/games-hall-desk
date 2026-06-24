@@ -67,6 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: utenti.php?ok=nome'); exit;
         }
     }
+
+    if ($az === 'change_ruolo') {
+        $id    = (int)($_POST['id'] ?? 0);
+        $ruolo = in_array($_POST['ruolo'] ?? '', ['responsabile','revisore'], true) ? $_POST['ruolo'] : 'operatore';
+        if ($id > 0 && $id !== (int)$user['id']) {
+            $pdo->prepare('UPDATE utenti SET ruolo=? WHERE id=?')->execute([$ruolo, $id]);
+            audit('utente_change_ruolo', 'utenti', $id, $ruolo);
+            header('Location: utenti.php?ok=ruolo'); exit;
+        }
+    }
 }
 
 /* =========================================================
@@ -82,14 +92,15 @@ $okMsg = match ($_GET['ok'] ?? '') {
     'toggle' => 'Stato aggiornato.',
     'reset'  => 'Password aggiornata.',
     'nome'   => 'Nome aggiornato.',
+    'ruolo'  => 'Ruolo aggiornato.',
     default  => ''
 };
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Utenti · <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/utenti.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/utenti.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
@@ -207,6 +218,33 @@ $okMsg = match ($_GET['ok'] ?? '') {
   </form>
 </dialog>
 
+<!-- ========== Dialog: cambia ruolo ========== -->
+<dialog id="dlg-ruolo" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Cambia ruolo</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <form method="post" class="ticket-new-form">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="change_ruolo">
+    <input type="hidden" name="id" id="ruolo-uid">
+    <p class="ul-reset-ctx" id="ruolo-ctx"></p>
+    <div class="ul-field ul-field-full">
+      <label for="ruolo-select">Nuovo ruolo</label>
+      <select id="ruolo-select" name="ruolo" onchange="document.getElementById('ruolo-chg-desc').textContent=({operatore:'Accesso completo alla cassa giornaliera e alle sezioni operative.',responsabile:'Accesso completo incluse impostazioni, gestione utenti e macchine.',revisore:'Solo visualizzazione report settimanali, mensili e annuali. Nessun accesso alle operazioni di cassa.'})[this.value]||''">
+        <option value="operatore">Operatore</option>
+        <option value="responsabile">Responsabile</option>
+        <option value="revisore">Revisore</option>
+      </select>
+      <p id="ruolo-chg-desc" class="ul-field-hint"></p>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Aggiorna ruolo</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- ========== Lista utenti ========== -->
 <div class="ul-page">
   <?php if (empty($utenti)): ?>
@@ -296,6 +334,12 @@ $okMsg = match ($_GET['ok'] ?? '') {
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="8" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
                   Reset password
                 </button>
+                <button type="button" class="ul-menu-item" role="menuitem"
+                        data-action="ruolo" data-uid="<?= (int)$u['id'] ?>" data-name="<?= $h($displayN) ?>" data-ruolo="<?= $h($u['ruolo']) ?>"
+                        <?= $isMe ? 'disabled title="Non puoi cambiare il tuo ruolo"' : '' ?>>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h11M9 2l3 2-3 2M15 12H4M6 10l-3 2 3 2"/></svg>
+                  Cambia ruolo
+                </button>
                 <div class="ul-menu-sep" role="separator"></div>
                 <form method="post" class="ul-menu-form ul-toggle-form" data-name="<?= $h($displayN) ?>">
                   <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
@@ -376,6 +420,19 @@ $okMsg = match ($_GET['ok'] ?? '') {
         document.getElementById('nome-uid').value = uid;
         document.getElementById('nome-val').value = name;
         document.getElementById('dlg-nome').showModal();
+      }
+      if (btn.dataset.action === 'ruolo') {
+        document.getElementById('ruolo-uid').value = uid;
+        document.getElementById('ruolo-ctx').textContent = 'Cambia ruolo per: ' + name;
+        var sel = document.getElementById('ruolo-select');
+        sel.value = btn.dataset.ruolo || 'operatore';
+        var descs = {
+          operatore:    'Accesso completo alla cassa giornaliera e alle sezioni operative.',
+          responsabile: 'Accesso completo incluse impostazioni, gestione utenti e macchine.',
+          revisore:     'Solo visualizzazione report settimanali, mensili e annuali. Nessun accesso alle operazioni di cassa.'
+        };
+        document.getElementById('ruolo-chg-desc').textContent = descs[sel.value] || '';
+        document.getElementById('dlg-ruolo').showModal();
       }
     });
   });

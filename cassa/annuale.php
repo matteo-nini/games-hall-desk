@@ -112,8 +112,8 @@ $totGiorni = array_sum($giorniM);
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Annuale <?= $anno ?> · <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/annuale.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/annuale.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 

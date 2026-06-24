@@ -32,6 +32,12 @@ function base_url(string $path = ''): string {
     return $base . ltrim($path, '/');
 }
 
+function asset_url(string $path): string {
+    $file = dirname(__DIR__) . '/' . ltrim($path, '/');
+    $v    = is_file($file) ? filemtime($file) : 0;
+    return base_url($path) . ($v ? '?v=' . $v : '');
+}
+
 /**
  * Calcola la riconciliazione di un turno.
  * $t deve contenere: fondo_cassa, monete, bancomat, differenze, ii_cassa,

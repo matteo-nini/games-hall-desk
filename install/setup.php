@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $root->exec("CREATE DATABASE IF NOT EXISTS `{$c['name']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             $db   = setup_connect($c['name']);
             foreach (['schema','002_ticket_assistenza','003_prestiti',
-                      '004_turni_programmati','005_profilo_impostazioni','006_moduli'] as $f) {
+                      '004_turni_programmati','005_profilo_impostazioni','006_moduli','007_seriali_civ'] as $f) {
                 $path = __DIR__ . "/../sql/{$f}.sql";
                 if (file_exists($path)) setup_run_file($db, $path);
             }
@@ -141,14 +141,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 $db->exec('DELETE FROM macchine');
-                $ins     = $db->prepare('INSERT INTO macchine (codice,tipo,fornitore,ordine,attiva) VALUES (?,?,?,?,1)');
+                $ins     = $db->prepare('INSERT INTO macchine (codice,tipo,fornitore,seriale,civ,ordine,attiva) VALUES (?,?,?,?,?,?,1)');
                 $codici  = $_POST['codice']    ?? [];
                 $tipi    = $_POST['tipo']      ?? [];
                 $forns   = $_POST['fornitore'] ?? [];
+                $seriali = $_POST['seriale']   ?? [];
+                $civs    = $_POST['civ']        ?? [];
                 $ord = 1;
                 foreach ($codici as $i => $cod) {
                     if (($cod = trim($cod)) === '') continue;
-                    $ins->execute([$cod, $tipi[$i] ?? 'VLT', $forns[$i] ?? 'NOVO', $ord++]);
+                    $ser = mb_substr(trim($seriali[$i] ?? ''), 0, 100) ?: null;
+                    $civ = mb_substr(trim($civs[$i]    ?? ''), 0, 100) ?: null;
+                    $ins->execute([$cod, $tipi[$i] ?? 'VLT', $forns[$i] ?? 'NOVO', $ser, $civ, $ord++]);
                 }
                 $_SESSION['setup_step'] = 5;
                 $_SESSION['setup_ok']   = 'Macchine salvate.';
@@ -161,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* Pre-carica macchine per step 4 */
 $macchineExisting = [];
 if ($step === 4 && ($db = setup_pdo())) {
-    try { $macchineExisting = $db->query('SELECT codice,tipo,fornitore FROM macchine ORDER BY ordine')->fetchAll(); }
+    try { $macchineExisting = $db->query('SELECT codice,tipo,fornitore,seriale,civ FROM macchine ORDER BY ordine')->fetchAll(); }
     catch (Throwable) {}
 }
 
@@ -411,10 +415,12 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
       <table class="sw-mach-table" id="mach-table">
         <thead>
           <tr>
-            <th style="width:38%">Codice</th>
-            <th style="width:22%">Tipo</th>
-            <th style="width:30%">Fornitore</th>
-            <th style="width:10%"></th>
+            <th style="width:28%">Codice</th>
+            <th style="width:14%">Tipo</th>
+            <th style="width:20%">Fornitore</th>
+            <th style="width:18%">Seriale</th>
+            <th style="width:13%">CIV</th>
+            <th style="width:7%"></th>
           </tr>
         </thead>
         <tbody id="mach-body">
@@ -435,6 +441,8 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
                 <?php endforeach; ?>
               </select>
             </td>
+            <td><input type="text" name="seriale[]" value="<?= $h($m['seriale'] ?? '') ?>" placeholder="SN…" maxlength="100"></td>
+            <td><input type="text" name="civ[]" value="<?= $h($m['civ'] ?? '') ?>" placeholder="CIV…" maxlength="100"></td>
             <td><button type="button" class="sw-mach-del" title="Rimuovi">×</button></td>
           </tr>
           <?php endforeach; ?>
@@ -443,6 +451,8 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
             <td><input type="text" name="codice[]" placeholder="Es. NOVO 31" required></td>
             <td><select name="tipo[]"><option value="VLT">VLT</option><option value="AWP">AWP</option></select></td>
             <td><select name="fornitore[]"><option value="NOVO">NOVO</option><option value="INSPIRED">INSPIRED</option><option value="SPIELO">SPIELO</option><option value="ALTRO">ALTRO</option></select></td>
+            <td><input type="text" name="seriale[]" placeholder="SN…" maxlength="100"></td>
+            <td><input type="text" name="civ[]" placeholder="CIV…" maxlength="100"></td>
             <td><button type="button" class="sw-mach-del" title="Rimuovi">×</button></td>
           </tr>
           <?php endif; ?>
@@ -495,6 +505,8 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
       + '<td><input type="text" name="codice[]" placeholder="Es. NOVO 31" required></td>'
       + '<td><select name="tipo[]"><option value="VLT">VLT</option><option value="AWP">AWP</option></select></td>'
       + '<td><select name="fornitore[]"><option value="NOVO">NOVO</option><option value="INSPIRED">INSPIRED</option><option value="SPIELO">SPIELO</option><option value="ALTRO">ALTRO</option></select></td>'
+      + '<td><input type="text" name="seriale[]" placeholder="SN…" maxlength="100"></td>'
+      + '<td><input type="text" name="civ[]" placeholder="CIV…" maxlength="100"></td>'
       + '<td><button type="button" class="sw-mach-del" title="Rimuovi">&times;</button></td>'
       + '</tr>';
   }

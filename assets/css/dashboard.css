@@ -98,6 +98,13 @@
   align-items: start
 }
 
+.dash-grid-2col {
+  grid-template-columns: 1.6fr 1fr
+}
+
+.muted-text { color: var(--muted) }
+.ok-text    { color: var(--green-ink) }
+
 .dash-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -238,7 +245,7 @@
 
 .dash-chart-wrap {
   position: relative;
-  height: 200px
+  height: 230px
 }
 
 @media (max-width: 760px) {

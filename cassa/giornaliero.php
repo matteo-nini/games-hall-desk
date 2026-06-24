@@ -173,8 +173,8 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/giornaliero.css') ?>"></head><body>
+<title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>"></head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <h1 class="sr-only">Cassa del <?= $h(date('d/m/Y', strtotime($data))) ?></h1>
 
@@ -270,8 +270,8 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
 </form>
 
 <?php if (isset($_GET['ok'])): ?>
-<div id="toast" class="toast" role="alert"><span class="tk">&#10003;</span> Salvato</div>
+<div class="ok">Salvato</div>
 <?php endif; ?>
 
-<script src="<?= base_url('assets/js/giornaliero.js') ?>"></script>
+<script src="<?= asset_url('assets/js/giornaliero.js') ?>"></script>
 </body></html>

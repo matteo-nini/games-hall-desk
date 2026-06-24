@@ -116,8 +116,8 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf" content="<?= csrf_token() ?>">
 <title>Profilo</title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/profilo.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/profilo.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
@@ -229,5 +229,5 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
   <canvas id="crop-canvas" width="256" height="256" hidden></canvas>
 </div>
 
-<script src="<?= base_url('assets/js/profilo.js') ?>"></script>
+<script src="<?= asset_url('assets/js/profilo.js') ?>"></script>
 </body></html>

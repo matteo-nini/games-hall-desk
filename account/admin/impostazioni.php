@@ -89,8 +89,8 @@ $ps = $prezzi['sera']    ?? 70.0;
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Impostazioni · <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/impostazioni.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/impostazioni.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 

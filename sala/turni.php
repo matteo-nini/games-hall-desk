@@ -227,8 +227,8 @@ if ($migrationOk) {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Turni — <?= $h($nomiMesi[$mese]) ?> <?= $anno ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/turni.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/turni.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
@@ -547,7 +547,7 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
 
 </div><!-- /.tp-layout -->
 
-<script src="<?= base_url('assets/js/turni.js') ?>"></script>
+<script src="<?= asset_url('assets/js/turni.js') ?>"></script>
 
 <?php endif; /* migrationOk */ ?>
 </body></html>

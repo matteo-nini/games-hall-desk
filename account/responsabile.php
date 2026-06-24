@@ -81,8 +81,8 @@ for ($i = 5; $i >= 0; $i--) {
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard — <?= $h($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="<?= base_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/css/dashboard.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/dashboard.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
@@ -135,7 +135,7 @@ for ($i = 5; $i >= 0; $i--) {
     </div>
   </div>
 
-  <div class="dash-grid">
+  <div class="dash-grid dash-grid-2col">
 
     <!-- ===== Ultime giornate ===== -->
     <section class="dash-card">
