@@ -127,11 +127,8 @@ $totGiorni = array_sum($giorniM);
       <button type="submit" class="ghost">Vai</button>
     </form>
   </div>
-  <div style="display:flex;gap:6px">
-    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&export=csv">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 1v7M3 5l3 3 3-3M1 10h10"/></svg>
-      CSV
-    </a>
+  <div class="topbar-actions">
+    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&export=csv">&#8595; CSV</a>
     <button class="topbar-action-btn no-print" onclick="window.print()" type="button">&#128438; Stampa</button>
   </div>
 </header>

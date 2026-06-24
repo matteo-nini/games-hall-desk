@@ -215,6 +215,8 @@ if (($_GET['export'] ?? '') === 'csv') {
     <a class="settimana-tab <?= $s===$sett?'active':'' ?>"
        href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $s ?>"><?= $ds ?>&ndash;<?= $de ?></a>
     <?php endfor; ?>
+  </div>
+  <div class="topbar-actions">
     <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
     <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
   </div>

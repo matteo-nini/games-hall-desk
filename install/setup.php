@@ -43,17 +43,6 @@ function setup_run_file(PDO $pdo, string $path): void {
 
 $cfgFile = __DIR__ . '/config.php';
 
-/* -------- guard: già configurato -------- */
-$pdo = setup_pdo();
-if ($pdo) {
-    try {
-        $nResp = (int)$pdo->query('SELECT COUNT(*) FROM utenti WHERE ruolo="responsabile"')->fetchColumn();
-        if ($nResp > 0 && ($_GET['force'] ?? '') !== '1') {
-            header('Location: ../account/login.php'); exit;
-        }
-    } catch (Throwable) { /* tabelle non ancora create */ }
-}
-
 $step = (int)($_SESSION['setup_step'] ?? 1);
 $err  = $_SESSION['setup_err'] ?? '';
 $msg  = $_SESSION['setup_ok']  ?? '';
@@ -62,6 +51,19 @@ unset($_SESSION['setup_err'], $_SESSION['setup_ok']);
 /* Se config.php mancante o senza credenziali, torna al passo 1 */
 if (!file_exists($cfgFile) || empty(setup_cfg()['db']['user'])) {
     if ($step > 1) { $_SESSION['setup_step'] = 1; $step = 1; }
+}
+
+/* -------- guard: già configurato -------- */
+/* Permette di proseguire se il setup è attivo (step > 1), altrimenti
+   reindirizza al login se esiste già un responsabile. */
+$pdo = setup_pdo();
+if ($pdo) {
+    try {
+        $nResp = (int)$pdo->query('SELECT COUNT(*) FROM utenti WHERE ruolo="responsabile"')->fetchColumn();
+        if ($nResp > 0 && ($_GET['force'] ?? '') !== '1' && $step <= 1) {
+            header('Location: ../account/login.php'); exit;
+        }
+    } catch (Throwable) { /* tabelle non ancora create */ }
 }
 
 /* ?back=1 — retrocede di un passo */

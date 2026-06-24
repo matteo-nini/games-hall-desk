@@ -1,5 +1,17 @@
 <?php
-ob_start();
+/* Output buffer: inietta favicon + manifest nel <head> di ogni pagina automaticamente */
+ob_start(function(string $html): string {
+    $pos = strpos($html, '</head>');
+    if ($pos === false || !function_exists('base_url')) return $html;
+    try {
+        $fav = htmlspecialchars(base_url('favicon.php'), ENT_QUOTES);
+        $man = htmlspecialchars(base_url('manifest.php'), ENT_QUOTES);
+    } catch (Throwable) { return $html; }
+    $inject = '<link rel="icon" type="image/svg+xml" href="' . $fav . '">'
+            . "\n<link rel=\"manifest\" href=\"" . $man . '">'
+            . "\n<meta name=\"theme-color\" content=\"#2563eb\">";
+    return substr($html, 0, $pos) . $inject . "\n" . substr($html, $pos);
+});
 // Autenticazione minima basata su sessione.
 require_once __DIR__ . '/db.php';
 

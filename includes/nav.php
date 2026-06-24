@@ -153,11 +153,8 @@ function top_menu(array $user): void {
 <script src="<?= asset_url('assets/js/ob-banners.js') ?>" defer></script>
 <script src="<?= asset_url('assets/js/toast.js') ?>" defer></script>
 <script>(function(){
-  var fl=document.createElement('link');fl.rel='icon';fl.type='image/svg+xml';fl.href='<?= addslashes(base_url('favicon.php')) ?>';document.head.appendChild(fl);
   var sn='<?= addslashes($navNomeSala) ?>';
   if(sn && document.title && document.title.indexOf(sn)===-1) document.title=document.title+' · '+sn;
-  var l=document.createElement('link');l.rel='manifest';l.href='<?= addslashes(base_url('manifest.php')) ?>';document.head.appendChild(l);
-  var m=document.createElement('meta');m.name='theme-color';m.content='#2563eb';document.head.appendChild(m);
   if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');
 })()</script>
 <?php

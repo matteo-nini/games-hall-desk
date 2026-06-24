@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/lib.php';
 header('Content-Type: application/manifest+json; charset=utf-8');
 $cfg  = config();

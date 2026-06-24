@@ -112,7 +112,7 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 
 <header class="topbar">
   <div><strong>Prestiti e rientri</strong> <span class="topbar-sub">Totale dare: <strong><?= $nv($tot_dare) ?> €</strong></span></div>
-  <div style="display:flex;gap:8px">
+  <div class="topbar-actions">
     <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-movimento').showModal()">+ Movimento</button>
     <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-persona').showModal()">+ Persona</button>
   </div>
@@ -122,7 +122,7 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 <?php if (isset($_GET['err'])): ?><div class="warn">Compilare tutti i campi obbligatori.</div><?php endif; ?>
 
 <!-- Riepilogo saldi -->
-<div class="calcrow prest-saldi" style="margin:14px 24px">
+<div class="calcrow prest-saldi">
   <?php foreach ($persone as $p): ?>
   <a class="mini prest-card <?= $p['dare']>0?'pcard-dare':($p['dare']<0?'pcard-neg':'pcard-zero') ?>" href="?p=<?= $p['id'] ?>">
     <div class="l"><?= $h($p['nome']) ?></div>
@@ -160,7 +160,7 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
         </select>
       </div>
       <div class="field"><label>Importo (€) *</label><input type="number" step="0.01" min="0.01" name="quantita" required></div>
-      <div class="field tnf-full"><label>Note</label><input type="text" name="note" placeholder="annotazioni opzionali" style="width:100%"></div>
+      <div class="field tnf-full"><label>Note</label><input type="text" name="note" placeholder="annotazioni opzionali"></div>
     </div>
     <div class="dlg-actions">
       <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
@@ -181,7 +181,7 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
     <div class="tnf-grid">
       <div class="field"><label>Nome *</label><input type="text" name="nome" required placeholder="nome o soprannome"></div>
       <div class="field"><label>Saldo iniziale (€)</label><input type="number" step="0.01" name="saldo_iniziale" value="0" placeholder="0"></div>
-      <div class="field tnf-full"><label>Note</label><input type="text" name="note" style="width:100%" placeholder="opzionale"></div>
+      <div class="field tnf-full"><label>Note</label><input type="text" name="note" placeholder="opzionale"></div>
     </div>
     <div class="dlg-actions">
       <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
@@ -194,27 +194,27 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
 </script>
 
 <!-- Lista movimenti -->
-<div style="margin: 20px 24px 0">
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px">
-    <h3 style="margin:0; font-size:13px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted)">
+<div class="prest-movimenti">
+  <div class="prest-movimenti-head">
+    <h3 class="prest-movimenti-title">
       Movimenti<?php if ($filtro_pid): $fp=array_filter($persone,fn($x)=>$x['id']===$filtro_pid); $fp=reset($fp); echo $fp?' — '.$h($fp['nome']):''; endif; ?>
     </h3>
-    <?php if ($filtro_pid): ?><a href="prestiti.php" style="font-size:12px; color:var(--muted)">&times; Mostra tutti</a><?php endif; ?>
+    <?php if ($filtro_pid): ?><a href="prestiti.php" class="prest-reset-filter">&times; Mostra tutti</a><?php endif; ?>
   </div>
   <div class="recent-list">
     <?php foreach ($movimenti as $m): ?>
     <div class="recent-row prest-row">
-      <span class="recent-date prest-data"><?= $h($m['data']) ?></span>
+      <span class="recent-date prest-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></span>
       <span class="prest-persona"><?= $h($m['pnome']) ?></span>
       <span class="badge prest-tipo <?= $m['tipo']==='prestito'?'ptype-out':'ptype-in' ?>"><?= strtoupper($m['tipo']) ?></span>
       <span class="prest-qta"><?= $nv($m['quantita']) ?> €</span>
       <?php if ($m['note']): ?><span class="prest-note"><?= $h($m['note']) ?></span><?php endif; ?>
       <?php if (is_responsabile()): ?>
-      <form method="post" onsubmit="return confirm('Eliminare?')" style="margin-left:auto">
+      <form method="post" onsubmit="return confirm('Eliminare?')" class="prest-del-form">
         <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="azione" value="del_movimento">
         <input type="hidden" name="id" value="<?= $h($m['id']) ?>">
-        <button type="submit" class="ghost" style="font-size:11px; padding:3px 8px">&#10005;</button>
+        <button type="submit" class="ghost prest-del-btn">&#10005;</button>
       </form>
       <?php endif; ?>
     </div>

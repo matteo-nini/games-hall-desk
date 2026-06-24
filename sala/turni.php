@@ -347,14 +347,10 @@ tr:nth-child(even) td{background:#fafbff}
     <a href="?anno=<?= $nextMese['anno'] ?>&mese=<?= $nextMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese successivo">&#9654;</a>
   </div>
   <?php if ($migrationOk): ?>
-  <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=csv" class="topbar-action-btn btnlink">
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14M10 3v10M6 9l4 4 4-4"/></svg>
-    CSV
-  </a>
-  <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=print" target="_blank" class="topbar-action-btn btnlink">
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7V3h10v4M5 15H3a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M5 11h10v6H5v-6z"/></svg>
-    Stampa
-  </a>
+  <div class="topbar-actions">
+    <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=csv" class="topbar-action-btn">&#8595; CSV</a>
+    <a href="?anno=<?= $anno ?>&mese=<?= $mese ?>&export=print" target="_blank" class="topbar-action-btn">&#128438; Stampa</a>
+  </div>
   <?php endif; ?>
 </header>
 

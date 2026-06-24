@@ -1240,6 +1240,12 @@ body {
    Topbar action button
    ============================================================ */
 
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center
+}
+
 .topbar-action-btn {
   display: inline-flex;
   align-items: center;

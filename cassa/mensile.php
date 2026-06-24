@@ -46,9 +46,9 @@ $mesi = nomi_mesi();
     <input type="number" name="anno" value="<?= $anno ?>" style="width:90px">
     <button>Mostra</button>
   </form>
-  <div>
-    <button onclick="window.print()">Stampa / PDF</button>
-    <a class="btnlink" href="<?= base_url('utils/export.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>">Export CSV</a>
+  <div class="topbar-actions">
+    <a class="topbar-action-btn" href="<?= base_url('utils/export.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>">&#8595; CSV</a>
+    <button class="topbar-action-btn no-print" onclick="window.print()" type="button">&#128438; Stampa</button>
   </div>
 </header>
 

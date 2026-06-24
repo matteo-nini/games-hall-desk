@@ -86,12 +86,8 @@ $base = base_url();
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar sh-top">
-  <strong>Audit log</strong>
-  <span style="font-weight:400;color:var(--muted)"><?= number_format($nTotal) ?> operazioni totali</span>
-  <a href="audit.php?export=csv" class="topbar-action-btn btnlink">
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h14M10 3v10M6 9l4 4 4-4"/></svg>
-    Esporta CSV
-  </a>
+  <div><strong>Audit log</strong> <span class="topbar-sub"><?= number_format($nTotal) ?> operazioni totali</span></div>
+  <a href="audit.php?export=csv" class="topbar-action-btn">&#8595; CSV</a>
 </header>
 
 <?php if (isset($_GET['ok'])): ?>
