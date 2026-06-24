@@ -222,8 +222,8 @@ for ($i = 5; $i >= 0; $i--) {
           <tr>
             <td class="op-nome"><?= $h($op['nome']) ?></td>
             <td class="rt"><?= $op['turni'] ?></td>
-            <td class="rt"><span class="op-scost <?= $cls ?>">€ <?= eur($med) ?></span></td>
-            <td class="rt muted-text">€ <?= eur($op['scost_max']) ?></td>
+            <td class="rt"><span class="op-scost <?= $cls ?>"><?= eur($med) ?></span></td>
+            <td class="rt muted-text"><?= eur($op['scost_max']) ?></td>
             <td class="rt">
               <span class="op-ok-bar" title="<?= $op['ok'] ?>/<?= $op['turni'] ?> turni con scostamento &lt; €4">
                 <span class="op-ok-fill" style="width:<?= $pct ?>%"></span>

@@ -62,66 +62,75 @@ $lista = $pdo->query('SELECT * FROM fornitori ORDER BY ordine')->fetchAll();
   <div><strong>Fornitori</strong></div>
 </header>
 
-<div class="imp-wrap">
+<div class="imp-page">
 
-  <div class="imp-section">
-    <h2 class="imp-section-title">Lista fornitori</h2>
-    <p class="imp-section-desc">I fornitori configurati qui compaiono nelle sezioni Scassettamenti, Ticket vincite e Bet/Win SNAI. Disabilitando un fornitore lo si nasconde dai nuovi inserimenti (i dati storici rimangono).</p>
+  <section class="imp-card" style="grid-column: 1 / -1">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Lista fornitori</h2>
+        <p class="imp-card-desc">I fornitori configurati qui compaiono in Scassettamenti, Ticket vincite e Bet/Win SNAI. Disabilitando un fornitore lo si nasconde dai nuovi inserimenti — i dati storici rimangono intatti. Trascina per riordinare.</p>
+      </div>
+    </div>
 
+    <?php if ($lista): ?>
     <ul class="forn-list" id="forn-list">
-    <?php foreach ($lista as $f): ?>
+      <?php foreach ($lista as $f): ?>
       <li class="forn-row <?= $f['attiva'] ? '' : 'forn-off' ?>" data-id="<?= $f['id'] ?>">
-        <span class="forn-handle" title="Trascina per riordinare" aria-hidden="true">⠿</span>
+        <span class="forn-handle" title="Trascina per riordinare" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+        </span>
         <form method="post" class="forn-rinomina-form">
           <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="rinomina">
           <input type="hidden" name="id" value="<?= $f['id'] ?>">
           <input class="forn-name-input" type="text" name="nome" value="<?= $h($f['nome']) ?>" maxlength="50" aria-label="Nome fornitore">
-          <button type="submit" class="ghost" style="font-size:11px;padding:3px 8px">Salva</button>
+          <button type="submit" class="ghost forn-btn-sm">Salva</button>
         </form>
         <form method="post" class="forn-toggle-form">
           <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="toggle">
           <input type="hidden" name="id" value="<?= $f['id'] ?>">
-          <button type="submit" class="ghost" style="font-size:11px;padding:3px 8px">
+          <button type="submit" class="ghost forn-btn-sm <?= $f['attiva'] ? '' : 'forn-toggle-on' ?>">
             <?= $f['attiva'] ? 'Disabilita' : 'Abilita' ?>
           </button>
         </form>
       </li>
-    <?php endforeach; ?>
+      <?php endforeach; ?>
     </ul>
+    <?php else: ?>
+    <p class="ticket-empty">Nessun fornitore ancora. Aggiungine uno qui sotto.</p>
+    <?php endif; ?>
 
     <form method="post" id="forn-ordine-form" style="display:none">
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="azione" value="ordine">
     </form>
-  </div>
+  </section>
 
-  <div class="imp-section">
-    <h2 class="imp-section-title">Aggiungi fornitore</h2>
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Aggiungi fornitore</h2>
+        <p class="imp-card-desc">Il nome viene convertito automaticamente in maiuscolo.</p>
+      </div>
+    </div>
     <form method="post">
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="azione" value="aggiungi">
-      <div class="imp-field-row">
+      <div class="forn-add-row">
         <input type="text" name="nome" placeholder="Es. GAMENET" maxlength="50" required style="text-transform:uppercase">
         <button type="submit">Aggiungi</button>
       </div>
     </form>
-  </div>
+  </section>
 
 </div>
-
-<style>
-.forn-list { list-style:none; padding:0; margin:0 0 8px; display:flex; flex-direction:column; gap:6px }
-.forn-row  { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--rxs); padding:8px 12px }
-.forn-off  { opacity:.5 }
-.forn-handle { cursor:grab; color:var(--faint); font-size:16px; user-select:none }
-.forn-rinomina-form { display:flex; align-items:center; gap:6px; flex:1 }
-.forn-name-input { border:1px solid var(--border); border-radius:var(--rxs); padding:5px 8px; font-size:13px; font-weight:600; background:var(--bg); color:var(--text); width:120px; text-transform:uppercase }
-.forn-toggle-form { margin-left:auto }
-.imp-field-row { display:flex; gap:8px; align-items:center }
-.imp-field-row input { flex:1; max-width:220px }
-</style>
 
 <script>
 (function(){

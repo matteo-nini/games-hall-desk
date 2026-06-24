@@ -217,7 +217,8 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
     <div class="sh-tabbar">
       <div class="tabs" role="tablist" aria-label="Selezione turno">
         <?php foreach ($turns as $n => $turn): $isLast = ($n === $lastTurn); ?>
-        <button type="button" id="tab-<?= $n ?>" role="tab" aria-selected="<?= $isLast ? 'true' : 'false' ?>" aria-controls="turno-<?= $n ?>" class="tab" data-tab="<?= $n ?>" onclick="showTab(<?= $n ?>)"><?= $h($turn['nome']) ?><small><?php
+        <button type="button" id="tab-<?= $n ?>" role="tab" aria-selected="<?= $isLast ? 'true' : 'false' ?>" aria-controls="turno-<?= $n ?>" class="tab" data-tab="<?= $n ?>" onclick="showTab(<?= $n ?>)"><?= $h($turn['nome']) ?><?php
+            if (!empty($turn['inizio']) || !empty($turn['fine'])): ?><span class="tab-hours"><?= $h($turn['inizio'] ?? '') ?>–<?= $h($turn['fine'] ?? '') ?></span><?php endif; ?><small><?php
             $parts = [];
             if ($schedName($n)) $parts[] = 'Assegnato: '.$h($schedName($n));
             if ($ownerName($n) && $ownerName($n) !== $schedName($n)) $parts[] = 'Salvato: '.$h($ownerName($n));
@@ -296,7 +297,13 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
   </div>
 
 </div>
-<?php if ($prevDayAlert): ?><div class="warn" style="background:var(--amber);color:#000;padding:10px 16px;font-size:13px;text-align:center">&#9888; La giornata di ieri risulta ancora <strong>aperta</strong>. <a href="?data=<?= $h($prev) ?>" style="color:inherit;font-weight:700">Vai al giorno precedente</a> per chiuderla.</div><?php endif; ?>
+<?php if ($prevDayAlert): ?>
+<div class="prev-day-alert" role="alert">
+  <svg class="pda-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <span class="pda-text">La giornata del <strong><?= $h(date('d/m/Y', strtotime($prev))) ?></strong> risulta ancora <strong>aperta</strong>.</span>
+  <a href="?data=<?= $h($prev) ?>" class="pda-link">Vai e chiudi &rarr;</a>
+</div>
+<?php endif; ?>
 <?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
 
 <form method="post" id="frm">

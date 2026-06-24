@@ -103,6 +103,8 @@ $primoGiorno  = sprintf('%04d-%02d-01', $anno, $mese);
 $ultimoGiorno = date('Y-m-t', strtotime($primoGiorno));
 $giorniMese   = (int)date('t', strtotime($primoGiorno));
 $nomiMesi     = nomi_mesi();
+$sett         = get_settings($pdo);
+$turns        = get_turns($sett);
 
 /* =========================================================
    GET — verifica migration (tutte e tre le dipendenze)
@@ -224,14 +226,19 @@ if ($migrationOk) {
         $byDay = [];
         foreach ($st as $r) $byDay[$r['data']][(int)$r['numero']] = $r['nome'];
         $f = fopen('php://output', 'w');
-        fputcsv($f, ['Data', 'Mattino', 'Sera'], ';');
+        $csvHead = ['Data'];
+        foreach ($turns as $n => $t) $csvHead[] = $t['nome'];
+        fputcsv($f, $csvHead, ';');
         for ($g = 1; $g <= $giorniMese; $g++) {
             $dc = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
-            fputcsv($f, [$dc, $byDay[$dc][1] ?? '', $byDay[$dc][2] ?? ''], ';');
+            $row = [$dc];
+            foreach (array_keys($turns) as $n) $row[] = $byDay[$dc][$n] ?? '';
+            fputcsv($f, $row, ';');
         }
         fputcsv($f, [], ';');
         fputcsv($f, ['Riepilogo operatori'], ';');
-        fputcsv($f, ['Operatore', 'Turni mattina', 'Turni sera', 'Tot. mattina (€)', 'Tot. sera (€)', 'Totale (€)'], ';');
+        $n1 = $turns[1]['nome'] ?? 'Mattino'; $n2 = $turns[2]['nome'] ?? 'Sera';
+        fputcsv($f, ['Operatore', 'Turni '.$n1, 'Turni '.$n2, 'Tot. '.$n1.' (€)', 'Tot. '.$n2.' (€)', 'Totale (€)'], ';');
         foreach ($opStats as $op) {
             $totM = (float)$op['n_mattino'] * $prezzoMattino;
             $totS = (float)$op['n_sera']    * $prezzoSera;
@@ -283,21 +290,24 @@ tr:nth-child(even) td{background:#fafbff}
         echo '<div class="tp-export-wrap">';
 
         /* Tabella giornaliera */
-        echo '<table><thead><tr><th>Data</th><th>Mattino</th><th>Sera</th></tr></thead><tbody>';
+        echo '<table><thead><tr><th>Data</th>';
+        foreach ($turns as $t) echo '<th>' . $h2($t['nome']) . '</th>';
+        echo '</tr></thead><tbody>';
         for ($g = 1; $g <= $giorniMese; $g++) {
             $dc  = sprintf('%04d-%02d-%02d', $anno, $mese, $g);
             $dow = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'][(int)date('N', strtotime($dc)) - 1];
             echo '<tr><td>' . $h2(date('d/m', strtotime($dc))) . ' <span style="color:#666">' . $dow . '</span></td>';
-            echo '<td>' . $h2($byDay[$dc][1] ?? '') . '</td>';
-            echo '<td>' . $h2($byDay[$dc][2] ?? '') . '</td></tr>';
+            foreach (array_keys($turns) as $n) echo '<td>' . $h2($byDay[$dc][$n] ?? '') . '</td>';
+            echo '</tr>';
         }
         echo '</tbody></table>';
 
         /* Tabella operatori */
         $totAllM = 0.0; $totAllS = 0.0;
+        $pn1 = $turns[1]['nome'] ?? 'Mattino'; $pn2 = $turns[2]['nome'] ?? 'Sera';
         echo '<table class="op-table"><thead><tr>';
-        echo '<th>Operatore</th><th class="num">Mattine</th><th class="num">Sere</th>';
-        echo '<th class="num">Tot. mattina</th><th class="num">Tot. sera</th><th class="num">Totale</th>';
+        echo '<th>Operatore</th><th class="num">' . $h2($pn1) . '</th><th class="num">' . $h2($pn2) . '</th>';
+        echo '<th class="num">Tot. ' . $h2($pn1) . '</th><th class="num">Tot. ' . $h2($pn2) . '</th><th class="num">Totale</th>';
         echo '</tr></thead><tbody>';
         foreach ($opStats as $op) {
             $totM    = (float)$op['n_mattino'] * $prezzoMattino;
@@ -393,9 +403,10 @@ tr:nth-child(even) td{background:#fafbff}
       </div>
 
       <!-- Slot mattino -->
-      <?php $canAddM = is_responsabile() || (!$slotM && $opPuoModificare); ?>
+      <?php $canAddM = is_responsabile() || (!$slotM && $opPuoModificare);
+            $tagM = mb_strtoupper(mb_substr($turns[1]['nome'] ?? 'M', 0, 1, 'UTF-8'), 'UTF-8'); ?>
       <div class="tp-slot <?= $slotM ? ($slotM['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
-        <span class="tp-slot-tag">M</span>
+        <span class="tp-slot-tag"><?= $tagM ?></span>
         <?php if ($slotM): ?>
           <span class="tp-slot-name"><?= $h($slotM['nome']) ?></span>
           <?php if (is_responsabile()): ?>
@@ -411,7 +422,7 @@ tr:nth-child(even) td{background:#fafbff}
           <?php if (is_responsabile()): ?>
           <button type="button" class="tp-slot-add"
                   data-data="<?= $h($dc) ?>" data-n="1"
-                  data-label="Mattino <?= $g ?>/<?= $mese ?>">+</button>
+                  data-label="<?= $h($turns[1]['nome'] ?? 'Turno 1') ?> <?= $g ?>/<?= $mese ?>">+</button>
           <?php else: ?>
           <form method="post" class="tp-del-form">
             <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
@@ -427,9 +438,10 @@ tr:nth-child(even) td{background:#fafbff}
       </div>
 
       <!-- Slot sera -->
-      <?php $canAddS = is_responsabile() || (!$slotS && $opPuoModificare); ?>
+      <?php $canAddS = is_responsabile() || (!$slotS && $opPuoModificare);
+            $tagS = mb_strtoupper(mb_substr($turns[2]['nome'] ?? 'S', 0, 1, 'UTF-8'), 'UTF-8'); ?>
       <div class="tp-slot <?= $slotS ? ($slotS['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
-        <span class="tp-slot-tag">S</span>
+        <span class="tp-slot-tag"><?= $tagS ?></span>
         <?php if ($slotS): ?>
           <span class="tp-slot-name"><?= $h($slotS['nome']) ?></span>
           <?php if (is_responsabile()): ?>
@@ -445,7 +457,7 @@ tr:nth-child(even) td{background:#fafbff}
           <?php if (is_responsabile()): ?>
           <button type="button" class="tp-slot-add"
                   data-data="<?= $h($dc) ?>" data-n="2"
-                  data-label="Sera <?= $g ?>/<?= $mese ?>">+</button>
+                  data-label="<?= $h($turns[2]['nome'] ?? 'Turno 2') ?> <?= $g ?>/<?= $mese ?>">+</button>
           <?php else: ?>
           <form method="post" class="tp-del-form">
             <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
@@ -467,7 +479,7 @@ tr:nth-child(even) td{background:#fafbff}
     <span class="tp-legenda-item tp-slot-mine">I miei turni</span>
     <span class="tp-legenda-item tp-slot-other">Altri operatori</span>
     <span class="tp-legenda-item tp-slot-empty">Non assegnato</span>
-    <span class="tp-legenda-price">Mattino <?= $h($nv($prezzoMattino)) ?> € · Sera <?= $h($nv($prezzoSera)) ?> €</span>
+    <span class="tp-legenda-price"><?= $h($turns[1]['nome'] ?? 'Mattino') ?> <?= $h($nv($prezzoMattino)) ?> € · <?= $h($turns[2]['nome'] ?? 'Sera') ?> <?= $h($nv($prezzoSera)) ?> €</span>
   </div>
 
 </section>
@@ -476,7 +488,8 @@ tr:nth-child(even) td{background:#fafbff}
 <aside class="tp-right">
 
 <?php
-$labels  = [1 => 'Mattino', 2 => 'Sera'];
+$labels = [];
+foreach ($turns as $n => $t) $labels[$n] = $t['nome'];
 $passati = array_values(array_filter($miei_turni, fn($t) => $t['data'] <= $oggi));
 $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi));
 ?>
@@ -489,8 +502,14 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
             ? 'me'
             : $turniOggi[$nCorrente]['nome'];
     }
-    $labelTurno = $nCorrente === 1 ? 'Mattino (13:00 – 19:00)'
-                : ($nCorrente === 2 ? 'Sera (19:00 – 01:00)' : null);
+    $labelTurno = null;
+    if ($nCorrente !== null && isset($turns[$nCorrente])) {
+        $tc = $turns[$nCorrente];
+        $labelTurno = $tc['nome'];
+        if (!empty($tc['inizio']) || !empty($tc['fine'])) {
+            $labelTurno .= ' (' . ($tc['inizio'] ?? '') . ' – ' . ($tc['fine'] ?? '') . ')';
+        }
+    }
     $turnoGiornaliero = false;
     if ($nCorrente !== null) {
         $stTg = $pdo->prepare(
@@ -539,7 +558,14 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
       <?php endif; ?>
     </div>
     <?php else: ?>
-    <p class="tp-fuori-msg" style="margin:0">Fuori orario turni<br><span class="muted-text" style="font-size:11px">13:00–19:00 mattino · 19:00–01:00 sera</span></p>
+    <?php
+    $orariDesc = implode(' · ', array_map(function($t) {
+        $s = $t['nome'];
+        if (!empty($t['inizio']) || !empty($t['fine'])) $s .= ' ' . ($t['inizio'] ?? '') . '–' . ($t['fine'] ?? '');
+        return $s;
+    }, $turns));
+    ?>
+    <p class="tp-fuori-msg" style="margin:0">Fuori orario turni<br><span class="muted-text" style="font-size:11px"><?= $h($orariDesc) ?></span></p>
     <?php endif; ?>
   </div>
 </details>
@@ -585,11 +611,13 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
     <?php if ($passati): ?>
     <div class="recent-list">
     <?php foreach (array_reverse($passati) as $mt):
-        $n = (int)$mt['numero']; ?>
+        $n = (int)$mt['numero'];
+        $tc = $turns[$n] ?? null;
+        $orariT = $tc && (!empty($tc['inizio']) || !empty($tc['fine'])) ? ($tc['inizio'] ?? '') . '–' . ($tc['fine'] ?? '') : ''; ?>
       <div class="recent-row">
         <span class="recent-date"><?= $h(date('d/m', strtotime($mt['data']))) ?></span>
-        <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $labels[$n] ?></span>
-        <span class="muted-text" style="font-size:11px"><?= $n === 1 ? '13–19' : '19–01' ?></span>
+        <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $h($labels[$n] ?? 'Turno '.$n) ?></span>
+        <?php if ($orariT): ?><span class="muted-text" style="font-size:11px"><?= $h($orariT) ?></span><?php endif; ?>
         <span class="tp-earn"><?= $h($nv($mt['prezzo'])) ?> €</span>
       </div>
     <?php endforeach; ?>
@@ -607,11 +635,13 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
     <?php if ($futuri): ?>
     <div class="recent-list">
     <?php foreach ($futuri as $mt):
-        $n = (int)$mt['numero']; ?>
+        $n = (int)$mt['numero'];
+        $tc = $turns[$n] ?? null;
+        $orariT = $tc && (!empty($tc['inizio']) || !empty($tc['fine'])) ? ($tc['inizio'] ?? '') . '–' . ($tc['fine'] ?? '') : ''; ?>
       <div class="recent-row">
         <span class="recent-date"><?= $h(date('d/m', strtotime($mt['data']))) ?></span>
-        <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $labels[$n] ?></span>
-        <span class="muted-text" style="font-size:11px"><?= $n === 1 ? '13–19' : '19–01' ?></span>
+        <span class="tp-tipo-badge tp-tipo-<?= $n === 1 ? 'matt' : 'sera' ?>"><?= $h($labels[$n] ?? 'Turno '.$n) ?></span>
+        <?php if ($orariT): ?><span class="muted-text" style="font-size:11px"><?= $h($orariT) ?></span><?php endif; ?>
         <span class="tp-earn tp-earn-preview"><?= $h($nv($mt['prezzo'])) ?> €</span>
       </div>
     <?php endforeach; ?>

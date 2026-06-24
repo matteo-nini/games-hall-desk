@@ -216,3 +216,100 @@
   font-size: 11px;
   padding: 4px 10px;
 }
+
+/* ============================================================
+   Fornitori
+   ============================================================ */
+
+.forn-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px
+}
+
+.forn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  padding: 8px 12px;
+  transition: background .1s
+}
+
+.forn-row:hover {
+  background: var(--surface3)
+}
+
+.forn-off {
+  opacity: .5
+}
+
+.forn-handle {
+  cursor: grab;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 4px 2px
+}
+
+.forn-handle:active {
+  cursor: grabbing
+}
+
+.forn-rinomina-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1
+}
+
+.forn-name-input {
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text);
+  width: 140px;
+  text-transform: uppercase;
+  min-height: 36px
+}
+
+.forn-name-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px
+}
+
+.forn-toggle-form {
+  margin-left: auto
+}
+
+.forn-btn-sm {
+  font-size: 12px;
+  padding: 6px 12px;
+  min-height: 36px;
+  white-space: nowrap
+}
+
+.forn-toggle-on {
+  color: var(--green);
+  border-color: var(--green-bd)
+}
+
+.forn-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center
+}
+
+.forn-add-row input[type=text] {
+  flex: 1;
+  max-width: 240px
+}

@@ -1493,6 +1493,73 @@ textarea.note:focus {
   }
 }
 
+/* Tab hours label */
+.tab-hours {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .2px
+}
+
+.tab.active .tab-hours {
+  color: var(--muted)
+}
+
+.tab.active.sera .tab-hours {
+  color: var(--accent)
+}
+
+.tab.active.matt .tab-hours {
+  color: var(--amber)
+}
+
+/* Alert giornata precedente aperta */
+.prev-day-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 24px 0;
+  padding: 10px 14px;
+  background: var(--amber-bg);
+  color: var(--amber-ink);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--rs);
+  font-size: 13px
+}
+
+.pda-ico {
+  flex-shrink: 0;
+  color: var(--amber)
+}
+
+.pda-text {
+  flex: 1;
+  line-height: 1.4
+}
+
+.pda-link {
+  color: var(--amber-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
+  flex-shrink: 0
+}
+
+.pda-link:hover {
+  text-decoration: none
+}
+
+@media (max-width: 560px) {
+  .prev-day-alert {
+    flex-wrap: wrap;
+    gap: 6px
+  }
+  .pda-link {
+    margin-left: 26px
+  }
+}
+
 /* Auto-save indicator */
 .as-ind {
   font-size: 11px;
