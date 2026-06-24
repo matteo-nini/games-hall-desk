@@ -66,6 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'sala') {
+        $nuovoNome = mb_substr(trim($_POST['nome_sala'] ?? ''), 0, 100);
+        if ($nuovoNome !== '') {
+            $cfgFile = dirname(__DIR__, 2) . '/install/config.php';
+            $cfgData = config();
+            $cfgData['nome_sala'] = $nuovoNome;
+            file_put_contents($cfgFile, "<?php\nreturn " . var_export($cfgData, true) . ";\n");
+            audit('impostazioni_sala', null, null, "nome_sala=$nuovoNome");
+        }
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     if ($az === 'retention') {
         $rd = max(7, min(3650, (int)($_POST['retention_giorni'] ?? 90)));
         $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
@@ -111,6 +123,32 @@ $ps = $prezzi['sera']    ?? 70.0;
 <?php else: ?>
 
 <div class="imp-page">
+
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h16M4 18V8l6-5 6 5v10M8 18v-5h4v5"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Nome sala</h2>
+        <p class="imp-card-desc">Appare nell'intestazione, nel favicon, nella PWA e ovunque venga richiesto il nome della sala.</p>
+      </div>
+    </div>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="sala">
+      <div class="imp-price-row" style="grid-template-columns:1fr">
+        <div class="imp-field">
+          <label for="imp-sala">Nome</label>
+          <input id="imp-sala" type="text" name="nome_sala" maxlength="100"
+                 value="<?= $h($cfg['nome_sala'] ?? '') ?>" placeholder="Es. Sala Giochi Roma" required>
+        </div>
+      </div>
+      <div class="imp-form-footer">
+        <button type="submit">Salva nome</button>
+      </div>
+    </form>
+  </section>
 
   <section class="imp-card">
     <div class="imp-card-head">

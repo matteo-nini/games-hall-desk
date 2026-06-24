@@ -29,4 +29,4 @@ INSERT IGNORE INTO prezzi_turni (nome, prezzo) VALUES
   ('sera',    70.00);
 
 -- Timestamp di inizio turno reale (per rilevare turni sovrapposti)
-ALTER TABLE turni ADD COLUMN IF NOT EXISTS iniziato_il DATETIME DEFAULT NULL;
+ALTER TABLE turni ADD COLUMN DATETIME DEFAULT NULL;

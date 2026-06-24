@@ -1,6 +1,6 @@
 <?php
 /**
- * SETUP WIZARD — Installazione iniziale Games Palace Desk.
+ * SETUP WIZARD — Installazione iniziale.
  * Eliminare dal server dopo il completamento.
  */
 session_start();
@@ -10,7 +10,12 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 /* -------- helpers -------- */
 function setup_cfg(): array {
     static $c = null;
-    if ($c === null) $c = require __DIR__ . '/config.php';
+    if ($c === null) {
+        $f = __DIR__ . '/config.php';
+        $c = file_exists($f)
+            ? require $f
+            : ['db' => ['host' => '127.0.0.1', 'name' => '', 'user' => '', 'pass' => '', 'charset' => 'utf8mb4'], 'nome_sala' => ''];
+    }
     return $c;
 }
 
@@ -36,6 +41,8 @@ function setup_run_file(PDO $pdo, string $path): void {
     }
 }
 
+$cfgFile = __DIR__ . '/config.php';
+
 /* -------- guard: già configurato -------- */
 $pdo = setup_pdo();
 if ($pdo) {
@@ -52,11 +59,54 @@ $err  = $_SESSION['setup_err'] ?? '';
 $msg  = $_SESSION['setup_ok']  ?? '';
 unset($_SESSION['setup_err'], $_SESSION['setup_ok']);
 
+/* Se config.php mancante o senza credenziali, torna al passo 1 */
+if (!file_exists($cfgFile) || empty(setup_cfg()['db']['user'])) {
+    if ($step > 1) { $_SESSION['setup_step'] = 1; $step = 1; }
+}
+
+/* ?back=1 — retrocede di un passo */
+if (($_GET['back'] ?? '') === '1' && $step > 1) {
+    $_SESSION['setup_step'] = $step - 1;
+    header('Location: setup.php'); exit;
+}
+
 /* -------- POST handlers -------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['act'] ?? '';
 
-    /* Step 1 — schema */
+    /* Step 1 — connessione database */
+    if ($act === 'dbconfig') {
+        $dbHost = trim($_POST['db_host'] ?? '');
+        $dbName = trim($_POST['db_name'] ?? '');
+        $dbUser = trim($_POST['db_user'] ?? '');
+        $dbPass = $_POST['db_pass'] ?? '';
+        if (!$dbHost || !$dbName || !$dbUser) {
+            $_SESSION['setup_err'] = 'Host, nome database e utente sono obbligatori.';
+        } else {
+            try {
+                $dsn = "mysql:host={$dbHost};charset=utf8mb4";
+                new PDO($dsn, $dbUser, $dbPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                $cfg = [
+                    'db' => [
+                        'host'    => $dbHost,
+                        'name'    => $dbName,
+                        'user'    => $dbUser,
+                        'pass'    => $dbPass,
+                        'charset' => 'utf8mb4',
+                    ],
+                    'nome_sala' => setup_cfg()['nome_sala'] ?? '',
+                ];
+                file_put_contents($cfgFile, "<?php\nreturn " . var_export($cfg, true) . ";\n");
+                $_SESSION['setup_step'] = 2;
+                $_SESSION['setup_ok']   = 'Connessione verificata e configurazione salvata.';
+            } catch (Throwable $e) {
+                $_SESSION['setup_err'] = 'Connessione fallita: ' . $e->getMessage();
+            }
+        }
+        header('Location: setup.php'); exit;
+    }
+
+    /* Step 2 — schema */
     if ($act === 'schema') {
         try {
             $c    = setup_cfg()['db'];
@@ -68,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $path = __DIR__ . "/../sql/{$f}.sql";
                 if (file_exists($path)) setup_run_file($db, $path);
             }
-            $_SESSION['setup_step'] = 2;
+            $_SESSION['setup_step'] = 3;
             $_SESSION['setup_ok']   = 'Database creato e schema installato correttamente.';
         } catch (Throwable $e) {
             $_SESSION['setup_err'] = $e->getMessage();
@@ -76,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: setup.php'); exit;
     }
 
-    /* Step 2 — admin */
+    /* Step 3 — admin */
     if ($act === 'admin') {
         $db   = setup_pdo();
         $nome = trim($_POST['nome']     ?? '');
@@ -96,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $db->prepare('INSERT INTO utenti (username,password_hash,nome,ruolo) VALUES (?,?,?,?)')
                        ->execute([$usr, password_hash($pwd, PASSWORD_DEFAULT), $nome ?: null, 'responsabile']);
-                    $_SESSION['setup_step'] = 3;
+                    $_SESSION['setup_step'] = 4;
                     $_SESSION['setup_ok']   = "Utente responsabile «{$usr}» creato.";
                 }
             } catch (Throwable $e) { $_SESSION['setup_err'] = $e->getMessage(); }
@@ -104,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: setup.php'); exit;
     }
 
-    /* Step 3 — sala & moduli */
+    /* Step 4 — sala & moduli */
     if ($act === 'sala') {
         $db   = setup_pdo();
         $nome = trim($_POST['nome_sala'] ?? '');
@@ -119,25 +169,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ups->execute(['modulo_assistenze', $ass]);
                 $ups->execute(['modulo_prestiti',   $pre]);
                 if ($nome !== '') {
-                    $cfg = require __DIR__ . '/config.php';
+                    $cfg = (function() use ($cfgFile) { return require $cfgFile; })();
                     $cfg['nome_sala'] = $nome;
-                    file_put_contents(__DIR__ . '/config.php',
-                        "<?php\nreturn " . var_export($cfg, true) . ";\n");
+                    file_put_contents($cfgFile, "<?php\nreturn " . var_export($cfg, true) . ";\n");
                 }
-                $_SESSION['setup_step'] = 4;
+                $_SESSION['setup_step'] = 5;
                 $_SESSION['setup_ok']   = 'Configurazione sala salvata.';
             } catch (Throwable $e) { $_SESSION['setup_err'] = $e->getMessage(); }
         }
         header('Location: setup.php'); exit;
     }
 
-    /* Step 4 — macchine */
+    /* Step 5 — macchine */
     if ($act === 'macchine') {
         $db   = setup_pdo();
         $skip = isset($_POST['salta']);
         if (!$db) { $_SESSION['setup_err'] = 'Database non raggiungibile.'; }
         elseif ($skip) {
-            $_SESSION['setup_step'] = 5;
+            $_SESSION['setup_step'] = 6;
         } else {
             try {
                 $db->exec('DELETE FROM macchine');
@@ -154,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $civ = mb_substr(trim($civs[$i]    ?? ''), 0, 100) ?: null;
                     $ins->execute([$cod, $tipi[$i] ?? 'VLT', $forns[$i] ?? 'NOVO', $ser, $civ, $ord++]);
                 }
-                $_SESSION['setup_step'] = 5;
+                $_SESSION['setup_step'] = 6;
                 $_SESSION['setup_ok']   = 'Macchine salvate.';
             } catch (Throwable $e) { $_SESSION['setup_err'] = $e->getMessage(); }
         }
@@ -162,18 +211,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* Pre-carica macchine per step 4 */
+/* Pre-carica macchine per step 5 */
 $macchineExisting = [];
-if ($step === 4 && ($db = setup_pdo())) {
+if ($step === 5 && ($db = setup_pdo())) {
     try { $macchineExisting = $db->query('SELECT codice,tipo,fornitore,seriale,civ FROM macchine ORDER BY ordine')->fetchAll(); }
     catch (Throwable) {}
 }
 
-$steps = ['Schema DB', 'Utente admin', 'Sala e moduli', 'Macchine', 'Completato'];
+$steps = ['Connessione DB', 'Schema DB', 'Utente admin', 'Sala e moduli', 'Macchine', 'Completato'];
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Setup — Cassa Sala</title>
+<title>Setup</title>
 <link rel="stylesheet" href="../assets/css/core.css">
 <style>
 body { margin: 0; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; background: var(--bg); padding: 40px 16px 60px }
@@ -237,6 +286,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
 /* Config box */
 .sw-cfgbox { background: var(--bg); border: 1px solid var(--border); border-radius: var(--rxs); padding: 14px 16px; font-size: 12px; font-family: monospace; color: var(--muted); margin-bottom: 20px; line-height: 1.7 }
 .sw-cfgbox strong { color: var(--text) }
+.sw-cfgbox a { color: var(--accent); font-family: inherit; font-size: inherit }
 
 /* Machines table */
 .sw-mach-table { width: 100%; border-collapse: collapse; margin-bottom: 10px }
@@ -267,7 +317,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
 <div class="sw-wrap">
 
   <div class="sw-header">
-    <div class="sw-logo">GP Desk</div>
+    <div class="sw-logo">Configurazione</div>
     <div class="sw-sub">Procedura di installazione iniziale</div>
   </div>
 
@@ -297,19 +347,59 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
   <?php if ($msg): ?><div class="sw-ok"><?= $h($msg) ?></div><?php endif; ?>
 
   <!-- ============================================================
-       STEP 1 — Schema DB
+       STEP 1 — Connessione database
        ============================================================ -->
   <?php if ($step === 1): ?>
   <div class="sw-card">
+    <h2>Connessione al database</h2>
+    <p class="sw-desc">Inserisci i parametri MySQL. Le credenziali vengono salvate in <code>install/config.php</code> e utilizzate dall'applicazione.</p>
+    <?php $dbCfg = setup_cfg()['db']; ?>
+    <form method="post">
+      <input type="hidden" name="act" value="dbconfig">
+      <div class="sw-field">
+        <label for="sw-dbhost">Host <span style="color:var(--red)">*</span></label>
+        <input type="text" id="sw-dbhost" name="db_host"
+               value="<?= $h($dbCfg['host'] ?: '127.0.0.1') ?>" placeholder="127.0.0.1" required>
+      </div>
+      <div class="sw-field">
+        <label for="sw-dbname">Nome database <span style="color:var(--red)">*</span></label>
+        <input type="text" id="sw-dbname" name="db_name"
+               value="<?= $h($dbCfg['name']) ?>" placeholder="cassa_sala" required>
+      </div>
+      <div class="sw-field">
+        <label for="sw-dbuser">Utente MySQL <span style="color:var(--red)">*</span></label>
+        <input type="text" id="sw-dbuser" name="db_user"
+               value="<?= $h($dbCfg['user']) ?>" placeholder="root" required autocomplete="username">
+      </div>
+      <div class="sw-field">
+        <label for="sw-dbpass">Password MySQL</label>
+        <input type="password" id="sw-dbpass" name="db_pass"
+               placeholder="(lascia vuoto se assente)" autocomplete="current-password">
+      </div>
+      <div class="sw-actions">
+        <button type="submit" class="sw-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          Testa e continua
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============================================================
+       STEP 2 — Schema DB
+       ============================================================ -->
+  <?php elseif ($step === 2): ?>
+  <div class="sw-card">
     <h2>Installazione database</h2>
-    <p class="sw-desc">Il wizard creerà il database (se non esiste) ed eseguirà tutti i file di schema. Verifica che i parametri in <code>config.php</code> siano corretti prima di procedere.</p>
+    <p class="sw-desc">Il wizard creerà il database (se non esiste) ed eseguirà tutti i file di schema SQL.</p>
 
     <?php $c = setup_cfg()['db']; ?>
     <div class="sw-cfgbox">
       Host: <strong><?= $h($c['host']) ?></strong><br>
       Database: <strong><?= $h($c['name']) ?></strong><br>
       Utente: <strong><?= $h($c['user']) ?></strong><br>
-      Password: <strong><?= $c['pass'] !== '' ? '••••••' : '(vuota)' ?></strong>
+      Password: <strong><?= $c['pass'] !== '' ? '••••••' : '(vuota)' ?></strong><br>
+      <a href="?back=1" style="font-size:11px">Modifica connessione</a>
     </div>
 
     <?php
@@ -317,7 +407,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
     try { setup_connect(); $connOk = true; } catch (Throwable $e) { }
     ?>
     <?php if (!$connOk): ?>
-    <div class="sw-err">Connessione al server MySQL fallita. Controlla host, username e password in <code>config.php</code>.</div>
+    <div class="sw-err">Connessione al server MySQL fallita. <a href="?back=1">Controlla i parametri</a>.</div>
     <?php endif; ?>
 
     <form method="post">
@@ -333,9 +423,9 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
   </div>
 
   <!-- ============================================================
-       STEP 2 — Admin
+       STEP 3 — Admin
        ============================================================ -->
-  <?php elseif ($step === 2): ?>
+  <?php elseif ($step === 3): ?>
   <div class="sw-card">
     <h2>Crea l'utente responsabile</h2>
     <p class="sw-desc">Questo account avrà accesso completo all'applicazione (admin). Potrai aggiungere altri utenti dopo il login.</p>
@@ -364,9 +454,9 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
   </div>
 
   <!-- ============================================================
-       STEP 3 — Sala & moduli
+       STEP 4 — Sala & moduli
        ============================================================ -->
-  <?php elseif ($step === 3): ?>
+  <?php elseif ($step === 4): ?>
   <div class="sw-card">
     <h2>Configurazione sala</h2>
     <p class="sw-desc">Inserisci il nome della sala (compare nell'intestazione) e scegli i moduli da attivare. Puoi modificarli in qualsiasi momento dalle Impostazioni.</p>
@@ -374,7 +464,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
       <input type="hidden" name="act" value="sala">
       <div class="sw-field">
         <label for="sw-sala">Nome sala</label>
-        <?php $curNome = setup_cfg()['nome_sala'] ?? 'Sala VLT'; ?>
+        <?php $curNome = setup_cfg()['nome_sala'] ?? ''; ?>
         <input type="text" id="sw-sala" name="nome_sala" value="<?= $h($curNome) ?>" placeholder="Es. Sala Giochi Roma">
       </div>
 
@@ -402,9 +492,9 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
   </div>
 
   <!-- ============================================================
-       STEP 4 — Macchine
+       STEP 5 — Macchine
        ============================================================ -->
-  <?php elseif ($step === 4): ?>
+  <?php elseif ($step === 5): ?>
   <div class="sw-card">
     <h2>Parco macchine</h2>
     <p class="sw-desc">Inserisci le macchine VLT e AWP presenti in sala. Ogni macchina deve avere un codice univoco (es. NOVO 31, INSPIRED 106). Puoi aggiungere o rimuovere macchine in qualsiasi momento dalla sezione <strong>Macchine</strong> dopo il login.</p>
@@ -469,9 +559,9 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
   </div>
 
   <!-- ============================================================
-       STEP 5 — Completato
+       STEP 6 — Completato
        ============================================================ -->
-  <?php elseif ($step >= 5): ?>
+  <?php elseif ($step >= 6): ?>
   <div class="sw-card sw-done">
     <div class="sw-done-icon">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>

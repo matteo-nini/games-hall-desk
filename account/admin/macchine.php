@@ -9,8 +9,8 @@ $msg  = '';
 
 /* Auto-migrazione colonne seriale/civ */
 try {
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS seriale VARCHAR(100) NULL AFTER fornitore');
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN IF NOT EXISTS civ VARCHAR(100) NULL AFTER seriale');
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN seriale VARCHAR(100) NULL AFTER fornitore');
+    $pdo->exec('ALTER TABLE macchine ADD COLUMN civ VARCHAR(100) NULL AFTER seriale');
 } catch (Throwable) {}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
