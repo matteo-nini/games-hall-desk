@@ -4,8 +4,9 @@ function top_menu(array $user): void {
     $role = $user['ruolo'] ?? '';
     $nome = htmlspecialchars($user['nome'] ?: $user['username']);
 
-    $navPdo  = db();
-    $navSett = get_settings($navPdo);
+    $navPdo      = db();
+    $navSett     = get_settings($navPdo);
+    $navNomeSala = $navSett['nome_sala'] ?? (config()['nome_sala'] ?? '');
     $modAssistenze = ($navSett['modulo_assistenze'] ?? '1') === '1';
     $modPrestiti   = ($navSett['modulo_prestiti']   ?? '1') === '1';
 
@@ -71,13 +72,15 @@ function top_menu(array $user): void {
 
     $foto    = $user['foto'] ?? null;
     $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
+    $salaWords   = array_filter(array_slice(preg_split('/\s+/', trim($navNomeSala)), 0, 2));
+    $salaInitials = mb_strtoupper(implode('', array_map(fn($w) => mb_substr($w, 0, 1, 'UTF-8'), $salaWords)), 'UTF-8') ?: 'CS';
 ?>
 <link rel="stylesheet" href="<?= asset_url('assets/css/ob-banners.css') ?>">
 <aside class="sidebar" id="sidebar" data-role="<?= htmlspecialchars($role) ?>" aria-label="Navigazione principale">
 
   <div class="sb-head">
-    <span class="sb-logo" aria-hidden="true">GP</span>
-    <span class="sb-title">Games Palace</span>
+    <span class="sb-logo" aria-hidden="true"><?= htmlspecialchars($salaInitials) ?></span>
+    <span class="sb-title"><?= htmlspecialchars($navNomeSala ?: 'Sala') ?></span>
     <button class="sb-collapse-btn" id="sb-collapse" type="button" title="Comprimi/Espandi menu" aria-label="Comprimi menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
@@ -146,9 +149,16 @@ function top_menu(array $user): void {
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
 <script src="<?= asset_url('assets/js/sidebar.js') ?>"></script>
-<script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';</script>
+<script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';window.GP_SALA='<?= addslashes($navNomeSala) ?>';</script>
 <script src="<?= asset_url('assets/js/ob-banners.js') ?>" defer></script>
 <script src="<?= asset_url('assets/js/toast.js') ?>" defer></script>
-<script>(function(){var l=document.createElement('link');l.rel='manifest';l.href='<?= addslashes(base_url('manifest.php')) ?>';document.head.appendChild(l);var m=document.createElement('meta');m.name='theme-color';m.content='#2563eb';document.head.appendChild(m);if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');})()</script>
+<script>(function(){
+  var fl=document.createElement('link');fl.rel='icon';fl.type='image/svg+xml';fl.href='<?= addslashes(base_url('favicon.php')) ?>';document.head.appendChild(fl);
+  var sn='<?= addslashes($navNomeSala) ?>';
+  if(sn && document.title && document.title.indexOf(sn)===-1) document.title=document.title+' · '+sn;
+  var l=document.createElement('link');l.rel='manifest';l.href='<?= addslashes(base_url('manifest.php')) ?>';document.head.appendChild(l);
+  var m=document.createElement('meta');m.name='theme-color';m.content='#2563eb';document.head.appendChild(m);
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');
+})()</script>
 <?php
 }

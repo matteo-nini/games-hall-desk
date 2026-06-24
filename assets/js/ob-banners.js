@@ -108,7 +108,7 @@
   /* ── First-run wizard ────────────────────────────────────── */
   var WIZARD_STEPS = [
     {
-      title: 'Benvenuto in Games Palace',
+      title: 'Benvenuto' + (window.GP_SALA ? ' in ' + window.GP_SALA : ''),
       body: 'Questo assistente ti guida nella configurazione iniziale della sala. Bastano pochi minuti.',
       next: 'Inizia'
     },
@@ -159,7 +159,7 @@
     dlg.innerHTML =
       '<div class="ob-wiz-step">' +
         '<div class="ob-wiz-num">Passo ' + (idx + 1) + ' di ' + WIZARD_STEPS.length + '</div>' +
-        (idx === 0 ? '<div class="ob-wiz-icon" aria-hidden="true">GP</div>' : '') +
+        (idx === 0 ? '<div class="ob-wiz-icon" aria-hidden="true">' + ((window.GP_SALA||'').replace(/\s+/g,' ').trim().split(' ').slice(0,2).map(function(w){return w.charAt(0).toUpperCase();}).join('')||'CS') + '</div>' : '') +
         '<h2>' + s.title + '</h2>' +
         '<p>' + s.body + '</p>' +
         '<div class="ob-wiz-actions">' +

@@ -138,7 +138,7 @@ function render_403(string $msg = 'Non hai i permessi per accedere a questa pagi
     <a href="javascript:history.back()" class="err-back err-back-ghost">&#8592; Indietro</a>
     <a href="' . $pre . 'index.php" class="err-back">Vai alla home</a>
   </div>
-  <p class="err-brand">Games Palace · Gestione cassa</p>
+  <p class="err-brand">' . htmlspecialchars(function_exists('config') ? (config()['nome_sala'] ?? 'Cassa Sala') : 'Cassa Sala') . ' · Gestione cassa</p>
 </div>
 </body></html>';
     exit;

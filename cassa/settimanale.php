@@ -208,7 +208,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     </span>
     <a class="settimana-nav-btn" href="?anno=<?= $nextSett['anno'] ?>&mese=<?= $nextSett['mese'] ?>&sett=<?= $nextSett['sett'] ?>" title="Settimana successiva">&#8594;</a>
   </div>
-  <div style="display:flex;gap:6px;align-items:center">
+  <div class="sett-topbar-actions">
     <!-- Selezione rapida settimana del mese -->
     <?php for ($s = 1; $s <= $numSettimane; $s++):
         $ds = ($s-1)*7+1; $de = min($s*7,$giorniMese); ?>
@@ -234,7 +234,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $vers    = $ri['versamento'];
     $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
-  <section class="turno t1" style="flex-basis:320px">
+  <section class="turno t1">
     <h2><?= $h($nomiGiorniBr[(int)date('w', strtotime($d))] . ' ' . date('d/m', strtotime($d))) ?></h2>
     <table class="grid">
       <tr><th>Fornitore</th><th>Giocato</th><th>Pagato</th><th>Inserito</th><th>Payout</th></tr>
@@ -262,10 +262,10 @@ if (($_GET['export'] ?? '') === 'csv') {
   </section>
 <?php endforeach; ?>
 </div>
-<?php if (!is_revisore()): ?><div class="actions"><button type="submit">Salva settimana</button></div><?php endif; ?>
+<?php if (!is_revisore()): ?><div class="actions sett-save"><button type="submit">Salva settimana</button></div><?php endif; ?>
 </form>
 
-<div class="riepilogo" style="max-width:640px">
+<div class="riepilogo riepilogo-main">
   <h3>Totali settimana <?= $sett ?> (<?= $dayStart ?>&ndash;<?= $dayEnd ?> <?= $h($nomiMesi[$mese]) ?>)</h3>
   <table class="grid">
     <tr><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Inserito</th><th class="rt">Payout</th><th class="rt">G/Ins</th></tr>

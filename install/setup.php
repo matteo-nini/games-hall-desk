@@ -173,7 +173,7 @@ $steps = ['Schema DB', 'Utente admin', 'Sala e moduli', 'Macchine', 'Completato'
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Setup — Games Palace Desk</title>
+<title>Setup — Cassa Sala</title>
 <link rel="stylesheet" href="../assets/css/core.css">
 <style>
 body { margin: 0; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; background: var(--bg); padding: 40px 16px 60px }
@@ -477,7 +477,7 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
     </div>
     <h2>Setup completato!</h2>
-    <p class="sw-desc">Games Palace Desk è pronto all'uso. Accedi con le credenziali del responsabile appena creato.</p>
+    <p class="sw-desc">Il sistema è pronto all'uso. Accedi con le credenziali del responsabile appena creato.</p>
 
     <div class="sw-done-warn">
       <strong>⚠ Elimina setup.php dal server</strong>

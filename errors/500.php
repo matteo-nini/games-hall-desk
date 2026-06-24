@@ -1,4 +1,8 @@
-<?php http_response_code(500); ?>
+<?php
+require_once __DIR__ . '/../includes/lib.php';
+http_response_code(500);
+$_errNomeSala = config()['nome_sala'] ?? 'Cassa Sala';
+?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>500 — Errore del server</title>
@@ -16,6 +20,6 @@
     <a href="javascript:history.back()" class="err-back err-back-ghost">← Indietro</a>
     <a href="../index.php" class="err-back">Vai alla home</a>
   </div>
-  <p class="err-brand">Games Palace · Gestione cassa</p>
+  <p class="err-brand"><?= htmlspecialchars($_errNomeSala) ?> · Gestione cassa</p>
 </div>
 </body></html>

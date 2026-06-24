@@ -19,6 +19,6 @@ http_response_code(404);
     <a href="javascript:history.back()" class="err-back err-back-ghost">&#8592; Indietro</a>
     <a href="<?= base_url('index.php') ?>" class="err-back">Vai alla home</a>
   </div>
-  <p class="err-brand">Games Palace · Gestione cassa</p>
+  <p class="err-brand"><?= htmlspecialchars(config()['nome_sala'] ?? 'Cassa Sala') ?> · Gestione cassa</p>
 </div>
 </body></html>

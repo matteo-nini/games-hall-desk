@@ -102,6 +102,21 @@
   grid-template-columns: 1.6fr 1fr
 }
 
+/* Responsabile: charts + sessions side-by-side */
+.resp-cols {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: start
+}
+
+.resp-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px
+}
+
 .muted-text { color: var(--muted) }
 .ok-text    { color: var(--green-ink) }
 
@@ -226,6 +241,10 @@
   border-color: transparent
 }
 
+
+@media (max-width: 900px) {
+  .resp-cols { grid-template-columns: 1fr }
+}
 
 @media (max-width: 760px) {
   .dash-grid { grid-template-columns: 1fr }
