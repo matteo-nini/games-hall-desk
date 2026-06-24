@@ -1,6 +1,8 @@
 <?php
-date_default_timezone_set('Europe/Rome');
-// Connessione PDO condivisa.
+$_tz_cfg = file_exists(__DIR__ . '/../install/config.php') ? (require __DIR__ . '/../install/config.php') : [];
+date_default_timezone_set($_tz_cfg['timezone'] ?? 'Europe/Rome');
+unset($_tz_cfg);
+
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {

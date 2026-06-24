@@ -42,6 +42,7 @@ $nextSett = $sett < $numSettimane
         ? ['anno' => $anno,   'mese' => $mese + 1, 'sett' => 1]
         : ['anno' => $anno+1, 'mese' => 1,         'sett' => 1]);
 
+$fornitori   = get_fornitori($pdo);
 $nomiMesi    = nomi_mesi();
 $nomiGiorniBr = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 
@@ -56,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_revisore()) {
     $pdo->beginTransaction();
     foreach (($_POST['bw'] ?? []) as $data => $forn) {
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) continue;
-        foreach (fornitori() as $f) {
+        foreach ($fornitori as $f) {
             $g = $num($forn[$f]['giocato'] ?? 0);
             $p = $num($forn[$f]['pagato'] ?? 0);
             $up->execute([$data, $f, $g, $p]);
@@ -72,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_revisore()) {
    ========================================================= */
 $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => ($v == 0 ? '' : rtrim(rtrim(number_format((float)$v, 2, '.', ''), '0'), '.'));
-$tot     = array_fill_keys(fornitori(), ['g' => 0, 'p' => 0, 'i' => 0]);
+$tot     = array_fill_keys($fornitori, ['g' => 0, 'p' => 0, 'i' => 0]);
 $tot_banc   = 0;
 $tot_vers   = 0;
 $tot_ticket = 0;
@@ -81,7 +82,7 @@ foreach ($giorni as $d) {
     $bw  = betwin_giorno($pdo, $d);
     $ri  = riepilogo_giornata($pdo, $d);
     $rows[$d] = ['bw' => $bw, 'ri' => $ri];
-    foreach (fornitori() as $f) {
+    foreach ($fornitori as $f) {
         $tot[$f]['g'] += $bw[$f]['giocato'];
         $tot[$f]['p'] += $bw[$f]['pagato'];
         $tot[$f]['i'] += $ri['scass'][$f];
@@ -231,7 +232,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $bw  = $rows[$d]['bw'];
     $ri  = $rows[$d]['ri'];
     $dg  = 0; $dp = 0;
-    foreach (fornitori() as $f) { $dg += $bw[$f]['giocato']; $dp += $bw[$f]['pagato']; }
+    foreach ($fornitori as $f) { $dg += $bw[$f]['giocato']; $dp += $bw[$f]['pagato']; }
     $ricavo  = $dg - $dp;
     $vers    = $ri['versamento'];
     $cassa   = $ri['bancomat'] + $vers;
@@ -240,7 +241,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     <h2><?= $h($nomiGiorniBr[(int)date('w', strtotime($d))] . ' ' . date('d/m', strtotime($d))) ?></h2>
     <table class="grid">
       <tr><th>Fornitore</th><th>Giocato</th><th>Pagato</th><th>Inserito</th><th>Payout</th></tr>
-      <?php foreach (fornitori() as $f): $g = $bw[$f]['giocato']; $p = $bw[$f]['pagato']; $ins = $ri['scass'][$f]; ?>
+      <?php foreach ($fornitori as $f): $g = $bw[$f]['giocato']; $p = $bw[$f]['pagato']; $ins = $ri['scass'][$f]; ?>
       <tr><td><?= $f ?></td>
         <?php if (!is_revisore()): ?>
         <td><input type="number" step="0.01" name="bw[<?= $d ?>][<?= $f ?>][giocato]" value="<?= $h($nv($g)) ?>"></td>
@@ -271,7 +272,7 @@ if (($_GET['export'] ?? '') === 'csv') {
   <h3>Totali settimana <?= $sett ?> (<?= $dayStart ?>&ndash;<?= $dayEnd ?> <?= $h($nomiMesi[$mese]) ?>)</h3>
   <table class="grid">
     <tr><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Inserito</th><th class="rt">Payout</th><th class="rt">G/Ins</th></tr>
-    <?php foreach (fornitori() as $f): ?>
+    <?php foreach ($fornitori as $f): ?>
     <tr><td><?= $f ?></td><td class="rt"><?= eur($tot[$f]['g']) ?></td><td class="rt"><?= eur($tot[$f]['p']) ?></td>
         <td class="rt"><?= eur($tot[$f]['i']) ?></td><td class="rt"><?= $pct($tot[$f]['p'], $tot[$f]['g']) ?></td>
         <td class="rt"><?= $tot[$f]['i'] > 0 ? number_format($tot[$f]['g'] / $tot[$f]['i'], 2, ',', '.') : '—' ?></td></tr>

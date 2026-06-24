@@ -1,6 +1,7 @@
 var ICO_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
 var ICO_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>';
-var ACTIVE=parseInt(localStorage.getItem('gp_tab'))||2, RES={};
+var GP_SUPPLIERS=GP_SUPPLIERS||{}, GP_LAST_TURN=GP_LAST_TURN||2, GP_TURNS=GP_TURNS||[];
+var ACTIVE=parseInt(localStorage.getItem('gp_tab'))||GP_LAST_TURN, RES={};
 function eur(v){v=Math.round(v*100)/100; if(Object.is(v,-0))v=0; return v.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function num(el){var v=parseFloat((el.value||'').toString().replace(',','.'));return isNaN(v)?0:v;}
 function recalcTurno(sec){
@@ -27,12 +28,12 @@ function recalcTurno(sec){
 }
 function updateActive(){
   var r=RES[ACTIVE]; if(!r)return;
-  var abs=Math.abs(r.scost), sera=(ACTIVE===2);
+  var abs=Math.abs(r.scost), isLast=(ACTIVE===GP_LAST_TURN);
   var isGood=abs<4, isMid=abs>=4&&abs<=5, isBad=abs>5;
   var vd=document.getElementById('hm-scost');
   vd.classList.toggle('ok',isGood); vd.classList.toggle('warn',isMid); vd.classList.toggle('bad',isBad);
   document.getElementById('v-ico').innerHTML=isGood?ICO_OK:ICO_WARN;
-  document.getElementById('v-big').textContent=sera?(isGood?'I conti tornano':'Scostamento da verificare'):(isGood?'Controllo: torna':'Controllo: scostamento');
+  document.getElementById('v-big').textContent=isLast?(isGood?'I conti tornano':'Scostamento da verificare'):(isGood?'Controllo: torna':'Controllo: scostamento');
   document.getElementById('m-scost').textContent=(r.scost>=0?'+':'')+eur(r.scost);
   document.getElementById('v-tot').textContent='€ '+eur(r.totale);
   document.getElementById('v-fondo').textContent='€ '+eur(r.fondo);
@@ -46,11 +47,14 @@ function updateActive(){
   el=document.getElementById('m-versamento'); if(el) el.textContent='€ '+eur(r.vers_cassa);
 }
 function recalcAll(){
-  var g={bancomat:0,versamento:0,ticket:0,incasso:0,NOVO:0,INSPIRED:0,SPIELO:0};
+  var g={bancomat:0,versamento:0,ticket:0,incasso:0};
+  for(var sid in GP_SUPPLIERS) g[sid]=0;
+  var nameToId={};
+  for(var sid in GP_SUPPLIERS) nameToId[GP_SUPPLIERS[sid]]=sid;
   document.querySelectorAll('.turno').forEach(function(sec){
     var n=+sec.dataset.turno, r=recalcTurno(sec); RES[n]=r;
     g.bancomat+=r.bancomat;g.versamento+=r.versamento;g.ticket+=r.ticket;g.incasso+=r.incasso;
-    for(var k in r.forn){if(g[k]!==undefined)g[k]+=r.forn[k];}
+    for(var k in r.forn){var sid=nameToId[k];if(sid!==undefined)g[sid]+=r.forn[k];}
   });
   for(var k in g){var e=document.getElementById('g-'+k);if(e)e.textContent=eur(g[k]);}
   updateActive();

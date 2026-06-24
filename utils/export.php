@@ -39,13 +39,14 @@ $w(["Bet/Win SNAI per fornitore"]);
 $w(['Fornitore','Giocato','Pagato','Ricavo','Inserito']);
 $primo = sprintf('%04d-%02d-01',$anno,$mese);
 $ultimo= sprintf('%04d-%02d-%02d',$anno,$mese,$ngiorni);
-$bw = []; foreach (fornitori() as $f) $bw[$f]=['g'=>0.0,'p'=>0.0];
+$fornitori = get_fornitori($pdo);
+$bw = array_fill_keys($fornitori, ['g'=>0.0,'p'=>0.0]);
 $st = $pdo->prepare('SELECT fornitore,SUM(giocato) g,SUM(pagato) p FROM snai_betwin WHERE data BETWEEN ? AND ? GROUP BY fornitore');
 $st->execute([$primo,$ultimo]);
-foreach ($st as $row) $bw[$row['fornitore']]=['g'=>(float)$row['g'],'p'=>(float)$row['p']];
-$ins=['NOVO'=>0.0,'INSPIRED'=>0.0,'SPIELO'=>0.0];
-for ($d=1;$d<=$ngiorni;$d++){ $r=riepilogo_giornata($pdo,sprintf('%04d-%02d-%02d',$anno,$mese,$d)); foreach(fornitori() as $f) $ins[$f]+=$r['scass'][$f]; }
-foreach (fornitori() as $f){
+foreach ($st as $row) if (isset($bw[$row['fornitore']])) $bw[$row['fornitore']]=['g'=>(float)$row['g'],'p'=>(float)$row['p']];
+$ins = array_fill_keys($fornitori, 0.0);
+for ($d=1;$d<=$ngiorni;$d++){ $r=riepilogo_giornata($pdo,sprintf('%04d-%02d-%02d',$anno,$mese,$d)); foreach($fornitori as $f) $ins[$f]+=$r['scass'][$f]??0; }
+foreach ($fornitori as $f){
     $w([$f,(float)$bw[$f]['g'],(float)$bw[$f]['p'],(float)($bw[$f]['g']-$bw[$f]['p']),(float)$ins[$f]]);
 }
 fclose($out);

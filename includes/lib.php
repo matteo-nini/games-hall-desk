@@ -5,8 +5,52 @@
 //  ricalcolo live; QUESTA versione lato server e' la fonte di verita'.
 // =====================================================================
 
-function fornitori(): array { return ['NOVO', 'INSPIRED', 'SPIELO']; }
-function tagli(): array     { return [5, 10, 20, 50, 100, 200, 500]; }
+function tagli(): array { return [5, 10, 20, 50, 100, 200, 500]; }
+
+/**
+ * Fornitori attivi, letti dalla tabella DB con fallback ai 3 fornitori
+ * predefiniti. In questo modo le installazioni senza la tabella fornitori
+ * (o senza la migration) continuano a funzionare.
+ */
+function get_fornitori(PDO $pdo): array {
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    try {
+        $rows  = $pdo->query('SELECT nome FROM fornitori WHERE attiva=1 ORDER BY ordine')->fetchAll(PDO::FETCH_COLUMN);
+        $cache = $rows ?: ['NOVO', 'INSPIRED', 'SPIELO'];
+    } catch (Throwable) {
+        $cache = ['NOVO', 'INSPIRED', 'SPIELO'];
+    }
+    return $cache;
+}
+
+/**
+ * Turni configurati. Legge num_turni e turno_N_* dalle impostazioni.
+ * Backward compat: se i nuovi tasti non esistono usa turno_mattino_* e turno_sera_*.
+ * Restituisce array indicizzato per numero turno (da 1 a N).
+ */
+function get_turns(array $sett): array {
+    $n = max(1, min(3, (int)($sett['num_turni'] ?? 2)));
+    $compat = [
+        1 => ['inizio' => 'turno_mattino_inizio', 'fine' => 'turno_mattino_fine'],
+        2 => ['inizio' => 'turno_sera_inizio',    'fine' => 'turno_sera_fine'],
+    ];
+    $defaults_nome  = [1 => 'Mattino', 2 => 'Sera', 3 => 'Notte'];
+    $defaults_inizio = [1 => '13:00',  2 => '19:00', 3 => '01:00'];
+    $defaults_fine   = [1 => '19:00',  2 => '01:00', 3 => '09:00'];
+    $turns = [];
+    for ($i = 1; $i <= $n; $i++) {
+        $ik = "turno_{$i}_inizio";
+        $fk = "turno_{$i}_fine";
+        $turns[$i] = [
+            'numero' => $i,
+            'nome'   => $sett["turno_{$i}_nome"] ?? $defaults_nome[$i],
+            'inizio' => $sett[$ik] ?? ($sett[$compat[$i]['inizio'] ?? ''] ?? $defaults_inizio[$i]),
+            'fine'   => $sett[$fk] ?? ($sett[$compat[$i]['fine']   ?? ''] ?? $defaults_fine[$i]),
+        ];
+    }
+    return $turns;
+}
 
 /** Arrotonda il versamento al multiplo di 5 più vicino: su se resto > 2, giù altrimenti. */
 function arrotonda_versamento(float $v): float {
@@ -52,9 +96,9 @@ function calcola_turno(array $t): array {
 
     $cassetto    = $contanti + $refill + $g('differenze') - $g('ii_cassa') - $g('rientri');
     $totale      = $cassetto + $g('monete') + $g('bancomat') + $ticket;
-    $vers_vlt    = $scass - $g('bancomat') - $ticket;          // versamento (incasso VLT)
-    $vers_cassa  = $cassetto + $g('monete') - $g('fondo_cassa'); // versamento (cassa)
-    $errore      = $vers_vlt - $vers_cassa;                     // deve essere 0
+    $vers_vlt    = $scass - $g('bancomat') - $ticket;
+    $vers_cassa  = $cassetto + $g('monete') - $g('fondo_cassa');
+    $errore      = $vers_vlt - $vers_cassa;
 
     return compact('contanti','refill','scass','ticket',
                    'cassetto','totale','vers_vlt','vers_cassa','errore');
@@ -84,32 +128,40 @@ function audit(string $azione, ?string $entita = null, ?int $entita_id = null, ?
 
 /** Somme di un turno: contanti, refill, scass (tot e per fornitore), ticket. */
 function sums_turno(PDO $pdo, int $tid): array {
-    $contanti = 0;
+    $fornitori = get_fornitori($pdo);
+    $contanti  = 0;
     $st = $pdo->prepare('SELECT taglio, pezzi FROM contanti WHERE turno_id=?'); $st->execute([$tid]);
     foreach ($st as $r) $contanti += (int)$r['taglio'] * (int)$r['pezzi'];
 
-    $scass_forn = ['NOVO'=>0.0,'INSPIRED'=>0.0,'SPIELO'=>0.0]; $scass = 0.0;
+    $scass_forn = array_fill_keys($fornitori, 0.0);
+    $scass = 0.0;
     $st = $pdo->prepare('SELECT m.fornitore f, SUM(s.importo) imp
                          FROM scassettamenti s JOIN macchine m ON m.id=s.macchina_id
                          WHERE s.turno_id=? GROUP BY m.fornitore');
     $st->execute([$tid]);
-    foreach ($st as $r) { $scass_forn[$r['f']] = (float)$r['imp']; $scass += (float)$r['imp']; }
+    foreach ($st as $r) {
+        $scass_forn[$r['f']] = (float)$r['imp'];
+        $scass += (float)$r['imp'];
+    }
 
     $st = $pdo->prepare('SELECT COALESCE(SUM(euro),0) v FROM refill_awp WHERE turno_id=?'); $st->execute([$tid]);
     $refill = (float)$st->fetch()['v'];
     $st = $pdo->prepare('SELECT COALESCE(SUM(importo),0) v FROM ticket WHERE turno_id=?'); $st->execute([$tid]);
     $ticket = (float)$st->fetch()['v'];
 
-    return compact('contanti','refill','scass','ticket') + ['scass_forn'=>$scass_forn];
+    return compact('contanti','refill','scass','ticket') + ['scass_forn' => $scass_forn];
 }
 
-/** Riepilogo finanziario di giornata: solo turno sera (numero=2). Il mattino è controllo, non contabilità. */
+/** Riepilogo finanziario di giornata: usa l'ultimo turno disponibile (massimo numero). */
 function riepilogo_giornata(PDO $pdo, string $data): array {
+    $fornitori = get_fornitori($pdo);
     $z = ['bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,'incasso_vlt'=>0.0,
-          'scass'=>['NOVO'=>0.0,'INSPIRED'=>0.0,'SPIELO'=>0.0]];
+          'scass'   => array_fill_keys($fornitori, 0.0)];
     $g = $pdo->prepare('SELECT id FROM giornate WHERE data=?'); $g->execute([$data]); $g = $g->fetch();
     if (!$g) return $z;
-    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? AND numero=2'); $ts->execute([$g['id']]);
+    /* Usa sempre l'ultimo turno del giorno per il riepilogo finanziario */
+    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? ORDER BY numero DESC LIMIT 1');
+    $ts->execute([$g['id']]);
     foreach ($ts as $t) {
         $s = sums_turno($pdo, (int)$t['id']);
         $c = calcola_turno([
@@ -117,21 +169,26 @@ function riepilogo_giornata(PDO $pdo, string $data): array {
             'differenze'=>$t['differenze'],'ii_cassa'=>$t['ii_cassa'],'rientri'=>$t['rientri'],
             'contanti'=>$s['contanti'],'refill'=>$s['refill'],'scass'=>$s['scass'],'ticket'=>$s['ticket'],
         ]);
-        $z['bancomat']   += (float)$t['bancomat'];
-        $z['versamento'] += $c['vers_cassa'];  // vers_cassa = cassetto+monete-fondo, identico alla formula Excel
-        $z['ticket']     += $s['ticket'];
-        $z['incasso_vlt']+= $s['scass'];
-        foreach (['NOVO','INSPIRED','SPIELO'] as $f) $z['scass'][$f] += $s['scass_forn'][$f];
+        $z['bancomat']    += (float)$t['bancomat'];
+        $z['versamento']  += $c['vers_cassa'];
+        $z['ticket']      += $s['ticket'];
+        $z['incasso_vlt'] += $s['scass'];
+        foreach ($fornitori as $f) $z['scass'][$f] += ($s['scass_forn'][$f] ?? 0.0);
     }
     return $z;
 }
 
-/** Bet/win SNAI di un giorno: ['NOVO'=>['giocato'=>..,'pagato'=>..], ...]. */
+/** Bet/win per un giorno: ['NOVO'=>['giocato'=>..,'pagato'=>..], ...]. */
 function betwin_giorno(PDO $pdo, string $data): array {
+    $fornitori = get_fornitori($pdo);
     $out = [];
-    foreach (fornitori() as $f) $out[$f] = ['giocato'=>0.0,'pagato'=>0.0];
+    foreach ($fornitori as $f) $out[$f] = ['giocato'=>0.0,'pagato'=>0.0];
     $st = $pdo->prepare('SELECT fornitore, giocato, pagato FROM snai_betwin WHERE data=?'); $st->execute([$data]);
-    foreach ($st as $r) $out[$r['fornitore']] = ['giocato'=>(float)$r['giocato'],'pagato'=>(float)$r['pagato']];
+    foreach ($st as $r) {
+        if (isset($out[$r['fornitore']])) {
+            $out[$r['fornitore']] = ['giocato'=>(float)$r['giocato'],'pagato'=>(float)$r['pagato']];
+        }
+    }
     return $out;
 }
 

@@ -18,14 +18,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     check_csrf();
     $az = $_POST['azione'] ?? '';
 
-    if ($az === 'orari') {
-        $keys = ['turno_mattino_inizio','turno_mattino_fine','turno_sera_inizio','turno_sera_fine'];
-        $st   = $pdo->prepare('UPDATE impostazioni SET valore=? WHERE chiave=?');
-        foreach ($keys as $k) {
-            $v = trim($_POST[$k] ?? '');
-            if (preg_match('/^\d{1,2}:\d{2}$/', $v)) $st->execute([$v, $k]);
+    if ($az === 'turni') {
+        $n  = max(1, min(3, (int)($_POST['num_turni'] ?? 2)));
+        $st = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $st->execute(['num_turni', (string)$n]);
+        for ($i = 1; $i <= 3; $i++) {
+            $nome  = mb_substr(trim($_POST["turno_{$i}_nome"]   ?? ''), 0, 30) ?: ['Mattino','Sera','Notte'][$i-1];
+            $inizio = trim($_POST["turno_{$i}_inizio"] ?? '');
+            $fine   = trim($_POST["turno_{$i}_fine"]   ?? '');
+            $st->execute(["turno_{$i}_nome",   $nome]);
+            if (preg_match('/^\d{1,2}:\d{2}$/', $inizio)) $st->execute(["turno_{$i}_inizio", $inizio]);
+            if (preg_match('/^\d{1,2}:\d{2}$/', $fine))   $st->execute(["turno_{$i}_fine",   $fine]);
         }
-        audit('impostazioni_orari', null, null, json_encode(array_intersect_key($_POST, array_flip($keys))));
+        /* Mantieni le chiavi legacy in sync per backward compat */
+        $sett_new = get_settings($pdo);
+        $st->execute(['turno_mattino_inizio', $sett_new['turno_1_inizio'] ?? '13:00']);
+        $st->execute(['turno_mattino_fine',   $sett_new['turno_1_fine']   ?? '19:00']);
+        $st->execute(['turno_sera_inizio',    $sett_new['turno_2_inizio'] ?? '19:00']);
+        $st->execute(['turno_sera_fine',      $sett_new['turno_2_fine']   ?? '01:00']);
+        audit('impostazioni_turni', null, null, "num_turni=$n");
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
+    if ($az === 'timezone') {
+        $allowed = DateTimeZone::listIdentifiers();
+        $tz = trim($_POST['timezone'] ?? 'Europe/Rome');
+        if (in_array($tz, $allowed, true)) {
+            $cfgFile = dirname(__DIR__, 2) . '/install/config.php';
+            $cfgData = config();
+            $cfgData['timezone'] = $tz;
+            file_put_contents($cfgFile, "<?php\nreturn " . var_export($cfgData, true) . ";\n");
+            audit('impostazioni_timezone', null, null, $tz);
+        }
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -159,45 +183,103 @@ $ps = $prezzi['sera']    ?? 70.0;
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l2.5 2.5"/></svg>
       </div>
       <div>
-        <h2 class="imp-card-title">Orari turni</h2>
-        <p class="imp-card-desc">Finestre orarie che determinano il turno corrente nella dashboard e nella pagina turni.</p>
+        <h2 class="imp-card-title">Configurazione turni</h2>
+        <p class="imp-card-desc">Numero di turni giornalieri, nome e orari. Usati per il riconoscimento automatico del turno corrente e per la struttura della cassa giornaliera.</p>
+      </div>
+    </div>
+    <?php
+    $turns = get_turns($sett);
+    $numT  = (int)($sett['num_turni'] ?? 2);
+    $dn    = ['Mattino','Sera','Notte'];
+    $di    = ['13:00','19:00','01:00'];
+    $df    = ['19:00','01:00','09:00'];
+    ?>
+    <form method="post" id="frm-turni">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="azione" value="turni">
+      <div class="imp-field" style="margin-bottom:16px">
+        <label for="num-turni">Numero di turni al giorno</label>
+        <select id="num-turni" name="num_turni" onchange="aggiornaRighe(this.value)">
+          <option value="1" <?= $numT===1?'selected':'' ?>>1 — turno unico</option>
+          <option value="2" <?= $numT===2?'selected':'' ?>>2 — mattino e sera</option>
+          <option value="3" <?= $numT===3?'selected':'' ?>>3 — mattino, sera e notte</option>
+        </select>
+      </div>
+      <div class="imp-orari-stack" id="turni-stack">
+      <?php for ($i = 1; $i <= 3; $i++):
+        $t    = $turns[$i] ?? ['nome'=>$dn[$i-1],'inizio'=>$di[$i-1],'fine'=>$df[$i-1]];
+        $vis  = ($i <= $numT) ? '' : ' style="display:none"';
+      ?>
+        <div class="imp-orari-row imp-turno-row" data-idx="<?= $i ?>"<?= $vis ?>>
+          <div class="imp-field" style="min-width:90px">
+            <label for="tn-<?= $i ?>">Nome turno <?= $i ?></label>
+            <input id="tn-<?= $i ?>" type="text" name="turno_<?= $i ?>_nome" value="<?= $h($t['nome']) ?>" maxlength="30" placeholder="<?= $h($dn[$i-1]) ?>">
+          </div>
+          <div class="imp-time-pair">
+            <div class="imp-field">
+              <label for="ti-<?= $i ?>i">Inizio</label>
+              <input id="ti-<?= $i ?>i" type="time" name="turno_<?= $i ?>_inizio" value="<?= $h($t['inizio']) ?>">
+            </div>
+            <span class="imp-sep" aria-hidden="true">—</span>
+            <div class="imp-field">
+              <label for="ti-<?= $i ?>f">Fine</label>
+              <input id="ti-<?= $i ?>f" type="time" name="turno_<?= $i ?>_fine" value="<?= $h($t['fine']) ?>">
+            </div>
+          </div>
+        </div>
+      <?php endfor; ?>
+      </div>
+      <div class="imp-form-footer">
+        <button type="submit">Salva configurazione turni</button>
+      </div>
+    </form>
+    <script>
+    function aggiornaRighe(n) {
+      n = parseInt(n);
+      document.querySelectorAll('.imp-turno-row').forEach(function(r) {
+        r.style.display = parseInt(r.dataset.idx) <= n ? '' : 'none';
+      });
+    }
+    </script>
+  </section>
+
+  <section class="imp-card">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M5 10l3 3 7-7"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Fuso orario</h2>
+        <p class="imp-card-desc">Il fuso orario usato per determinare il turno corrente e le date di chiusura. Cambiarlo richiede un riavvio della sessione PHP per avere effetto immediato.</p>
       </div>
     </div>
     <form method="post">
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="orari">
-      <div class="imp-orari-stack">
-        <div class="imp-orari-row">
-          <span class="imp-orari-lbl">Mattino</span>
-          <div class="imp-time-pair">
-            <div class="imp-field">
-              <label for="ti-mi">Inizio</label>
-              <input id="ti-mi" type="time" name="turno_mattino_inizio" value="<?= $h($sett['turno_mattino_inizio'] ?? '13:00') ?>" required>
-            </div>
-            <span class="imp-sep" aria-hidden="true">—</span>
-            <div class="imp-field">
-              <label for="ti-mf">Fine</label>
-              <input id="ti-mf" type="time" name="turno_mattino_fine" value="<?= $h($sett['turno_mattino_fine'] ?? '19:00') ?>" required>
-            </div>
-          </div>
-        </div>
-        <div class="imp-orari-row">
-          <span class="imp-orari-lbl">Sera</span>
-          <div class="imp-time-pair">
-            <div class="imp-field">
-              <label for="ti-si">Inizio</label>
-              <input id="ti-si" type="time" name="turno_sera_inizio" value="<?= $h($sett['turno_sera_inizio'] ?? '19:00') ?>" required>
-            </div>
-            <span class="imp-sep" aria-hidden="true">—</span>
-            <div class="imp-field">
-              <label for="ti-sf">Fine</label>
-              <input id="ti-sf" type="time" name="turno_sera_fine" value="<?= $h($sett['turno_sera_fine'] ?? '01:00') ?>" required>
-            </div>
-          </div>
-        </div>
+      <input type="hidden" name="azione" value="timezone">
+      <div class="imp-field">
+        <label for="imp-tz">Fuso orario</label>
+        <select id="imp-tz" name="timezone">
+          <?php
+          $curTz = config()['timezone'] ?? 'Europe/Rome';
+          $popular = ['Europe/Rome','Europe/London','Europe/Paris','Europe/Berlin','Europe/Madrid',
+                      'America/New_York','America/Los_Angeles','America/Chicago','America/Sao_Paulo',
+                      'Asia/Dubai','Asia/Tokyo','Australia/Sydney','Pacific/Auckland'];
+          $allTz   = DateTimeZone::listIdentifiers();
+          ?>
+          <optgroup label="Comuni">
+          <?php foreach ($popular as $tz): ?>
+            <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
+          <?php endforeach; ?>
+          </optgroup>
+          <optgroup label="Tutti">
+          <?php foreach ($allTz as $tz): if (in_array($tz, $popular, true)) continue; ?>
+            <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
+          <?php endforeach; ?>
+          </optgroup>
+        </select>
       </div>
       <div class="imp-form-footer">
-        <button type="submit">Salva orari</button>
+        <button type="submit">Salva fuso orario</button>
       </div>
     </form>
   </section>

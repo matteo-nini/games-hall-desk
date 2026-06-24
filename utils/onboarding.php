@@ -144,7 +144,8 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <h3>Configurazione iniziale</h3>
           <p>Prima di avviare le operazioni, accedi a <strong>Impostazioni</strong> e configura:</p>
           <ul>
-            <li><strong>Orari turni</strong>: definisci le fasce orarie di mattino e sera per il riconoscimento automatico del turno corrente.</li>
+            <li><strong>Turni</strong>: scegli quanti turni al giorno (1–3), personalizza il nome (es. Mattino / Sera / Notte) e gli orari di inizio e fine per il riconoscimento automatico del turno corrente.</li>
+            <li><strong>Fuso orario</strong>: seleziona il timezone della sala — importante per le sale fuori dall'Italia.</li>
             <li><strong>Costo turni</strong>: importo corrisposto per turno, visibile nel riepilogo guadagni degli operatori.</li>
             <li><strong>Permessi</strong>: scegli se gli operatori possono modificare solo il proprio turno o qualsiasi turno (utile per correzioni e inserimento storico); scegli se possono modificare il calendario turni programmati.</li>
             <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza e Prestiti secondo le necessità della sala.</li>
@@ -161,7 +162,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <ul>
             <li><strong>Codice</strong>: identificativo univoco (es. VLT01, AWP03).</li>
             <li><strong>Tipo</strong>: VLT (videolottery) o AWP (slot da bar).</li>
-            <li><strong>Fornitore</strong>: usato per raggruppare scassettamenti e ticket.</li>
+            <li><strong>Fornitore</strong>: usato per raggruppare scassettamenti e ticket. Configura i fornitori disponibili dalla sezione <a href="<?= base_url('account/admin/fornitori.php') ?>">Fornitori</a>.</li>
             <li><strong>Ordine</strong>: sequenza di visualizzazione nella pagina giornaliero.</li>
           </ul>
           <div class="ob-tip">Le macchine disattivate non compaiono nel giornaliero ma rimangono nello storico. Non eliminarle: usa il toggle attiva/disattiva.</div>

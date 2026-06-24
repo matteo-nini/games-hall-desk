@@ -10,8 +10,9 @@ $mese = (int)($_GET['mese'] ?? date('n'));
 if ($mese < 1 || $mese > 12) $mese = (int)date('n');
 $ngiorni = (int)date('t', mktime(0,0,0,$mese,1,$anno));
 
-$h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
-$pct= fn($p,$g) => $g > 0 ? number_format($p/$g*100,1,',','.').'%' : '—';
+$h        = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+$pct      = fn($p,$g) => $g > 0 ? number_format($p/$g*100,1,',','.').'%' : '—';
+$fornitori = get_fornitori($pdo);
 
 // cassa per giorno
 $righe = []; $tot = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
@@ -27,12 +28,12 @@ for ($d = 1; $d <= $ngiorni; $d++) {
 // bet/win per fornitore (mese)
 $primo = sprintf('%04d-%02d-01', $anno, $mese);
 $ultimo= sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
-$bw = ['NOVO'=>['g'=>0,'p'=>0],'INSPIRED'=>['g'=>0,'p'=>0],'SPIELO'=>['g'=>0,'p'=>0]];
+$bw = array_fill_keys($fornitori, ['g'=>0,'p'=>0]);
 $st = $pdo->prepare('SELECT fornitore, SUM(giocato) g, SUM(pagato) p FROM snai_betwin WHERE data BETWEEN ? AND ? GROUP BY fornitore');
 $st->execute([$primo,$ultimo]);
-foreach ($st as $row) $bw[$row['fornitore']] = ['g'=>(float)$row['g'],'p'=>(float)$row['p']];
-$ins = ['NOVO'=>0,'INSPIRED'=>0,'SPIELO'=>0];
-foreach ($righe as $r) foreach (fornitori() as $f) $ins[$f] += $r['scass'][$f];
+foreach ($st as $row) if (isset($bw[$row['fornitore']])) $bw[$row['fornitore']] = ['g'=>(float)$row['g'],'p'=>(float)$row['p']];
+$ins = array_fill_keys($fornitori, 0);
+foreach ($righe as $r) foreach ($fornitori as $f) $ins[$f] = ($ins[$f] ?? 0) + ($r['scass'][$f] ?? 0);
 $mesi = nomi_mesi();
 ?>
 <!doctype html><html lang="it"><head>
@@ -72,7 +73,7 @@ $mesi = nomi_mesi();
   <h3>Bet/Win SNAI per fornitore</h3>
   <table class="grid">
     <tr><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Ricavo</th><th class="rt">Inserito</th><th class="rt">Payout</th></tr>
-    <?php $TG=0;$TP=0;$TI=0; foreach (fornitori() as $f): $g=$bw[$f]['g'];$p=$bw[$f]['p'];$TG+=$g;$TP+=$p;$TI+=$ins[$f]; ?>
+    <?php $TG=0;$TP=0;$TI=0; foreach ($fornitori as $f): $g=$bw[$f]['g'];$p=$bw[$f]['p'];$TG+=$g;$TP+=$p;$TI+=$ins[$f]; ?>
     <tr><td><?= $f ?></td><td class="rt"><?= eur($g) ?></td><td class="rt"><?= eur($p) ?></td>
         <td class="rt"><?= eur($g-$p) ?></td><td class="rt"><?= eur($ins[$f]) ?></td><td class="rt"><?= $pct($p,$g) ?></td></tr>
     <?php endforeach; ?>

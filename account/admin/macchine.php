@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($az === 'add') {
         $codice  = trim($_POST['codice'] ?? '');
         $tipo    = ($_POST['tipo'] ?? 'VLT') === 'AWP' ? 'AWP' : 'VLT';
-        $forn    = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
+        $forn    = in_array($_POST['fornitore'] ?? '', array_merge($fornitori, ['ALTRO']), true) ? $_POST['fornitore'] : 'ALTRO';
         $ord     = (int)($_POST['ordine'] ?? 0);
         $seriale = mb_substr(trim($_POST['seriale'] ?? ''), 0, 100) ?: null;
         $civ     = mb_substr(trim($_POST['civ'] ?? ''), 0, 100) ?: null;
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: macchine.php?ok=toggle'); exit;
     } elseif ($az === 'edit') {
         $id      = (int)$_POST['id'];
-        $forn    = in_array($_POST['fornitore'] ?? '', ['NOVO','INSPIRED','SPIELO','ALTRO'], true) ? $_POST['fornitore'] : 'ALTRO';
+        $forn    = in_array($_POST['fornitore'] ?? '', array_merge($fornitori, ['ALTRO']), true) ? $_POST['fornitore'] : 'ALTRO';
         $seriale = mb_substr(trim($_POST['seriale'] ?? ''), 0, 100) ?: null;
         $civ     = mb_substr(trim($_POST['civ'] ?? ''), 0, 100) ?: null;
         $pdo->prepare('UPDATE macchine SET codice=?, fornitore=?, seriale=?, civ=?, ordine=? WHERE id=?')
@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$fornitori = get_fornitori($pdo);
 $macchine = $pdo->query('SELECT * FROM macchine ORDER BY tipo, ordine, codice')->fetchAll();
 $vlt      = array_values(array_filter($macchine, fn($m) => $m['tipo'] === 'VLT'));
 $awp      = array_values(array_filter($macchine, fn($m) => $m['tipo'] === 'AWP'));
@@ -124,7 +125,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <div class="ul-field">
         <label for="add-forn">Fornitore</label>
         <select id="add-forn" name="fornitore">
-          <option>NOVO</option><option>INSPIRED</option><option>SPIELO</option><option>ALTRO</option>
+          <?php foreach (array_merge($fornitori, ['ALTRO']) as $f): ?><option><?= $h($f) ?></option><?php endforeach; ?>
         </select>
       </div>
       <div class="ul-field">
@@ -204,8 +205,8 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <input class="mach-input" name="codice" form="mef-<?= $mid ?>"
              value="<?= $h($m['codice']) ?>" placeholder="Codice" required aria-label="Codice macchina">
       <select class="mach-select" name="fornitore" form="mef-<?= $mid ?>" aria-label="Fornitore">
-        <?php foreach (['NOVO','INSPIRED','SPIELO','ALTRO'] as $f): ?>
-        <option <?= $f === $m['fornitore'] ? 'selected' : '' ?>><?= $f ?></option>
+        <?php foreach (array_merge($fornitori, ['ALTRO']) as $f): ?>
+        <option <?= $f === $m['fornitore'] ? 'selected' : '' ?>><?= $h($f) ?></option>
         <?php endforeach; ?>
       </select>
       <input type="number" class="mach-input mach-ord" name="ordine" form="mef-<?= $mid ?>"
