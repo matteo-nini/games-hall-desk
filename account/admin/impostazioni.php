@@ -39,9 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     }
 
     if ($az === 'permessi') {
-        $v = isset($_POST['operatori_modifica_turni']) ? '1' : '0';
-        $pdo->prepare('UPDATE impostazioni SET valore=? WHERE chiave="operatori_modifica_turni"')->execute([$v]);
-        audit('impostazioni_permessi', null, null, "operatori_modifica_turni=$v");
+        $st = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $v1 = isset($_POST['operatori_modifica_turni']) ? '1' : '0';
+        $v2 = isset($_POST['turno_edit_libero'])        ? '1' : '0';
+        $st->execute(['operatori_modifica_turni', $v1]);
+        $st->execute(['turno_edit_libero',        $v2]);
+        audit('impostazioni_permessi', null, null, "omt=$v1 tel=$v2");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -243,7 +246,11 @@ $ps = $prezzi['sera']    ?? 70.0;
       <input type="hidden" name="azione" value="permessi">
       <label class="imp-opt">
         <input type="checkbox" name="operatori_modifica_turni" <?= ($sett['operatori_modifica_turni'] ?? '1') === '1' ? 'checked' : '' ?>>
-        <span class="imp-opt-text">Gli operatori possono aggiungere e modificare i turni programmati</span>
+        <span class="imp-opt-text">Gli operatori possono aggiungere e modificare i turni nel calendario</span>
+      </label>
+      <label class="imp-opt">
+        <input type="checkbox" name="turno_edit_libero" <?= ($sett['turno_edit_libero'] ?? '1') === '1' ? 'checked' : '' ?>>
+        <span class="imp-opt-text">Gli operatori possono modificare i dati di qualsiasi turno giornaliero (non solo il proprio) — utile per correzioni e inserimento storico</span>
       </label>
       <div class="imp-form-footer">
         <button type="submit">Salva permessi</button>

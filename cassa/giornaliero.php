@@ -5,6 +5,7 @@ $user = require_login();
 require_not_revisore();
 $cfg  = config();
 $pdo  = db();
+$sett = get_settings($pdo);
 $TOL  = (float)($cfg['tolleranza'] ?? 5);
 
 $data = $_GET['data'] ?? date('Y-m-d');
@@ -37,9 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
         foreach ($salva_n as $n) {
             $t = ensure_turno($pdo, (int)$g['id'], $n); $tid = (int)$t['id']; $d = $in[$n] ?? [];
-            $own = $t['operatore_id'];
-            $puoi = is_responsabile() || $own === null || (int)$own === (int)$user['id'];
-            if (!$puoi) continue; // non modificare il turno di un altro operatore
             $num = fn($v) => is_numeric($v) ? (float)$v : 0.0;
             $note = trim((string)($d['note'] ?? '')); $note = $note === '' ? null : mb_substr($note, 0, 1000);
             $pdo->prepare('UPDATE turni SET fondo_cassa=?, monete=?, bancomat=?, differenze=?, ii_cassa=?, rientri=?, note=? WHERE id=?')
@@ -54,8 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM ticket WHERE turno_id=?')->execute([$tid]);
             $stt = $pdo->prepare('INSERT INTO ticket (turno_id,fornitore,importo) VALUES (?,?,?)');
             foreach (fornitori() as $f) { $imp=$num($d['ticket'][$f]??0); if ($imp!=0.0) $stt->execute([$tid,$f,$imp]); }
-            if ($own === null)
-                $pdo->prepare('UPDATE turni SET operatore_id=? WHERE id=?')->execute([(int)$user['id'],$tid]);
+            $pdo->prepare('UPDATE turni SET operatore_id=? WHERE id=?')->execute([(int)$user['id'],$tid]);
         }
         $pdo->commit(); audit('salvataggio_giornata','giornate',(int)$g['id'],$data);
     } catch (Throwable $e) {
@@ -83,13 +80,31 @@ foreach ([1,2] as $n) {
 }
 $users = [];
 foreach ($pdo->query('SELECT id, COALESCE(NULLIF(nome,""),username) nome FROM utenti') as $u) $users[(int)$u['id']] = $u['nome'];
+
+/* Assegnazioni programmate per oggi (calendario turni) */
+$programmati = [];
+$stProg = $pdo->prepare('SELECT tp.numero, COALESCE(NULLIF(u.nome,""),u.username) AS nome
+                          FROM turni_programmati tp JOIN utenti u ON u.id=tp.operatore_id
+                          WHERE tp.data=?');
+$stProg->execute([$data]);
+foreach ($stProg as $r) $programmati[(int)$r['numero']] = $r['nome'];
+
+/* Policy di modifica turni: configurabile da impostazioni.
+   'libero' = qualsiasi utente può modificare qualsiasi turno (storico, correzioni).
+   'assegnato' = l'operatore può modificare solo il turno assegnato a lui. */
+$editLibero = ($sett['turno_edit_libero'] ?? '1') === '1';
 $canEdit = [];
 foreach ([1,2] as $n) {
     $own = $turni[$n]['t']['operatore_id'];
-    $canEdit[$n] = (is_responsabile() || $own === null || (int)$own === (int)$user['id']) && !($chiusa && !is_responsabile());
+    $proprio = $own === null || (int)$own === (int)$user['id'];
+    $canEdit[$n] = ($editLibero || is_responsabile() || $proprio)
+                   && !($chiusa && !is_responsabile());
 }
 $anyEdit = $canEdit[1] || $canEdit[2];
+
+$schedName = fn($n) => $programmati[$n] ?? null;
 $ownerName = fn($n) => ($turni[$n]['t']['operatore_id'] ? ($users[(int)$turni[$n]['t']['operatore_id']] ?? '—') : null);
+$chiusaBy  = ($chiusa && !empty($g['chiusa_da'])) ? ($users[(int)$g['chiusa_da']] ?? '—') : null;
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => ($v == 0 ? '' : rtrim(rtrim(number_format((float)$v,2,'.',''),'0'),'.'));
 $prev = date('Y-m-d', strtotime("$data -1 day"));
@@ -188,8 +203,20 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
     </div>
     <div class="sh-tabbar">
       <div class="tabs" role="tablist" aria-label="Selezione turno">
-        <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small>controllo<?php if ($ownerName(1)): ?> &middot; <?= $h($ownerName(1)) ?><?php endif; ?></small></button>
-        <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small>chiusura<?php if ($ownerName(2)): ?> &middot; <?= $h($ownerName(2)) ?><?php endif; ?></small></button>
+        <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small><?php
+            $parts = [];
+            if ($schedName(1)) $parts[] = 'Assegnato: '.$h($schedName(1));
+            if ($ownerName(1) && $ownerName(1) !== $schedName(1)) $parts[] = 'Salvato: '.$h($ownerName(1));
+            elseif ($ownerName(1) && !$schedName(1)) $parts[] = 'Salvato: '.$h($ownerName(1));
+            echo $parts ? implode(' · ', $parts) : 'controllo';
+        ?></small></button>
+        <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small><?php
+            $parts = [];
+            if ($schedName(2)) $parts[] = 'Assegnato: '.$h($schedName(2));
+            if ($ownerName(2) && $ownerName(2) !== $schedName(2)) $parts[] = 'Salvato: '.$h($ownerName(2));
+            elseif ($ownerName(2) && !$schedName(2)) $parts[] = 'Salvato: '.$h($ownerName(2));
+            echo $parts ? implode(' · ', $parts) : 'chiusura';
+        ?></small></button>
       </div>
       <div class="sh-stats-wrap">
         <div class="sh-stats" aria-label="Dati chiusura turno">
@@ -211,7 +238,7 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
       </div>
     </div>
     <div class="sh-actions">
-      <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span>
+      <span class="badge <?= $chiusa?'closed':'open' ?>"><?= $chiusa?'CHIUSA':'APERTA' ?></span><?php if ($chiusaBy): ?><span class="sh-chiusa-by">chiusa da <?= $h($chiusaBy) ?></span><?php endif; ?>
       <?php if ($anyEdit): ?><button type="submit" form="frm" class="save-btn">Salva</button><?php endif; ?>
       <?php if (!$chiusa && $anyEdit): ?>
         <form method="post" class="actions">

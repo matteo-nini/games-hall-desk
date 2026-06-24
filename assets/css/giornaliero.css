@@ -278,6 +278,13 @@ details.adv[open]>summary::before {
   max-width: 100%
 }
 
+.sh-chiusa-by {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap
+}
+
 .tab.active {
   background: var(--surface);
   color: var(--text);
