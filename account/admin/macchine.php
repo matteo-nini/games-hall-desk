@@ -13,6 +13,8 @@ try {
     $pdo->exec('ALTER TABLE macchine ADD COLUMN civ VARCHAR(100) NULL AFTER seriale');
 } catch (Throwable) {}
 
+$fornitori = get_fornitori($pdo);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     $az = $_POST['azione'] ?? '';
@@ -51,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$fornitori = get_fornitori($pdo);
 $macchine = $pdo->query('SELECT * FROM macchine ORDER BY tipo, ordine, codice')->fetchAll();
 $vlt      = array_values(array_filter($macchine, fn($m) => $m['tipo'] === 'VLT'));
 $awp      = array_values(array_filter($macchine, fn($m) => $m['tipo'] === 'AWP'));

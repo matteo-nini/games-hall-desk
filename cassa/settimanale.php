@@ -149,8 +149,8 @@ th{background:#f4f4f4;font-weight:600}
 <tbody>
 <?php foreach ($giorni as $d):
     $bw = $rows[$d]['bw']; $ri = $rows[$d]['ri']; $first = true;
-    foreach (['INSPIRED','SPIELO','NOVO'] as $f):
-        $g=$bw[$f]['giocato'];$p=$bw[$f]['pagato'];$ins=$ri['scass'][$f]; ?>
+    foreach ($fornitori as $f):
+        $g=$bw[$f]['giocato']??0;$p=$bw[$f]['pagato']??0;$ins=$ri['scass'][$f]??0; ?>
 <tr>
   <td><?= $first ? $h(date('d/m/Y',strtotime($d))) : '' ?></td>
   <td><?= $f ?></td>
@@ -192,7 +192,7 @@ if (($_GET['export'] ?? '') === 'csv') {
         $bw = $rows[$d]['bw'];
         $ri = $rows[$d]['ri'];
         $first = true;
-        foreach (['INSPIRED', 'SPIELO', 'NOVO'] as $f) {
+        foreach ($fornitori as $f) {
             $row = [$d, $f,
                 number_format($bw[$f]['giocato'], 2, ',', '.'),
                 number_format($bw[$f]['pagato'],  2, ',', '.'),
