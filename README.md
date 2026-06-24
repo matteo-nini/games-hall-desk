@@ -26,7 +26,8 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - **Annuale** — panoramica mese per mese con link diretto al mensile
 - **Export CSV** mensile e settimanale (separatore `;`, BOM UTF-8 per Excel Italia)
 - **Export Stampa/PDF** su tutti e tre i livelli: view HTML ottimizzata per la stampa con auto-trigger `window.print()`
-- **Dashboard responsabile** con grafici Chart.js: andamento incassi ultimi 30 giorni (barre) e ultimi 6 mesi (linea)
+- **Dashboard responsabile** con grafici Chart.js: andamento incassi ultimi 30 giorni (barre) e ultimi 6 mesi (linea); **statistiche per operatore** — turni compilati, scostamento medio e percentuale turni corretti degli ultimi 30 giorni
+- **Confronto settimana precedente** nel riepilogo settimanale: badge +/−% accanto a ogni totale per confronto immediato con la settimana scorsa
 
 ### Sala
 - **AWP** — registro refill con data, importo e macchina
@@ -54,6 +55,7 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - Guida operativa (`onboarding.php`) con tab dedicati per operatore, responsabile e revisore
 
 ### Impostazioni configurabili
+- **Logo sala**: caricabile da impostazioni e mostrato nella barra laterale al posto delle iniziali — personalizzazione white-label immediata
 - **Numero di turni** (1–3) con nome e orari personalizzabili per turno — adattabile a qualsiasi organizzazione della sala
 - **Fornitori configurabili**: lista supplier modificabile, rinominabile e riordinabile tramite drag-and-drop — propaga automaticamente a ticket, scassettamenti, Bet/Win e macchine
 - **Fuso orario**: selezionabile tra tutti i timezone PHP/IANA — utile per sale fuori dall'Europa/Roma

@@ -58,6 +58,35 @@ for ($i = 29; $i >= 0; $i--) {
     $chart30['data'][]   = $dayMap[$d] ?? 0;
 }
 
+/* Statistiche operatori: ultimi 30 giorni */
+$stOp = $pdo->prepare("
+    SELECT t.id, t.operatore_id, t.fondo_cassa, t.monete, t.bancomat, t.differenze, t.ii_cassa, t.rientri,
+           COALESCE(NULLIF(u.nome,''), u.username) AS op_nome,
+           COALESCE((SELECT SUM(c.taglio*c.pezzi) FROM contanti c WHERE c.turno_id=t.id),0) AS contanti,
+           COALESCE((SELECT SUM(r.euro) FROM refill_awp r WHERE r.turno_id=t.id),0) AS refill,
+           COALESCE((SELECT SUM(s.importo) FROM scassettamenti s WHERE s.turno_id=t.id),0) AS scass,
+           COALESCE((SELECT SUM(tk.importo) FROM ticket tk WHERE tk.turno_id=t.id),0) AS ticket
+    FROM turni t
+    JOIN giornate g ON g.id=t.giornata_id
+    LEFT JOIN utenti u ON u.id=t.operatore_id
+    WHERE g.data >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND t.operatore_id IS NOT NULL
+");
+$stOp->execute();
+$opStats = [];
+foreach ($stOp as $row) {
+    $calc  = calcola_turno((array)$row);
+    $oid   = (int)$row['operatore_id'];
+    $scost = abs($calc['errore']);
+    if (!isset($opStats[$oid])) {
+        $opStats[$oid] = ['nome'=>$row['op_nome'],'turni'=>0,'scost_tot'=>0.0,'scost_max'=>0.0,'ok'=>0];
+    }
+    $opStats[$oid]['turni']++;
+    $opStats[$oid]['scost_tot'] += $scost;
+    if ($scost > $opStats[$oid]['scost_max']) $opStats[$oid]['scost_max'] = $scost;
+    if ($scost < 4) $opStats[$oid]['ok']++;
+}
+uasort($opStats, fn($a,$b) => $b['turni'] <=> $a['turni']);
+
 /* Charts: ultimi 6 mesi */
 $nomiMesiBr = ['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 $st = $pdo->query("
@@ -168,6 +197,48 @@ for ($i = 5; $i >= 0; $i--) {
     </section>
 
   </div>
+
+  <?php if (!empty($opStats)): ?>
+  <section class="dash-card dash-op-stats">
+    <h2 class="dash-card-title">Statistiche operatori · ultimi 30 giorni</h2>
+    <div class="op-table-wrap">
+      <table class="op-table">
+        <thead>
+          <tr>
+            <th>Operatore</th>
+            <th class="rt">Turni</th>
+            <th class="rt">Scost. medio</th>
+            <th class="rt">Scost. max</th>
+            <th class="rt">Turni ok</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($opStats as $op):
+            $med  = $op['turni'] > 0 ? $op['scost_tot'] / $op['turni'] : 0;
+            $pct  = $op['turni'] > 0 ? round($op['ok'] / $op['turni'] * 100) : 0;
+            $cls  = $med < 4 ? 'ok' : ($med <= 5 ? 'warn' : 'bad');
+          ?>
+          <tr>
+            <td class="op-nome"><?= $h($op['nome']) ?></td>
+            <td class="rt"><?= $op['turni'] ?></td>
+            <td class="rt"><span class="op-scost <?= $cls ?>">€ <?= eur($med) ?></span></td>
+            <td class="rt muted-text">€ <?= eur($op['scost_max']) ?></td>
+            <td class="rt">
+              <span class="op-ok-bar" title="<?= $op['ok'] ?>/<?= $op['turni'] ?> turni con scostamento &lt; €4">
+                <span class="op-ok-fill" style="width:<?= $pct ?>%"></span>
+              </span>
+              <span class="op-ok-pct"><?= $pct ?>%</span>
+            </td>
+            <td></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <?php endif; ?>
+
 </div>
 
 

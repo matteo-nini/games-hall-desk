@@ -778,6 +778,14 @@ table.grid {
   flex-shrink: 0
 }
 
+.sb-logo-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0
+}
+
 .sb-title {
   font-size: 14px;
   font-weight: 700;

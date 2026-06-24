@@ -91,3 +91,24 @@
   max-width: 680px
 }
 
+.sett-delta {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: var(--rxs);
+  margin-left: 4px;
+  vertical-align: middle;
+  letter-spacing: .02em
+}
+
+.delta-up { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green) }
+.delta-dn { background: color-mix(in srgb, var(--red)   15%, transparent); color: var(--red)   }
+
+.sett-compare-note {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 6px 0 0;
+  text-align: right
+}
+

@@ -74,14 +74,20 @@ function top_menu(array $user): void {
 
     $foto    = $user['foto'] ?? null;
     $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
-    $salaWords   = array_filter(array_slice(preg_split('/\s+/', trim($navNomeSala)), 0, 2));
+    $salaWords    = array_filter(array_slice(preg_split('/\s+/', trim($navNomeSala)), 0, 2));
     $salaInitials = mb_strtoupper(implode('', array_map(fn($w) => mb_substr($w, 0, 1, 'UTF-8'), $salaWords)), 'UTF-8') ?: 'CS';
+    $navLogoPath  = $navSett['logo_path'] ?? null;
+    $navLogoUrl   = $navLogoPath ? base_url('account/uploads/sala/' . rawurlencode($navLogoPath)) : null;
 ?>
 <link rel="stylesheet" href="<?= asset_url('assets/css/ob-banners.css') ?>">
 <aside class="sidebar" id="sidebar" data-role="<?= htmlspecialchars($role) ?>" aria-label="Navigazione principale">
 
   <div class="sb-head">
-    <span class="sb-logo" aria-hidden="true"><?= htmlspecialchars($salaInitials) ?></span>
+    <?php if ($navLogoUrl): ?>
+      <img src="<?= htmlspecialchars($navLogoUrl) ?>" class="sb-logo-img" alt="<?= htmlspecialchars($navNomeSala) ?>">
+    <?php else: ?>
+      <span class="sb-logo" aria-hidden="true"><?= htmlspecialchars($salaInitials) ?></span>
+    <?php endif; ?>
     <span class="sb-title"><?= htmlspecialchars($navNomeSala ?: 'Sala') ?></span>
     <button class="sb-collapse-btn" id="sb-collapse" type="button" title="Comprimi/Espandi menu" aria-label="Comprimi menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>

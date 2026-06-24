@@ -95,6 +95,29 @@ $pct = fn($p, $g) => $g > 0 ? number_format($p / $g * 100, 1, ',', '.') . '%' : 
 $tg = array_sum(array_column($tot, 'g'));
 $tp = array_sum(array_column($tot, 'p'));
 
+/* Settimana precedente per confronto */
+$prevDs   = ($prevSett['sett'] - 1) * 7 + 1;
+$prevDays = (int)date('t', mktime(0, 0, 0, $prevSett['mese'], 1, $prevSett['anno']));
+$prevDe   = min($prevSett['sett'] * 7, $prevDays);
+$prevGiorni = [];
+for ($d = $prevDs; $d <= $prevDe; $d++) {
+    $prevGiorni[] = date('Y-m-d', mktime(0, 0, 0, $prevSett['mese'], $d, $prevSett['anno']));
+}
+$prev_tg = 0; $prev_tp = 0; $prev_banc = 0; $prev_vers = 0; $prev_ins = 0;
+foreach ($prevGiorni as $d) {
+    $bw = betwin_giorno($pdo, $d);
+    $ri = riepilogo_giornata($pdo, $d);
+    foreach ($fornitori as $f) { $prev_tg += $bw[$f]['giocato']; $prev_tp += $bw[$f]['pagato']; $prev_ins += $ri['scass'][$f]; }
+    $prev_banc += $ri['bancomat'];
+    $prev_vers += $ri['versamento'];
+}
+$delta = fn(float $cur, float $prv): string =>
+    ($prv == 0) ? '' :
+    sprintf('<span class="sett-delta %s">%s%s%%</span>',
+        $cur >= $prv ? 'delta-up' : 'delta-dn',
+        $cur >= $prv ? '+' : '',
+        number_format(($cur - $prv) / $prv * 100, 1, ',', '.'));
+
 /* =========================================================
    Export stampa (HTML print-friendly)
    ========================================================= */
@@ -271,17 +294,48 @@ if (($_GET['export'] ?? '') === 'csv') {
 <div class="riepilogo riepilogo-main">
   <h3>Totali settimana <?= $sett ?> (<?= $dayStart ?>&ndash;<?= $dayEnd ?> <?= $h($nomiMesi[$mese]) ?>)</h3>
   <table class="grid">
-    <tr><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Inserito</th><th class="rt">Payout</th><th class="rt">G/Ins</th></tr>
+    <tr>
+      <th>Fornitore</th>
+      <th class="rt">Giocato</th><th class="rt">Pagato</th><th class="rt">Inserito</th>
+      <th class="rt">Payout</th><th class="rt">G/Ins</th>
+    </tr>
     <?php foreach ($fornitori as $f): ?>
-    <tr><td><?= $f ?></td><td class="rt"><?= eur($tot[$f]['g']) ?></td><td class="rt"><?= eur($tot[$f]['p']) ?></td>
-        <td class="rt"><?= eur($tot[$f]['i']) ?></td><td class="rt"><?= $pct($tot[$f]['p'], $tot[$f]['g']) ?></td>
-        <td class="rt"><?= $tot[$f]['i'] > 0 ? number_format($tot[$f]['g'] / $tot[$f]['i'], 2, ',', '.') : '—' ?></td></tr>
+    <tr>
+      <td><?= $h($f) ?></td>
+      <td class="rt"><?= eur($tot[$f]['g']) ?></td>
+      <td class="rt"><?= eur($tot[$f]['p']) ?></td>
+      <td class="rt"><?= eur($tot[$f]['i']) ?></td>
+      <td class="rt"><?= $pct($tot[$f]['p'], $tot[$f]['g']) ?></td>
+      <td class="rt"><?= $tot[$f]['i'] > 0 ? number_format($tot[$f]['g'] / $tot[$f]['i'], 2, ',', '.') : '—' ?></td>
+    </tr>
     <?php endforeach; ?>
-    <tr class="tot"><td>TOTALE</td><td class="rt"><?= eur($tg) ?></td><td class="rt"><?= eur($tp) ?></td>
-        <td class="rt"><?= eur(array_sum(array_column($tot, 'i'))) ?></td><td class="rt"><?= $pct($tp, $tg) ?></td><td></td></tr>
-    <tr><td>Bancomat settimana</td><td class="rt"><?= eur($tot_banc) ?></td><td colspan="4"></td></tr>
-    <tr><td>Versamento settimana</td><td class="rt"><?= eur($tot_vers) ?></td><td colspan="4"></td></tr>
-    <tr class="tot"><td>Margine settimana</td><td class="rt"><?= eur($tot_banc + $tot_vers - ($tg - $tp)) ?></td><td colspan="4"></td></tr>
+    <tr class="tot">
+      <td>TOTALE BET</td>
+      <td class="rt"><?= eur($tg) ?> <?= $delta($tg, $prev_tg) ?></td>
+      <td class="rt"><?= eur($tp) ?> <?= $delta($tp, $prev_tp) ?></td>
+      <td class="rt"><?= eur(array_sum(array_column($tot,'i'))) ?> <?= $delta(array_sum(array_column($tot,'i')), $prev_ins) ?></td>
+      <td class="rt"><?= $pct($tp,$tg) ?></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Bancomat</td>
+      <td class="rt"><?= eur($tot_banc) ?> <?= $delta($tot_banc, $prev_banc) ?></td>
+      <td colspan="4"></td>
+    </tr>
+    <tr>
+      <td>Versamento</td>
+      <td class="rt"><?= eur($tot_vers) ?> <?= $delta($tot_vers, $prev_vers) ?></td>
+      <td colspan="4"></td>
+    </tr>
+    <?php $margine = $tot_banc + $tot_vers - ($tg - $tp); $prevMargine = $prev_banc + $prev_vers - ($prev_tg - $prev_tp); ?>
+    <tr class="tot">
+      <td>Margine</td>
+      <td class="rt"><?= eur($margine) ?> <?= $delta($margine, $prevMargine) ?></td>
+      <td colspan="4"></td>
+    </tr>
   </table>
+  <?php if ($prev_tg > 0 || $prev_banc > 0): ?>
+  <p class="sett-compare-note">vs settimana <?= $prevSett['sett'] ?> (<?= $prevDs ?>&ndash;<?= $prevDe ?> <?= $h($nomiMesi[$prevSett['mese']]) ?>)</p>
+  <?php endif; ?>
 </div>
 </body></html>

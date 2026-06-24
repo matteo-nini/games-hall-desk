@@ -194,3 +194,25 @@
     flex-direction: column
   }
 }
+
+.imp-logo-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 14px;
+}
+
+.imp-logo-preview img {
+  max-height: 52px;
+  max-width: 150px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--rxs);
+  background: var(--bg);
+  padding: 6px;
+}
+
+.btn-sm {
+  font-size: 11px;
+  padding: 4px 10px;
+}
