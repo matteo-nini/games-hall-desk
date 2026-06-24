@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Europe/Rome');
 // Connessione PDO condivisa.
 function db(): PDO {
     static $pdo = null;
