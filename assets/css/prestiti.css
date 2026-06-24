@@ -97,17 +97,26 @@
   white-space: nowrap
 }
 
-.pm-th-ava  { width: 52px }
-.pm-th-num  { text-align: right }
-.pm-th-menu { width: 44px }
+.pm-th-ava {
+  width: 52px
+}
 
-.pm-table tbody tr + tr {
+.pm-th-num {
+  text-align: right
+}
+
+.pm-th-menu {
+  width: 44px
+}
+
+.pm-table tbody tr+tr {
   border-top: 1px solid var(--border)
 }
 
 .pm-row td {
   padding: 12px 14px;
-  vertical-align: middle
+  vertical-align: middle;
+  text-align: left;
 }
 
 .pm-row:hover {
@@ -134,12 +143,35 @@
   user-select: none
 }
 
-.pm-ava-c0 { background: var(--accent-weak);    color: var(--accent-ink) }
-.pm-ava-c1 { background: var(--green-bg);       color: var(--green-ink) }
-.pm-ava-c2 { background: var(--amber-bg);       color: var(--amber-ink) }
-.pm-ava-c3 { background: var(--ava-purple-bg);  color: var(--ava-purple-ink) }
-.pm-ava-c4 { background: var(--ava-teal-bg);    color: var(--ava-teal-ink) }
-.pm-ava-c5 { background: var(--ava-rose-bg);    color: var(--ava-rose-ink) }
+.pm-ava-c0 {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.pm-ava-c1 {
+  background: var(--green-bg);
+  color: var(--green-ink)
+}
+
+.pm-ava-c2 {
+  background: var(--amber-bg);
+  color: var(--amber-ink)
+}
+
+.pm-ava-c3 {
+  background: var(--ava-purple-bg);
+  color: var(--ava-purple-ink)
+}
+
+.pm-ava-c4 {
+  background: var(--ava-teal-bg);
+  color: var(--ava-teal-ink)
+}
+
+.pm-ava-c5 {
+  background: var(--ava-rose-bg);
+  color: var(--ava-rose-ink)
+}
 
 /* Date */
 .pm-td-data {
@@ -289,6 +321,7 @@
 
 /* ---- Responsive ---- */
 @media (max-width: 760px) {
+
   .pm-th-note,
   .pm-td-note {
     display: none

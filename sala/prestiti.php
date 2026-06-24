@@ -209,8 +209,8 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
       <thead>
         <tr>
           <th class="pm-th-ava" aria-hidden="true"></th>
-          <th>Data</th>
           <th>Persona</th>
+          <th>Data</th>
           <th>Tipo</th>
           <th class="pm-th-num">Importo</th>
           <th class="pm-th-note">Note</th>
@@ -226,7 +226,6 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
           <td class="pm-td-ava">
             <div class="pm-ava pm-ava-c<?= $cIdx ?>" aria-hidden="true"><?= $h($initial) ?></div>
           </td>
-          <td class="pm-td-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></td>
           <td class="pm-td-persona">
             <?php if ($filtro_pid === 0): ?>
             <a href="?p=<?= (int)$m['persona_id'] ?>" class="pm-persona-link"><?= $h($m['pnome']) ?></a>
@@ -234,6 +233,7 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
             <?= $h($m['pnome']) ?>
             <?php endif; ?>
           </td>
+          <td class="pm-td-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></td>
           <td>
             <span class="pm-badge <?= $m['tipo']==='prestito'?'pm-out':'pm-in' ?>">
               <?= $m['tipo']==='prestito' ? 'Prestito' : 'Rientro' ?>
