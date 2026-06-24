@@ -313,3 +313,51 @@
   flex: 1;
   max-width: 240px
 }
+
+/* ============================================================
+   Card wide + Sala grouped layout
+   ============================================================ */
+
+.imp-card-wide {
+  grid-column: 1 / -1
+}
+
+.imp-sala-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px
+}
+
+.imp-sala-half {
+  display: flex;
+  flex-direction: column;
+  gap: 12px
+}
+
+/* Sub-section heading inside a card */
+.imp-sub-head {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border)
+}
+
+/* Turni + Prezzi 2-col layout inside card */
+.imp-turni-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 4px
+}
+
+@media (max-width: 640px) {
+  .imp-sala-cols,
+  .imp-turni-layout {
+    grid-template-columns: 1fr;
+    gap: 20px
+  }
+}

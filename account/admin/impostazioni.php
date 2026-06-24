@@ -66,6 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         $st->execute(['turno_mattino_fine',   $sett_new['turno_1_fine']   ?? '19:00']);
         $st->execute(['turno_sera_inizio',    $sett_new['turno_2_inizio'] ?? '19:00']);
         $st->execute(['turno_sera_fine',      $sett_new['turno_2_fine']   ?? '01:00']);
+        /* Save prices if submitted with combined form */
+        $ptNames = ['mattino', 'sera', 'notte'];
+        $stP = $pdo->prepare('INSERT INTO prezzi_turni (nome, prezzo) VALUES (?,?) ON DUPLICATE KEY UPDATE prezzo=VALUES(prezzo)');
+        for ($i = 1; $i <= $n; $i++) {
+            $k = "prezzo_turno_$i";
+            if (isset($_POST[$k]) && is_numeric($_POST[$k]))
+                $stP->execute([$ptNames[$i-1], abs((float)$_POST[$k])]);
+        }
         audit('impostazioni_turni', null, null, "num_turni=$n");
         header('Location: impostazioni.php?ok=1'); exit;
     }
@@ -152,8 +160,14 @@ if ($migrationOk) {
     foreach ($pdo->query('SELECT nome, prezzo FROM prezzi_turni') as $r)
         $prezzi[$r['nome']] = (float)$r['prezzo'];
 }
-$pm = $prezzi['mattino'] ?? 60.0;
-$ps = $prezzi['sera']    ?? 70.0;
+$pm    = $prezzi['mattino'] ?? 60.0;
+$ps    = $prezzi['sera']    ?? 70.0;
+$pn    = $prezzi['notte']   ?? 60.0;
+$turns = $migrationOk ? get_turns($sett) : [];
+$numT  = (int)($sett['num_turni'] ?? 2);
+$dn    = ['Mattino','Sera','Notte'];
+$di    = ['13:00','19:00','01:00'];
+$df    = ['19:00','01:00','09:00'];
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -181,126 +195,136 @@ $ps = $prezzi['sera']    ?? 70.0;
 
 <div class="imp-page">
 
-  <section class="imp-card">
+  <section class="imp-card imp-card-wide">
     <div class="imp-card-head">
       <div class="imp-card-ico" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h16M4 18V8l6-5 6 5v10M8 18v-5h4v5"/></svg>
       </div>
       <div>
-        <h2 class="imp-card-title">Nome sala</h2>
-        <p class="imp-card-desc">Appare nell'intestazione, nel favicon, nella PWA e ovunque venga richiesto il nome della sala.</p>
+        <h2 class="imp-card-title">Identità sala</h2>
+        <p class="imp-card-desc">Nome e logo compaiono nell'intestazione, nella PWA e nei documenti generati.</p>
       </div>
     </div>
-    <form method="post">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="sala">
-      <div class="imp-price-row" style="grid-template-columns:1fr">
-        <div class="imp-field">
-          <label for="imp-sala">Nome</label>
-          <input id="imp-sala" type="text" name="nome_sala" maxlength="100"
-                 value="<?= $h($cfg['nome_sala'] ?? '') ?>" placeholder="Es. Sala Giochi Roma" required>
+    <div class="imp-sala-cols">
+      <div class="imp-sala-half">
+        <p class="imp-sub-head">Nome</p>
+        <form method="post">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="azione" value="sala">
+          <div class="imp-field">
+            <label for="imp-sala">Nome sala</label>
+            <input id="imp-sala" type="text" name="nome_sala" maxlength="100"
+                   value="<?= $h($cfg['nome_sala'] ?? '') ?>" placeholder="Es. Sala Giochi Roma" required>
+          </div>
+          <div class="imp-form-footer">
+            <button type="submit">Salva nome</button>
+          </div>
+        </form>
+      </div>
+      <div class="imp-sala-half">
+        <p class="imp-sub-head">Logo</p>
+        <?php $logoPath = $sett['logo_path'] ?? null; ?>
+        <?php if ($logoPath): ?>
+        <div class="imp-logo-preview">
+          <img src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo sala attuale">
+          <form method="post">
+            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+            <input type="hidden" name="azione" value="logo_del">
+            <button type="submit" class="ghost btn-sm">Rimuovi logo</button>
+          </form>
         </div>
-      </div>
-      <div class="imp-form-footer">
-        <button type="submit">Salva nome</button>
-      </div>
-    </form>
-  </section>
-
-  <section class="imp-card">
-    <div class="imp-card-head">
-      <div class="imp-card-ico" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="16" height="12" rx="2"/><circle cx="7" cy="9" r="1.5"/><path d="M2 15l4-4 3 3 3-4 4 5"/></svg>
-      </div>
-      <div>
-        <h2 class="imp-card-title">Logo sala</h2>
-        <p class="imp-card-desc">Appare nella barra laterale al posto delle iniziali. Ideale per personalizzare l'app con il brand della sala (max 2 MB, formati: jpg, png, webp, svg).</p>
+        <?php endif; ?>
+        <form method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="azione" value="logo">
+          <div class="imp-field">
+            <label for="imp-logo"><?= $logoPath ? 'Sostituisci logo' : 'Carica logo' ?></label>
+            <input id="imp-logo" type="file" name="logo_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" required>
+          </div>
+          <div class="imp-form-footer">
+            <button type="submit">Carica</button>
+          </div>
+        </form>
       </div>
     </div>
-    <?php $logoPath = $sett['logo_path'] ?? null; ?>
-    <?php if ($logoPath): ?>
-    <div class="imp-logo-preview">
-      <img src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo sala attuale">
-      <form method="post">
-        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-        <input type="hidden" name="azione" value="logo_del">
-        <button type="submit" class="ghost btn-sm">Rimuovi logo</button>
-      </form>
-    </div>
-    <?php endif; ?>
-    <form method="post" enctype="multipart/form-data">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="logo">
-      <div class="imp-field">
-        <label for="imp-logo"><?= $logoPath ? 'Sostituisci logo' : 'Carica logo' ?></label>
-        <input id="imp-logo" type="file" name="logo_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" required>
-      </div>
-      <div class="imp-form-footer">
-        <button type="submit">Carica</button>
-      </div>
-    </form>
   </section>
 
-  <section class="imp-card">
+  <section class="imp-card imp-card-wide">
     <div class="imp-card-head">
       <div class="imp-card-ico" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l2.5 2.5"/></svg>
       </div>
       <div>
-        <h2 class="imp-card-title">Configurazione turni</h2>
-        <p class="imp-card-desc">Numero di turni giornalieri, nome e orari. Usati per il riconoscimento automatico del turno corrente e per la struttura della cassa giornaliera.</p>
+        <h2 class="imp-card-title">Turni</h2>
+        <p class="imp-card-desc">Numero, nome, orari e costo dei turni giornalieri. Le modifiche si riflettono sulla cassa, sul calendario e sui report operatori.</p>
       </div>
     </div>
-    <?php
-    $turns = get_turns($sett);
-    $numT  = (int)($sett['num_turni'] ?? 2);
-    $dn    = ['Mattino','Sera','Notte'];
-    $di    = ['13:00','19:00','01:00'];
-    $df    = ['19:00','01:00','09:00'];
-    ?>
     <form method="post" id="frm-turni">
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="azione" value="turni">
-      <div class="imp-field" style="margin-bottom:16px">
-        <label for="num-turni">Numero di turni al giorno</label>
-        <select id="num-turni" name="num_turni" onchange="aggiornaRighe(this.value)">
-          <option value="1" <?= $numT===1?'selected':'' ?>>1 — turno unico</option>
-          <option value="2" <?= $numT===2?'selected':'' ?>>2 — mattino e sera</option>
-          <option value="3" <?= $numT===3?'selected':'' ?>>3 — mattino, sera e notte</option>
-        </select>
-      </div>
-      <div class="imp-orari-stack" id="turni-stack">
-      <?php for ($i = 1; $i <= 3; $i++):
-        $t    = $turns[$i] ?? ['nome'=>$dn[$i-1],'inizio'=>$di[$i-1],'fine'=>$df[$i-1]];
-        $vis  = ($i <= $numT) ? '' : ' style="display:none"';
-      ?>
-        <div class="imp-orari-row imp-turno-row" data-idx="<?= $i ?>"<?= $vis ?>>
-          <div class="imp-field" style="min-width:90px">
-            <label for="tn-<?= $i ?>">Nome turno <?= $i ?></label>
-            <input id="tn-<?= $i ?>" type="text" name="turno_<?= $i ?>_nome" value="<?= $h($t['nome']) ?>" maxlength="30" placeholder="<?= $h($dn[$i-1]) ?>">
+      <div class="imp-turni-layout">
+        <div class="imp-turni-col">
+          <p class="imp-sub-head">Configurazione</p>
+          <div class="imp-field" style="margin-bottom:16px">
+            <label for="num-turni">Numero di turni al giorno</label>
+            <select id="num-turni" name="num_turni" onchange="aggiornaRighe(this.value)">
+              <option value="1" <?= $numT===1?'selected':'' ?>>1 — turno unico</option>
+              <option value="2" <?= $numT===2?'selected':'' ?>>2 — mattino e sera</option>
+              <option value="3" <?= $numT===3?'selected':'' ?>>3 — mattino, sera e notte</option>
+            </select>
           </div>
-          <div class="imp-time-pair">
-            <div class="imp-field">
-              <label for="ti-<?= $i ?>i">Inizio</label>
-              <input id="ti-<?= $i ?>i" type="time" name="turno_<?= $i ?>_inizio" value="<?= $h($t['inizio']) ?>">
+          <div class="imp-orari-stack" id="turni-stack">
+          <?php for ($i = 1; $i <= 3; $i++):
+            $t   = $turns[$i] ?? ['nome'=>$dn[$i-1],'inizio'=>$di[$i-1],'fine'=>$df[$i-1]];
+            $vis = $i <= $numT ? '' : ' style="display:none"';
+          ?>
+            <div class="imp-orari-row imp-turno-row" data-idx="<?= $i ?>"<?= $vis ?>>
+              <div class="imp-field" style="min-width:90px">
+                <label for="tn-<?= $i ?>">Nome turno <?= $i ?></label>
+                <input id="tn-<?= $i ?>" type="text" name="turno_<?= $i ?>_nome" value="<?= $h($t['nome']) ?>" maxlength="30" placeholder="<?= $h($dn[$i-1]) ?>">
+              </div>
+              <div class="imp-time-pair">
+                <div class="imp-field">
+                  <label for="ti-<?= $i ?>i">Inizio</label>
+                  <input id="ti-<?= $i ?>i" type="time" name="turno_<?= $i ?>_inizio" value="<?= $h($t['inizio']) ?>">
+                </div>
+                <span class="imp-sep" aria-hidden="true">—</span>
+                <div class="imp-field">
+                  <label for="ti-<?= $i ?>f">Fine</label>
+                  <input id="ti-<?= $i ?>f" type="time" name="turno_<?= $i ?>_fine" value="<?= $h($t['fine']) ?>">
+                </div>
+              </div>
             </div>
-            <span class="imp-sep" aria-hidden="true">—</span>
-            <div class="imp-field">
-              <label for="ti-<?= $i ?>f">Fine</label>
-              <input id="ti-<?= $i ?>f" type="time" name="turno_<?= $i ?>_fine" value="<?= $h($t['fine']) ?>">
-            </div>
+          <?php endfor; ?>
           </div>
         </div>
-      <?php endfor; ?>
+        <div class="imp-turni-col imp-turni-prezzi">
+          <p class="imp-sub-head">Costo per turno <span class="imp-unit">€</span></p>
+          <p class="imp-card-desc" style="margin-bottom:12px">Importo corrisposto all'operatore per ogni turno effettuato.</p>
+          <div class="imp-orari-stack">
+          <?php for ($i = 1; $i <= 3; $i++):
+            $ptKey  = ['mattino','sera','notte'][$i-1];
+            $ptVal  = $prezzi[$ptKey] ?? ($i === 1 ? $pm : ($i === 2 ? $ps : $pn));
+            $t      = $turns[$i] ?? ['nome' => $dn[$i-1]];
+            $vis    = $i <= $numT ? '' : ' style="display:none"';
+          ?>
+            <div class="imp-field imp-prezzo-row" data-idx="<?= $i ?>"<?= $vis ?>>
+              <label for="imp-p<?= $i ?>"><?= $h($t['nome']) ?></label>
+              <input id="imp-p<?= $i ?>" type="number" step="0.01" min="0"
+                     name="prezzo_turno_<?= $i ?>" value="<?= $h(number_format((float)$ptVal, 2, '.', '')) ?>">
+            </div>
+          <?php endfor; ?>
+          </div>
+        </div>
       </div>
       <div class="imp-form-footer">
-        <button type="submit">Salva configurazione turni</button>
+        <button type="submit">Salva turni e prezzi</button>
       </div>
     </form>
     <script>
     function aggiornaRighe(n) {
       n = parseInt(n);
-      document.querySelectorAll('.imp-turno-row').forEach(function(r) {
+      document.querySelectorAll('.imp-turno-row, .imp-prezzo-row').forEach(function(r) {
         r.style.display = parseInt(r.dataset.idx) <= n ? '' : 'none';
       });
     }
@@ -344,35 +368,6 @@ $ps = $prezzi['sera']    ?? 70.0;
       </div>
       <div class="imp-form-footer">
         <button type="submit">Salva fuso orario</button>
-      </div>
-    </form>
-  </section>
-
-  <section class="imp-card">
-    <div class="imp-card-head">
-      <div class="imp-card-ico" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M13 7.5a3.5 3.5 0 1 0 0 5"/><path d="M6.5 9.5h5M6.5 11h5"/></svg>
-      </div>
-      <div>
-        <h2 class="imp-card-title">Costo turni</h2>
-        <p class="imp-card-desc">Importo corrisposto per ogni turno effettuato. Visibile nel riepilogo guadagni degli operatori.</p>
-      </div>
-    </div>
-    <form method="post">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="prezzi">
-      <div class="imp-price-row">
-        <div class="imp-field">
-          <label for="imp-pm">Mattino <span class="imp-unit">€</span></label>
-          <input id="imp-pm" type="number" step="0.01" min="0" name="prezzo_mattino" value="<?= $h($nv($pm)) ?>">
-        </div>
-        <div class="imp-field">
-          <label for="imp-ps">Sera <span class="imp-unit">€</span></label>
-          <input id="imp-ps" type="number" step="0.01" min="0" name="prezzo_sera" value="<?= $h($nv($ps)) ?>">
-        </div>
-      </div>
-      <div class="imp-form-footer">
-        <button type="submit">Salva prezzi</button>
       </div>
     </form>
   </section>

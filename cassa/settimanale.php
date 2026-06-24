@@ -241,14 +241,19 @@ if (($_GET['export'] ?? '') === 'csv') {
     <?php endfor; ?>
   </div>
   <div class="topbar-actions">
-    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
-    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
+    <?php if (!is_revisore()): ?>
+    <button type="submit" form="frm-sett" class="topbar-action-btn sett-save-btn">Salva</button>
+    <?php endif; ?>
+    <a class="topbar-action-btn ghost" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
+    <a class="topbar-action-btn ghost" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
   </div>
 </header>
 
 <?php if (isset($_GET['ok'])): ?><div class="ok">Salvato.</div><?php endif; ?>
 
-<form method="post">
+<div class="sett-layout">
+<div class="sett-days-col">
+<form method="post" id="frm-sett">
 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
 <div class="turni">
 <?php foreach ($giorni as $d):
@@ -288,9 +293,9 @@ if (($_GET['export'] ?? '') === 'csv') {
   </section>
 <?php endforeach; ?>
 </div>
-<?php if (!is_revisore()): ?><div class="actions sett-save"><button type="submit">Salva settimana</button></div><?php endif; ?>
 </form>
-
+</div>
+<aside class="sett-totals-col">
 <div class="riepilogo riepilogo-main">
   <h3>Totali settimana <?= $sett ?> (<?= $dayStart ?>&ndash;<?= $dayEnd ?> <?= $h($nomiMesi[$mese]) ?>)</h3>
   <table class="grid">
@@ -337,5 +342,7 @@ if (($_GET['export'] ?? '') === 'csv') {
   <?php if ($prev_tg > 0 || $prev_banc > 0): ?>
   <p class="sett-compare-note">vs settimana <?= $prevSett['sett'] ?> (<?= $prevDs ?>&ndash;<?= $prevDe ?> <?= $h($nomiMesi[$prevSett['mese']]) ?>)</p>
   <?php endif; ?>
+</div>
+</aside>
 </div>
 </body></html>

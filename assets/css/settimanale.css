@@ -73,24 +73,68 @@
   flex-wrap: wrap
 }
 
+/* Save button in topbar: override .topbar button ghost style */
+.topbar-actions .sett-save-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent)
+}
+
+.topbar-actions .sett-save-btn:hover {
+  background: var(--accent-ink)
+}
+
+/* ============================================================
+   2-column page layout
+   ============================================================ */
+
+.sett-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  padding: 16px 24px 48px;
+  align-items: start
+}
+
+/* Days column: 2-col grid, last odd card stretches */
+.sett-days-col .turni {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px
+}
+
+.sett-days-col .turni .turno:last-child:nth-child(odd) {
+  grid-column: 1 / -1
+}
+
+/* Totals column: sticky sidebar */
+.sett-totals-col {
+  position: sticky;
+  top: 60px
+}
+
+.riepilogo-main {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  box-shadow: var(--sh)
+}
+
+.riepilogo-main h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 12px
+}
+
 /* Visual separation between the two mini-tables inside each turno card */
 .turni .turno table.grid + table.grid {
   margin-top: 10px;
   border-top: 1px solid var(--border)
 }
 
-/* Save button row */
-.sett-save {
-  display: flex;
-  justify-content: flex-end;
-  padding: 4px 24px 20px
-}
-
-/* Riepilogo totali settimana */
-.riepilogo-main {
-  max-width: 680px
-}
-
+/* Delta badges in totals */
 .sett-delta {
   display: inline-block;
   font-size: 10px;
@@ -112,3 +156,32 @@
   text-align: right
 }
 
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 960px) {
+  .sett-layout {
+    grid-template-columns: 1fr;
+    padding: 12px 16px 32px
+  }
+
+  .sett-totals-col {
+    position: static
+  }
+
+  /* On narrow screens the days grid stays 2-col */
+  .sett-days-col .turni {
+    grid-template-columns: 1fr 1fr
+  }
+}
+
+@media (max-width: 600px) {
+  .sett-days-col .turni {
+    grid-template-columns: 1fr
+  }
+
+  .sett-days-col .turni .turno:last-child:nth-child(odd) {
+    grid-column: auto
+  }
+}
