@@ -2,6 +2,21 @@
    Settimanale — navigazione settimane
    ============================================================ */
 
+/* Topbar: left group (title + nav + tabs) */
+.sett-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0
+}
+
+.sett-topbar-title {
+  font-size: 14px;
+  white-space: nowrap
+}
+
 .settimana-nav {
   display: flex;
   align-items: center;
@@ -65,7 +80,7 @@
   color: #fff
 }
 
-/* Topbar right group: week tabs + export buttons */
+/* Week tabs group */
 .sett-topbar-actions {
   display: flex;
   gap: 6px;
@@ -73,15 +88,25 @@
   flex-wrap: wrap
 }
 
-/* Save button in topbar: override .topbar button ghost style */
-.topbar-actions .sett-save-btn {
+/* Save button: primary, overrides .topbar button ghost from core.css */
+.sett-save-btn {
+  display: inline-flex;
+  align-items: center;
   background: var(--accent);
   color: #fff;
-  border-color: var(--accent)
+  border: 1px solid var(--accent);
+  border-radius: var(--rs);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .1s
 }
 
-.topbar-actions .sett-save-btn:hover {
-  background: var(--accent-ink)
+.sett-save-btn:hover {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink)
 }
 
 /* ============================================================
@@ -90,48 +115,63 @@
 
 .sett-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 360px;
   gap: 16px;
   padding: 16px 24px 48px;
   align-items: start
 }
 
-/* Days column: 2-col grid, last odd card stretches */
+/* Days column: 2-col grid, override core.css .turni flex+padding */
 .sett-days-col .turni {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px
+  gap: 12px;
+  padding: 0
 }
 
+/* Last odd card stretches full width */
 .sett-days-col .turni .turno:last-child:nth-child(odd) {
   grid-column: 1 / -1
+}
+
+/* Visual separation between the two mini-tables inside each turno card */
+.sett-days-col .turni .turno table.grid + table.grid {
+  margin-top: 10px;
+  border-top: 1px solid var(--border)
 }
 
 /* Totals column: sticky sidebar */
 .sett-totals-col {
   position: sticky;
-  top: 60px
+  top: 0
+}
+
+/* Override core.css .riepilogo { margin: 18px 24px } in sidebar context */
+.sett-totals-col .riepilogo {
+  margin: 0
 }
 
 .riepilogo-main {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px 20px;
-  box-shadow: var(--sh)
+  overflow-x: auto
 }
 
 .riepilogo-main h3 {
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
-  margin: 0 0 12px
+  margin: 0 0 12px;
+  white-space: nowrap
 }
 
-/* Visual separation between the two mini-tables inside each turno card */
-.turni .turno table.grid + table.grid {
-  margin-top: 10px;
-  border-top: 1px solid var(--border)
+/* Compact table in narrow sidebar */
+.riepilogo-main table.grid {
+  font-size: 11px;
+  min-width: 300px
+}
+
+.riepilogo-main .grid th,
+.riepilogo-main .grid td {
+  padding: 5px 6px
 }
 
 /* Delta badges in totals */
@@ -160,7 +200,13 @@
    Responsive
    ============================================================ */
 
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
+  .sett-layout {
+    grid-template-columns: 1fr 300px
+  }
+}
+
+@media (max-width: 900px) {
   .sett-layout {
     grid-template-columns: 1fr;
     padding: 12px 16px 32px
@@ -168,11 +214,6 @@
 
   .sett-totals-col {
     position: static
-  }
-
-  /* On narrow screens the days grid stays 2-col */
-  .sett-days-col .turni {
-    grid-template-columns: 1fr 1fr
   }
 }
 

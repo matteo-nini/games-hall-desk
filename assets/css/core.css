@@ -1251,7 +1251,9 @@ body {
 .topbar-actions {
   display: flex;
   gap: 8px;
-  align-items: center
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0
 }
 
 .topbar-action-btn {

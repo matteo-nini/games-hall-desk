@@ -87,7 +87,9 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     <a class="filtro-btn <?= $filtro==='aperto'?'active':'' ?>" href="?filtro=aperto">Aperti</a>
     <a class="filtro-btn <?= $filtro==='risolto'?'active':'' ?>" href="?filtro=risolto">Risolti</a>
   </div>
-  <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-ticket').showModal()">+ Apri ticket</button>
+  <div class="topbar-actions">
+    <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-ticket').showModal()">+ Apri ticket</button>
+  </div>
 </header>
 
 <?php if (isset($_GET['ok'])): ?><div class="ok">Salvato</div><?php endif; ?>

@@ -1,5 +1,5 @@
 -- Import prestiti da Excel
--- Generato il: 2026-06-25 00:41:50
+-- Generato il: 2026-06-25
 
 START TRANSACTION;
 

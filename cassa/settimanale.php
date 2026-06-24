@@ -222,30 +222,30 @@ if (($_GET['export'] ?? '') === 'csv') {
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
-  <div><strong><?= $h($cfg['nome_sala']) ?></strong> · Bet/Win SNAI</div>
-  <div class="settimana-nav">
-    <a class="settimana-nav-btn" href="?anno=<?= $prevSett['anno'] ?>&mese=<?= $prevSett['mese'] ?>&sett=<?= $prevSett['sett'] ?>" title="Settimana precedente">&#8592;</a>
-    <span class="settimana-nav-label">
-      <?= $h($nomiMesi[$mese]) ?> <?= $anno ?> &mdash;
-      Settimana <?= $sett ?> &nbsp;
-      <span class="settimana-nav-range"><?= $dayStart ?>&ndash;<?= $dayEnd ?></span>
-    </span>
-    <a class="settimana-nav-btn" href="?anno=<?= $nextSett['anno'] ?>&mese=<?= $nextSett['mese'] ?>&sett=<?= $nextSett['sett'] ?>" title="Settimana successiva">&#8594;</a>
-  </div>
-  <div class="sett-topbar-actions">
-    <!-- Selezione rapida settimana del mese -->
-    <?php for ($s = 1; $s <= $numSettimane; $s++):
-        $ds = ($s-1)*7+1; $de = min($s*7,$giorniMese); ?>
-    <a class="settimana-tab <?= $s===$sett?'active':'' ?>"
-       href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $s ?>"><?= $ds ?>&ndash;<?= $de ?></a>
-    <?php endfor; ?>
+  <div class="sett-topbar-left">
+    <div class="sett-topbar-title"><strong><?= $h($cfg['nome_sala']) ?></strong> · Bet/Win</div>
+    <div class="settimana-nav">
+      <a class="settimana-nav-btn" href="?anno=<?= $prevSett['anno'] ?>&mese=<?= $prevSett['mese'] ?>&sett=<?= $prevSett['sett'] ?>" title="Settimana precedente">&#8592;</a>
+      <span class="settimana-nav-label">
+        <?= $h($nomiMesi[$mese]) ?> <?= $anno ?>
+        <span class="settimana-nav-range">&nbsp;<?= $dayStart ?>&ndash;<?= $dayEnd ?></span>
+      </span>
+      <a class="settimana-nav-btn" href="?anno=<?= $nextSett['anno'] ?>&mese=<?= $nextSett['mese'] ?>&sett=<?= $nextSett['sett'] ?>" title="Settimana successiva">&#8594;</a>
+    </div>
+    <div class="sett-topbar-actions">
+      <?php for ($s = 1; $s <= $numSettimane; $s++):
+          $ds = ($s-1)*7+1; $de = min($s*7,$giorniMese); ?>
+      <a class="settimana-tab <?= $s===$sett?'active':'' ?>"
+         href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $s ?>"><?= $ds ?>&ndash;<?= $de ?></a>
+      <?php endfor; ?>
+    </div>
   </div>
   <div class="topbar-actions">
     <?php if (!is_revisore()): ?>
-    <button type="submit" form="frm-sett" class="topbar-action-btn sett-save-btn">Salva</button>
+    <button type="submit" form="frm-sett" class="sett-save-btn">Salva</button>
     <?php endif; ?>
-    <a class="topbar-action-btn ghost" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
-    <a class="topbar-action-btn ghost" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
+    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
+    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
   </div>
 </header>
 
