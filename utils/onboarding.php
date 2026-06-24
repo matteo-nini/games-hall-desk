@@ -146,7 +146,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <ul>
             <li><strong>Orari turni</strong>: definisci le fasce orarie di mattino e sera per il riconoscimento automatico del turno corrente.</li>
             <li><strong>Costo turni</strong>: importo corrisposto per turno, visibile nel riepilogo guadagni degli operatori.</li>
-            <li><strong>Permessi</strong>: stabilisci se gli operatori possono modificare i turni programmati.</li>
+            <li><strong>Permessi</strong>: scegli se gli operatori possono modificare solo il proprio turno o qualsiasi turno (utile per correzioni e inserimento storico); scegli se possono modificare il calendario turni programmati.</li>
             <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza e Prestiti secondo le necessità della sala.</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('account/admin/impostazioni.php') ?>">Vai alle impostazioni →</a>

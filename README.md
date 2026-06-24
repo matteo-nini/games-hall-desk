@@ -55,7 +55,7 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 ### Impostazioni configurabili
 - Orari turni mattino/sera (per determinare il turno corrente nella dashboard)
 - Costo orario per turno (visibile nei guadagni operatori)
-- Permessi operatori per modifica turni programmati
+- **Permessi operatori**: modifica turni nel calendario; modifica turni giornalieri (solo propri o qualsiasi)
 - Moduli opzionali: Ticket assistenza · Prestiti e rientri
 - **Dati assistenza tecnica**: numero di telefono, codice lock, password — mostrati agli operatori all'apertura di ogni ticket
 - Retention log audit (minimo 7 giorni)
@@ -93,68 +93,62 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 
 ## Setup
 
-### 1. Database
+### Metodo raccomandato — Wizard web
 
-Importa le migrazioni nell'ordine:
+Apri `install/setup.php` nel browser: il wizard guida l'installazione in 6 passi (connessione DB, schema, account responsabile, nome sala e moduli, macchine, completato). Al termine **elimina la cartella `install/`**.
+
+### Metodo alternativo — Riga di comando
 
 ```bash
-mysql -u root -p games_palace < sql/schema.sql
-mysql -u root -p games_palace < sql/002_ticket_assistenza.sql
-mysql -u root -p games_palace < sql/003_prestiti.sql
-mysql -u root -p games_palace < sql/004_turni_programmati.sql
-mysql -u root -p games_palace < sql/005_profilo_impostazioni.sql
-mysql -u root -p games_palace < sql/006_moduli.sql
-mysql -u root -p games_palace < sql/007_seriali_civ.sql
+# 1. Crea il database
+mysql -u root -p -e "CREATE DATABASE cassa_sala CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+# 2. Installa lo schema (file unico)
+mysql -u root -p cassa_sala < install/schema.sql
 ```
 
-> Le migrazioni 004–007 aggiungono colonne con `IF NOT EXISTS`: sono sicure da eseguire più volte. La tabella `login_attempts` per il rate limiting viene creata automaticamente al primo accesso.
+### Configurazione
 
-### 2. Configurazione
-
-Rinomina `config.example.php` → `config.php` e compila:
+Il wizard crea `install/config.php` automaticamente. Per configurare a mano:
 
 ```php
 return [
     'db' => [
         'host'    => 'localhost',
-        'name'    => 'games_palace',
+        'name'    => 'cassa_sala',
         'user'    => 'utente_db',
         'pass'    => 'password_db',
         'charset' => 'utf8mb4',
     ],
-    'nome_sala'  => 'Games Palace',
+    'nome_sala'  => 'Nome Sala',
     'tolleranza' => 5,   // € — soglia scostamento giornaliero (sopra = banner rosso)
 ];
 ```
 
-`config.php` è escluso dal repository — non versionarlo mai.
+`config.php` non va mai versionato.
 
-### 3. Primo responsabile
+### Parco macchine e operatori
 
-Apri `install/setup.php` nel browser, crea il primo account responsabile, poi **elimina il file o la cartella `install/`**.
+Da `account/admin/macchine.php` inserisci VLT e AWP con fornitore, seriale e CIV. Da `account/admin/utenti.php` crea gli account operatori.
 
-### 4. Parco macchine e operatori
-
-Da `account/admin/macchine.php` inserisci tutte le VLT e AWP con fornitore, seriale e CIV. Da `account/admin/utenti.php` crea gli account operatori.
-
-### 5. Impostazioni sala
+### Impostazioni sala
 
 Da `account/admin/impostazioni.php` configura:
 - Orari turni mattino/sera
+- Permessi operatori (modifica turni propri o qualsiasi)
 - Dati assistenza tecnica (numero, lock, password)
-- Eventuali moduli opzionali da disabilitare
+- Moduli opzionali (ticket assistenza, prestiti)
 
 ---
 
-## Deploy su SiteGround (o hosting cPanel)
+## Deploy su hosting cPanel / SiteGround
 
-1. Crea il database MySQL dal pannello e annotare credenziali
-2. In phpMyAdmin importa i file SQL nell'ordine indicato sopra
-3. Carica i file via SFTP nella cartella pubblica
-4. Compila `config.php` con i dati reali
-5. Attiva HTTPS → imposta `'cookie_secure' => true` in `includes/auth.php`
-6. Esegui `install/setup.php` dal browser, crea il responsabile, **elimina la cartella `install/`**
-7. Verifica che `sw.js` sia raggiungibile dalla root del dominio (necessario per la PWA)
+1. Crea il database MySQL dal pannello e annota le credenziali
+2. Carica i file via SFTP nella cartella pubblica
+3. Apri `install/setup.php` dal browser e completa il wizard
+4. Attiva HTTPS → imposta `'cookie_secure' => true` in `includes/auth.php`
+5. **Elimina la cartella `install/`** dopo aver verificato l'accesso
+6. Verifica che `sw.js` sia raggiungibile dalla root del dominio (necessario per la PWA)
 
 ---
 
@@ -185,7 +179,7 @@ Implementate in `includes/lib.php` → `calcola_turno()` (fonte di verità lato 
 
 | Operazione | Operatore | Responsabile | Revisore |
 |---|:---:|:---:|:---:|
-| Compila turno giornaliero | ✓ (solo il proprio) | ✓ | ✗ |
+| Compila turno giornaliero | ✓ (policy configurabile) | ✓ | ✗ |
 | Chiude giornata | ✓ | ✓ | ✗ |
 | Riapre giornata | ✗ | ✓ | ✗ |
 | Apre/chiude ticket assistenza | ✓ | ✓ | ✗ |
@@ -247,14 +241,10 @@ games-palace-desk/
 │   ├── js/                      Script per componente
 │   └── img/                     Icone e immagini (gp-icon.svg per PWA)
 │
-├── sql/
-│   ├── schema.sql               Schema principale
-│   ├── 002_ticket_assistenza.sql
-│   ├── 003_prestiti.sql
-│   ├── 004_turni_programmati.sql
-│   ├── 005_profilo_impostazioni.sql
-│   ├── 006_moduli.sql
-│   └── 007_seriali_civ.sql      Aggiunge colonne seriale e CIV alle macchine
+├── install/
+│   ├── setup.php                Wizard di installazione (eliminare dopo il setup)
+│   ├── schema.sql               Schema database completo (unico file)
+│   └── config.php               ⚠ Creato dal wizard — non versionare
 │
 ├── manifest.php                 Manifest PWA dinamico (supporta sottocartelle)
 ├── sw.js                        Service worker (network-first PHP, cache-first asset)

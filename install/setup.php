@@ -115,11 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $root = setup_connect();
             $root->exec("CREATE DATABASE IF NOT EXISTS `{$c['name']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             $db   = setup_connect($c['name']);
-            foreach (['schema','002_ticket_assistenza','003_prestiti',
-                      '004_turni_programmati','005_profilo_impostazioni','006_moduli','007_seriali_civ'] as $f) {
-                $path = __DIR__ . "/../sql/{$f}.sql";
-                if (file_exists($path)) setup_run_file($db, $path);
-            }
+            setup_run_file($db, __DIR__ . '/schema.sql');
             $_SESSION['setup_step'] = 3;
             $_SESSION['setup_ok']   = 'Database creato e schema installato correttamente.';
         } catch (Throwable $e) {
