@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM ticket WHERE turno_id=?')->execute([$tid]);
             $stt = $pdo->prepare('INSERT INTO ticket (turno_id,fornitore,importo) VALUES (?,?,?)');
             foreach (fornitori() as $f) { $imp=$num($d['ticket'][$f]??0); if ($imp!=0.0) $stt->execute([$tid,$f,$imp]); }
-            if ($own === null && $user['ruolo'] === 'operatore')
+            if ($own === null)
                 $pdo->prepare('UPDATE turni SET operatore_id=? WHERE id=?')->execute([(int)$user['id'],$tid]);
         }
         $pdo->commit(); audit('salvataggio_giornata','giornate',(int)$g['id'],$data);
