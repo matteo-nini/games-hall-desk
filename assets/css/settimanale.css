@@ -115,7 +115,7 @@
 
 .sett-layout {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr 560px;
   gap: 16px;
   padding: 16px 24px 48px;
   align-items: start
@@ -135,7 +135,7 @@
 }
 
 /* Visual separation between the two mini-tables inside each turno card */
-.sett-days-col .turni .turno table.grid + table.grid {
+.sett-days-col .turni .turno table.grid+table.grid {
   margin-top: 10px;
   border-top: 1px solid var(--border)
 }
@@ -143,7 +143,7 @@
 /* Totals column: sticky sidebar */
 .sett-totals-col {
   position: sticky;
-  top: 0
+  top: 20px
 }
 
 /* Override core.css .riepilogo { margin: 18px 24px } in sidebar context */
@@ -186,8 +186,15 @@
   letter-spacing: .02em
 }
 
-.delta-up { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green) }
-.delta-dn { background: color-mix(in srgb, var(--red)   15%, transparent); color: var(--red)   }
+.delta-up {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  color: var(--green)
+}
+
+.delta-dn {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  color: var(--red)
+}
 
 .sett-compare-note {
   font-size: 11px;
