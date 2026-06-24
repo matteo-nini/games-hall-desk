@@ -11,6 +11,9 @@ $TOL  = (float)($cfg['tolleranza'] ?? 5);
 $data = $_GET['data'] ?? date('Y-m-d');
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) $data = date('Y-m-d');
 
+$turns    = get_turns($sett);
+$fornitori = get_fornitori($pdo);
+$lastTurn  = max(array_keys($turns));
 $macchine = $pdo->query('SELECT * FROM macchine WHERE attiva = 1 AND tipo = "VLT" ORDER BY ordine')->fetchAll();
 $byforn = [];
 foreach ($macchine as $m) $byforn[$m['fornitore']][] = $m;
@@ -31,9 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($g['stato'] === 'chiusa' && !is_responsabile()) { http_response_code(403); exit('Giornata chiusa: modifica non consentita.'); }
 
-    $in = $_POST['turno'] ?? [];
-    $st_n = (int)($_POST['salva_turno'] ?? 2);
-    $salva_n = is_responsabile() ? [1,2] : (in_array($st_n,[1,2]) ? [$st_n] : [2]);
+    $in      = $_POST['turno'] ?? [];
+    $turnNums = array_keys($turns);
+    $st_n    = (int)($_POST['salva_turno'] ?? $lastTurn);
+    $salva_n = is_responsabile() ? $turnNums : (in_array($st_n, $turnNums) ? [$st_n] : [$lastTurn]);
     try {
         $pdo->beginTransaction();
         foreach ($salva_n as $n) {
@@ -51,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($macchine as $m) { $imp=$num($d['scass'][$m['id']]??0); if ($imp!=0.0) $sts->execute([$tid,(int)$m['id'],$imp]); }
             $pdo->prepare('DELETE FROM ticket WHERE turno_id=?')->execute([$tid]);
             $stt = $pdo->prepare('INSERT INTO ticket (turno_id,fornitore,importo) VALUES (?,?,?)');
-            foreach (fornitori() as $f) { $imp=$num($d['ticket'][$f]??0); if ($imp!=0.0) $stt->execute([$tid,$f,$imp]); }
+            foreach ($fornitori as $f) { $imp=$num($d['ticket'][$f]??0); if ($imp!=0.0) $stt->execute([$tid,$f,$imp]); }
             $pdo->prepare('UPDATE turni SET operatore_id=? WHERE id=?')->execute([(int)$user['id'],$tid]);
         }
         $pdo->commit(); audit('salvataggio_giornata','giornate',(int)$g['id'],$data);
@@ -67,7 +71,7 @@ $g = ensure_giornata($pdo, $data);
 $chiusa = ($g['stato'] === 'chiusa');
 $readonly = $chiusa && !is_responsabile();
 $turni = [];
-foreach ([1,2] as $n) {
+foreach (array_keys($turns) as $n) {
     $t = ensure_turno($pdo, (int)$g['id'], $n); $tid = (int)$t['id'];
     $cont=[]; $st=$pdo->prepare('SELECT taglio,pezzi FROM contanti WHERE turno_id=?'); $st->execute([$tid]);
     foreach ($st as $r) $cont[(int)$r['taglio']]=(int)$r['pezzi'];
@@ -77,6 +81,15 @@ foreach ([1,2] as $n) {
     $tk=[]; $st=$pdo->prepare('SELECT fornitore,importo FROM ticket WHERE turno_id=?'); $st->execute([$tid]);
     foreach ($st as $r) $tk[$r['fornitore']]=(float)$r['importo'];
     $turni[$n] = ['t'=>$t,'cont'=>$cont,'sc'=>$sc,'tk'=>$tk,'sum_refill'=>$sum_refill];
+}
+
+/* Alert giornata precedente ancora aperta */
+$prevDayAlert = false;
+if ($data === date('Y-m-d')) {
+    $stPrev = $pdo->prepare("SELECT stato FROM giornate WHERE data=DATE_SUB(CURDATE(),INTERVAL 1 DAY)");
+    $stPrev->execute();
+    $prevDay = $stPrev->fetch();
+    $prevDayAlert = ($prevDay && $prevDay['stato'] === 'aperta');
 }
 $users = [];
 foreach ($pdo->query('SELECT id, COALESCE(NULLIF(nome,""),username) nome FROM utenti') as $u) $users[(int)$u['id']] = $u['nome'];
@@ -94,13 +107,13 @@ foreach ($stProg as $r) $programmati[(int)$r['numero']] = $r['nome'];
    'assegnato' = l'operatore può modificare solo il turno assegnato a lui. */
 $editLibero = ($sett['turno_edit_libero'] ?? '1') === '1';
 $canEdit = [];
-foreach ([1,2] as $n) {
-    $own = $turni[$n]['t']['operatore_id'];
+foreach (array_keys($turns) as $n) {
+    $own     = $turni[$n]['t']['operatore_id'];
     $proprio = $own === null || (int)$own === (int)$user['id'];
     $canEdit[$n] = ($editLibero || is_responsabile() || $proprio)
                    && !($chiusa && !is_responsabile());
 }
-$anyEdit = $canEdit[1] || $canEdit[2];
+$anyEdit = in_array(true, $canEdit, true);
 
 $schedName = fn($n) => $programmati[$n] ?? null;
 $ownerName = fn($n) => ($turni[$n]['t']['operatore_id'] ? ($users[(int)$turni[$n]['t']['operatore_id']] ?? '—') : null);
@@ -111,7 +124,7 @@ $prev = date('Y-m-d', strtotime("$data -1 day"));
 $next = date('Y-m-d', strtotime("$data +1 day"));
 
 /* ---------------- render schede input di un turno ---------------- */
-$render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName) {
+$render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$canEdit,$ownerName) {
     $T = $turni[$n]; $ro = $canEdit[$n] ? '' : 'disabled'; $hide = $n===1 ? '1' : '0';
 ?>
   <section class="turno" id="turno-<?= $n ?>" role="tabpanel" aria-labelledby="tab-<?= $n ?>" data-turno="<?= $n ?>" data-hidden="<?= $hide ?>" data-refill="<?= $h($T['sum_refill']) ?>" data-tol="<?= $h($TOL) ?>">
@@ -154,7 +167,7 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
         </div>
         <div class="panel">
           <h3>Ticket pagati</h3>
-          <?php foreach (fornitori() as $f): $fid='t'.$n.'-tk-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($f)); ?>
+          <?php foreach ($fornitori as $f): $fid='t'.$n.'-tk-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($f)); ?>
           <div class="field"><label for="<?= $fid ?>"><?= $h($f) ?></label><input id="<?= $fid ?>" type="number" inputmode="decimal" step="0.01" class="ticket" name="turno[<?= $n ?>][ticket][<?= $f ?>]" value="<?= $h($nv($T['tk'][$f] ?? 0)) ?>" <?= $ro ?>></div>
           <?php endforeach; ?>
           <div class="ptot"><span>Totale ticket</span><span class="v o-ticket">0,00</span></div>
@@ -203,20 +216,15 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
     </div>
     <div class="sh-tabbar">
       <div class="tabs" role="tablist" aria-label="Selezione turno">
-        <button type="button" id="tab-1" role="tab" aria-selected="false" aria-controls="turno-1" class="tab matt" data-tab="1" onclick="showTab(1)">Mattino<small><?php
+        <?php foreach ($turns as $n => $turn): $isLast = ($n === $lastTurn); ?>
+        <button type="button" id="tab-<?= $n ?>" role="tab" aria-selected="<?= $isLast ? 'true' : 'false' ?>" aria-controls="turno-<?= $n ?>" class="tab" data-tab="<?= $n ?>" onclick="showTab(<?= $n ?>)"><?= $h($turn['nome']) ?><small><?php
             $parts = [];
-            if ($schedName(1)) $parts[] = 'Assegnato: '.$h($schedName(1));
-            if ($ownerName(1) && $ownerName(1) !== $schedName(1)) $parts[] = 'Salvato: '.$h($ownerName(1));
-            elseif ($ownerName(1) && !$schedName(1)) $parts[] = 'Salvato: '.$h($ownerName(1));
-            echo $parts ? implode(' · ', $parts) : 'controllo';
+            if ($schedName($n)) $parts[] = 'Assegnato: '.$h($schedName($n));
+            if ($ownerName($n) && $ownerName($n) !== $schedName($n)) $parts[] = 'Salvato: '.$h($ownerName($n));
+            elseif ($ownerName($n) && !$schedName($n)) $parts[] = 'Salvato: '.$h($ownerName($n));
+            echo $parts ? implode(' · ', $parts) : ($isLast ? 'chiusura' : 'controllo');
         ?></small></button>
-        <button type="button" id="tab-2" role="tab" aria-selected="true" aria-controls="turno-2" class="tab sera" data-tab="2" onclick="showTab(2)">Sera<small><?php
-            $parts = [];
-            if ($schedName(2)) $parts[] = 'Assegnato: '.$h($schedName(2));
-            if ($ownerName(2) && $ownerName(2) !== $schedName(2)) $parts[] = 'Salvato: '.$h($ownerName(2));
-            elseif ($ownerName(2) && !$schedName(2)) $parts[] = 'Salvato: '.$h($ownerName(2));
-            echo $parts ? implode(' · ', $parts) : 'chiusura';
-        ?></small></button>
+        <?php endforeach; ?>
       </div>
       <div class="sh-stats-wrap">
         <div class="sh-stats" aria-label="Dati chiusura turno">
@@ -228,9 +236,9 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
           <span class="ss-item"><span class="ss-l">Bancomat</span><span class="ss-v" id="g-bancomat">—</span></span>
           <span class="ss-item"><span class="ss-l">Ticket</span><span class="ss-v" id="g-ticket">—</span></span>
           <!-- <span class="ss-sep" aria-hidden="true"></span> -->
-          <span class="ss-item ss-sm"><span class="ss-l">NOVO</span><span class="ss-v" id="g-NOVO">—</span></span>
-          <span class="ss-item ss-sm"><span class="ss-l">INSPIRED</span><span class="ss-v" id="g-INSPIRED">—</span></span>
-          <span class="ss-item ss-sm"><span class="ss-l">SPIELO</span><span class="ss-v" id="g-SPIELO">—</span></span>
+          <?php foreach ($fornitori as $f): $fid = 'g-'.preg_replace('/[^a-z0-9]+/i','-',strtolower($f)); ?>
+          <span class="ss-item ss-sm"><span class="ss-l"><?= $h($f) ?></span><span class="ss-v" id="<?= $fid ?>">—</span></span>
+          <?php endforeach; ?>
           <span class="ss-item"><span class="ss-l">VLT tot.</span><span class="ss-v" id="g-incasso">—</span></span>
         </div>
         <button class="ss-arr ss-arr-l" aria-hidden="true" tabindex="-1">&#8249;</button>
@@ -288,17 +296,31 @@ $render = function($n) use ($h,$nv,$byforn,$turni,$TOL,$data,$canEdit,$ownerName
   </div>
 
 </div>
+<?php if ($prevDayAlert): ?><div class="warn" style="background:var(--amber);color:#000;padding:10px 16px;font-size:13px;text-align:center">&#9888; La giornata di ieri risulta ancora <strong>aperta</strong>. <a href="?data=<?= $h($prev) ?>" style="color:inherit;font-weight:700">Vai al giorno precedente</a> per chiuderla.</div><?php endif; ?>
 <?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
 
 <form method="post" id="frm">
 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-<input type="hidden" name="salva_turno" id="salva_turno" value="2">
-<?php $render(2); $render(1); ?>
+<input type="hidden" name="salva_turno" id="salva_turno" value="<?= $lastTurn ?>">
+<?php foreach (array_reverse(array_keys($turns)) as $n) $render($n); ?>
 </form>
 
 <?php if (isset($_GET['ok'])): ?>
 <div class="ok">Salvato</div>
 <?php endif; ?>
 
+<?php
+$gpSuppliers = [];
+foreach ($fornitori as $f) {
+    $gpSuppliers[preg_replace('/[^a-z0-9]+/i', '-', strtolower($f))] = $f;
+}
+$gpTurns = [];
+foreach ($turns as $n => $t) $gpTurns[] = ['n' => $n, 'nome' => $t['nome']];
+?>
+<script>
+var GP_SUPPLIERS = <?= json_encode($gpSuppliers) ?>;
+var GP_LAST_TURN = <?= $lastTurn ?>;
+var GP_TURNS     = <?= json_encode($gpTurns) ?>;
+</script>
 <script src="<?= asset_url('assets/js/giornaliero.js') ?>"></script>
 </body></html>

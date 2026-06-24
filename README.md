@@ -9,11 +9,12 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 ## Caratteristiche principali
 
 ### Cassa giornaliera
-- Doppio turno (Mattino · Sera) con schede separate — il salvataggio è sempre isolato al turno attivo
+- **1–3 turni configurabili** (nomi e orari personalizzabili: Mattino · Sera · Notte o qualsivoglia nomenclatura) con schede separate — il salvataggio è sempre isolato al turno attivo
 - Conteggio banconote per taglio con calcolo automatico del totale contanti
-- Scassettamenti VLT per macchina, raggruppati per fornitore (NOVO · INSPIRED · SPIELO)
+- Scassettamenti VLT per macchina, raggruppati per fornitore (configurabile: NOVO · INSPIRED · SPIELO o qualsiasi altro)
 - Refill AWP con orario e importo
 - Ticket vincita per fornitore
+- **Alert giornata precedente aperta**: comparsa automatica in cima alla pagina se il giorno precedente non è stato ancora chiuso
 - Formule di riconciliazione calcolate sia in tempo reale lato browser sia sul server
 - Banner scostamento colorato (verde / giallo / rosso) configurabile per soglia
 - **Auto-salvataggio locale**: il form si salva in `localStorage` ogni 500ms mentre scrivi — i dati sopravvivono a ricariche accidentali e vengono ripristinati automaticamente
@@ -34,7 +35,7 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - **Prestiti e rientri** — registro movimenti per persona con saldo corrente
 
 ### Gestione macchine
-- Parco macchine VLT e AWP con tipo, fornitore, ordine di visualizzazione
+- Parco macchine VLT e AWP con tipo, fornitore (dalla lista fornitori configurabile), ordine di visualizzazione
 - **Seriale e CIV** per ogni macchina — editabili inline nella lista
 - Storico guasti collassabile per macchina, con conteggio ticket aperti/risolti
 - Attivazione/disattivazione senza perdita dello storico
@@ -53,7 +54,9 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - Guida operativa (`onboarding.php`) con tab dedicati per operatore, responsabile e revisore
 
 ### Impostazioni configurabili
-- Orari turni mattino/sera (per determinare il turno corrente nella dashboard)
+- **Numero di turni** (1–3) con nome e orari personalizzabili per turno — adattabile a qualsiasi organizzazione della sala
+- **Fornitori configurabili**: lista supplier modificabile, rinominabile e riordinabile tramite drag-and-drop — propaga automaticamente a ticket, scassettamenti, Bet/Win e macchine
+- **Fuso orario**: selezionabile tra tutti i timezone PHP/IANA — utile per sale fuori dall'Europa/Roma
 - Costo orario per turno (visibile nei guadagni operatori)
 - **Permessi operatori**: modifica turni nel calendario; modifica turni giornalieri (solo propri o qualsiasi)
 - Moduli opzionali: Ticket assistenza · Prestiti e rientri

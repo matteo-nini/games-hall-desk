@@ -192,6 +192,19 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   attempted_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ---------- Fornitori (lista configurabile) ----------
+CREATE TABLE IF NOT EXISTS fornitori (
+  id     INT AUTO_INCREMENT PRIMARY KEY,
+  nome   VARCHAR(50)  NOT NULL UNIQUE,
+  ordine INT          NOT NULL DEFAULT 0,
+  attiva TINYINT(1)   NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO fornitori (nome, ordine) VALUES
+  ('NOVO',     1),
+  ('INSPIRED', 2),
+  ('SPIELO',   3);
+
 -- ---------- Impostazioni ----------
 CREATE TABLE IF NOT EXISTS impostazioni (
   chiave        VARCHAR(60)  NOT NULL PRIMARY KEY,
@@ -200,6 +213,17 @@ CREATE TABLE IF NOT EXISTS impostazioni (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
+  ('num_turni',                  '2'),
+  ('turno_1_nome',               'Mattino'),
+  ('turno_1_inizio',             '13:00'),
+  ('turno_1_fine',               '19:00'),
+  ('turno_2_nome',               'Sera'),
+  ('turno_2_inizio',             '19:00'),
+  ('turno_2_fine',               '01:00'),
+  ('turno_3_nome',               'Notte'),
+  ('turno_3_inizio',             '01:00'),
+  ('turno_3_fine',               '09:00'),
+  -- chiavi legacy (mantenute per compatibilità con installazioni esistenti)
   ('turno_mattino_inizio',       '13:00'),
   ('turno_mattino_fine',         '19:00'),
   ('turno_sera_inizio',          '19:00'),
