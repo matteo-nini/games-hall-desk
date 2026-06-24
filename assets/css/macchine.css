@@ -77,7 +77,7 @@
 /* Column header row */
 .mach-head {
   display: grid;
-  grid-template-columns: 1fr 90px 38px 1fr 68px 52px 90px 36px;
+  grid-template-columns: repeat(5, 1fr) 90px 90px 36px;
   gap: 8px;
   padding: 8px 14px;
   background: var(--surface2);
@@ -109,11 +109,15 @@
 /* Machine row */
 .mach-row {
   display: grid;
-  grid-template-columns: 1fr 90px 38px 1fr 68px 52px 90px 36px;
+  grid-template-columns: repeat(5, 1fr) 90px 90px 36px;
   gap: 8px;
   padding: 8px 14px;
   align-items: center;
   border-top: 1px solid var(--border)
+}
+
+.mach-row input {
+  width: 100%
 }
 
 .mach-row:hover {
@@ -276,7 +280,7 @@
   border-top: 1px dashed var(--border)
 }
 
-.mach-history > summary {
+.mach-history>summary {
   list-style: none;
   cursor: pointer;
   padding: 7px 14px;
@@ -289,9 +293,11 @@
   gap: 8px
 }
 
-.mach-history > summary::-webkit-details-marker { display: none }
+.mach-history>summary::-webkit-details-marker {
+  display: none
+}
 
-.mach-history[open] > summary {
+.mach-history[open]>summary {
   border-bottom: 1px solid var(--border)
 }
 
