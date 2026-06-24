@@ -136,9 +136,9 @@ h3 {
   background: var(--surface)
 }
 
-.topbar a:not(.topbar-action-btn):not(.btnlink) {
+/* .topbar a:not(.topbar-action-btn):not(.btnlink) {
   color: var(--muted)
-}
+} */
 
 .badge {
   padding: 3px 10px;
