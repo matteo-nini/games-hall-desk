@@ -560,6 +560,10 @@
   padding: 20px 24px
 }
 
+@media (max-width: 899px) {
+  .imp-sidenav { left: 0 }
+}
+
 @media (max-width: 680px) {
   .imp-sidenav { display: none }
   .imp-body { margin-left: 0; padding: 16px 16px 64px }
@@ -582,7 +586,7 @@
 
 .imp-sidenav {
   position: fixed;
-  left: 0;
+  left: var(--sidebar-w);
   top: 52px;
   width: 176px;
   height: calc(100vh - 52px);
