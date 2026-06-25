@@ -139,6 +139,20 @@ CREATE TABLE IF NOT EXISTS ticket_assistenza (
   FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ---------- Documenti ----------
+CREATE TABLE IF NOT EXISTS documenti (
+  id          INT          AUTO_INCREMENT PRIMARY KEY,
+  nome        VARCHAR(120) NOT NULL,
+  descrizione VARCHAR(255) DEFAULT NULL,
+  filename    VARCHAR(120) NOT NULL,
+  mime        VARCHAR(80)  NOT NULL DEFAULT 'application/octet-stream',
+  ordine      INT          NOT NULL DEFAULT 0,
+  visibile    TINYINT(1)   NOT NULL DEFAULT 1,
+  caricato_da INT          DEFAULT NULL,
+  caricato_il DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (caricato_da) REFERENCES utenti(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ---------- Prestiti ----------
 CREATE TABLE IF NOT EXISTS prestiti_persone (
   id             INT AUTO_INCREMENT PRIMARY KEY,
@@ -231,6 +245,7 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('operatori_modifica_turni',   '1'),
   ('turno_edit_libero',          '1'),
   ('modulo_assistenze',          '1'),
-  ('modulo_prestiti',            '1');
+  ('modulo_prestiti',            '1'),
+  ('modulo_documenti',           '1');
 
 SET foreign_key_checks = 1;

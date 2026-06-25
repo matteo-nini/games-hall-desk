@@ -158,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nome = trim($_POST['nome_sala'] ?? '');
         $ass  = isset($_POST['modulo_assistenze']) ? '1' : '0';
         $pre  = isset($_POST['modulo_prestiti'])   ? '1' : '0';
+        $doc  = isset($_POST['modulo_documenti'])  ? '1' : '0';
         if (!$db) { $_SESSION['setup_err'] = 'Database non raggiungibile.'; }
         else {
             try {
@@ -166,6 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $ups->execute(['modulo_assistenze', $ass]);
                 $ups->execute(['modulo_prestiti',   $pre]);
+                $ups->execute(['modulo_documenti',  $doc]);
                 if ($nome !== '') {
                     $cfg = (function() use ($cfgFile) { return require $cfgFile; })();
                     $cfg['nome_sala'] = $nome;
@@ -480,6 +482,13 @@ body { margin: 0; display: flex; align-items: flex-start; justify-content: cente
           <span>
             <span class="sw-check-lbl">Prestiti</span>
             <span class="sw-check-sub">Tracciamento prestiti di denaro a clienti o collaboratori</span>
+          </span>
+        </label>
+        <label class="sw-check">
+          <input type="checkbox" name="modulo_documenti" value="1" checked>
+          <span>
+            <span class="sw-check-lbl">Documenti</span>
+            <span class="sw-check-sub">Caricamento e condivisione di documenti operativi (moduli, avvisi, istruzioni)</span>
           </span>
         </label>
       </div>

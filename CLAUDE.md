@@ -1,5 +1,21 @@
 # CLAUDE.md — Guida per AI assistant
 
+## Checklist operativa — aggiornare ad ogni sessione
+
+Dopo ogni modifica significativa (nuova feature, cambio schema DB, nuovo modulo) aggiornare **sempre** questi file:
+
+| File | Quando |
+|---|---|
+| `README.md` | Ogni nuova feature, modifica alla struttura progetto, aggiornamento permessi |
+| `CLAUDE.md` | Nuovi helper, nuove tabelle, nuovi moduli, nuove convenzioni |
+| `install/schema.sql` | Ogni nuova tabella o chiave `impostazioni` — **unica fonte di verità** per il DB |
+| `install/setup.php` | Se si aggiunge un modulo opzionale (step 4: checkbox + POST handler) |
+| `utils/onboarding.php` | Se si aggiunge una sezione/funzione che gli utenti devono conoscere |
+
+**Regola SQL**: nessun file di migration nel progetto. Aggiornare solo `install/schema.sql`. Per le istallazioni esistenti, dettare la query all'utente.
+
+---
+
 ## Panoramica progetto
 
 **Games Palace Desk** è un'app PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT e AWP. Nessun framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
@@ -60,7 +76,7 @@ prestiti_persone  (id, nome, saldo_iniziale, note)
 prestiti_movimenti(id, data, persona_id, tipo[prestito|rientro], quantita, note,
                    creato_da, creato_il)
 documenti         (id, nome, descrizione, filename, mime, ordine, visibile,
-                   caricato_da, caricato_il)  ← migration: sql/documenti_migration.sql
+                   caricato_da, caricato_il)
 ```
 
 ## Moduli opzionali (tabella `impostazioni`)

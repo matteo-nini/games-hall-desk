@@ -130,6 +130,20 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
         </div>
       </div>
 
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">8</div>
+        <div class="ob-body">
+          <h3>Documenti operativi</h3>
+          <p>La sezione <strong>Documenti</strong> raccoglie i moduli e le istruzioni caricati dal responsabile — ad esempio il modulo antiriciclaggio da stampare per le vincite alte.</p>
+          <ul>
+            <li>Clicca <strong>Apri</strong> per visualizzare il documento nel browser.</li>
+            <li>Clicca la freccia ↓ per scaricarlo sul tuo dispositivo.</li>
+            <li>Per le vincite che richiedono un modulo cartaceo, apri il documento e stampa direttamente dal browser.</li>
+          </ul>
+          <a class="ob-panel-link" href="<?= base_url('sala/documenti.php') ?>">Vai ai documenti →</a>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -145,11 +159,12 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <p>Prima di avviare le operazioni, accedi a <strong>Impostazioni</strong> e configura:</p>
           <ul>
             <li><strong>Logo</strong>: carica il logo della sala — comparirà nella barra laterale di tutti gli utenti, sostituendo le iniziali. Formati supportati: JPG, PNG, WebP, SVG (max 2 MB).</li>
+            <li><strong>Brand colori</strong>: scegli il colore accent dell'interfaccia (bottoni, link, badge) tramite color picker con anteprima live. Usa uno degli 8 swatches predefiniti o scegli il tuo. Lascia vuoto per il blu default.</li>
             <li><strong>Turni</strong>: scegli quanti turni al giorno (1–3), personalizza il nome (es. Mattino / Sera / Notte) e gli orari di inizio e fine per il riconoscimento automatico del turno corrente.</li>
             <li><strong>Fuso orario</strong>: seleziona il timezone della sala — importante per le sale fuori dall'Italia.</li>
             <li><strong>Costo turni</strong>: importo corrisposto per turno, visibile nel riepilogo guadagni degli operatori.</li>
             <li><strong>Permessi</strong>: scegli se gli operatori possono modificare solo il proprio turno o qualsiasi turno (utile per correzioni e inserimento storico); scegli se possono modificare il calendario turni programmati.</li>
-            <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza e Prestiti secondo le necessità della sala.</li>
+            <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza, Prestiti e Documenti secondo le necessità della sala.</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('account/admin/impostazioni.php') ?>">Vai alle impostazioni →</a>
         </div>
@@ -202,6 +217,21 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
       <div class="ob-step">
         <div class="ob-num" aria-hidden="true">5</div>
+        <div class="ob-body">
+          <h3>Modulo Documenti</h3>
+          <p>La sezione <strong>Documenti</strong> permette di caricare moduli, avvisi e istruzioni accessibili a tutti gli operatori. Esempi di utilizzo:</p>
+          <ul>
+            <li>Modulo antiriciclaggio da stampare per vincite sopra soglia.</li>
+            <li>Istruzioni per le procedure di apertura/chiusura.</li>
+            <li>Avvisi e comunicazioni interne.</li>
+          </ul>
+          <p>Il modulo deve essere attivato in Impostazioni → Moduli. Solo il responsabile può caricare ed eliminare documenti; tutti gli utenti possono aprirli e scaricarli. I file vengono archiviati con nome casuale e richiedono sempre l'autenticazione per essere visualizzati.</p>
+          <a class="ob-panel-link" href="<?= base_url('sala/documenti.php') ?>">Vai ai documenti →</a>
+        </div>
+      </div>
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">6</div>
         <div class="ob-body">
           <h3>Audit log e retention</h3>
           <p>La sezione <strong>Audit</strong> mostra tutte le operazioni effettuate nel sistema: login, salvataggi, chiusure giornata, modifiche impostazioni.</p>

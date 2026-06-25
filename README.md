@@ -115,11 +115,8 @@ Apri `install/setup.php` nel browser: il wizard guida l'installazione in 6 passi
 # 1. Crea il database
 mysql -u root -p -e "CREATE DATABASE cassa_sala CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
-# 2. Installa lo schema base
+# 2. Installa lo schema (include tutte le tabelle, inclusi Documenti)
 mysql -u root -p cassa_sala < install/schema.sql
-
-# 3. (Opzionale) Attiva il modulo Documenti
-mysql -u root -p cassa_sala < sql/documenti_migration.sql
 ```
 
 ### Configurazione
@@ -157,10 +154,21 @@ Da `account/admin/impostazioni.php` configura:
 
 ### Attivare il modulo Documenti
 
-1. Eseguire `sql/documenti_migration.sql` sul database
-2. Andare in Impostazioni → Moduli → attivare "Documenti"
+Il modulo è incluso nello schema base (`install/schema.sql`). Per attivarlo su un'installazione esistente eseguire sul database:
 
-La cartella `account/uploads/documenti/` viene creata automaticamente al primo upload.
+```sql
+CREATE TABLE IF NOT EXISTS documenti (
+  id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(120) NOT NULL,
+  descrizione VARCHAR(255) DEFAULT NULL, filename VARCHAR(120) NOT NULL,
+  mime VARCHAR(80) NOT NULL DEFAULT 'application/octet-stream',
+  ordine INT NOT NULL DEFAULT 0, visibile TINYINT(1) NOT NULL DEFAULT 1,
+  caricato_da INT DEFAULT NULL, caricato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (caricato_da) REFERENCES utenti(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT IGNORE INTO impostazioni (chiave, valore) VALUES ('modulo_documenti', '1');
+```
+
+Poi andare in Impostazioni → Moduli → attivare "Documenti". La cartella `account/uploads/documenti/` viene creata automaticamente al primo upload.
 
 ---
 
@@ -262,9 +270,6 @@ games-palace-desk/
 │   ├── export.php               Export CSV mensile aggregato
 │   └── onboarding.php           Guida operativa (tab per ruolo)
 │
-├── sql/
-│   └── documenti_migration.sql  Migration tabella documenti (eseguire manualmente)
-│
 ├── includes/
 │   ├── auth.php                 Autenticazione, CSRF, rate limiting, ruoli
 │   ├── lib.php                  Business logic, calcoli cassa, brand_derive(), helpers
@@ -297,5 +302,5 @@ games-palace-desk/
 - Il banner dati assistenza nel dialog "Apri ticket" è visibile solo se almeno un campo è configurato in Impostazioni
 - Il rate limiting login è IP-based: dopo 5 tentativi falliti in 15 minuti l'IP viene bloccato automaticamente
 - Il log audit di ogni scrittura significativa include: utente, IP, entità modificata, dettaglio dell'operazione
-- I documenti caricati vengono rinominati con UUID casuale — la URL non è indovinabile ma richiede sempre l'autenticazione via `doc_view.php`
+- I documenti caricati vengono rinominati con UUID casuale — richiedono sempre autenticazione via `doc_view.php`, non c'è accesso diretto alla cartella
 - Il brand accent aggiornato in Impostazioni ha effetto immediato su tutta l'interfaccia; l'anteprima live nella pagina impostazioni usa `document.documentElement.style.setProperty()` prima ancora del salvataggio
