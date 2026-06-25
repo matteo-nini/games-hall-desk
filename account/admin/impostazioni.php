@@ -191,20 +191,6 @@ $df    = ['19:00','01:00','09:00'];
 <link rel="stylesheet" href="<?= asset_url('assets/css/impostazioni.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
-
-<header class="topbar sh-top">
-  <strong>Impostazioni</strong>
-</header>
-
-<?php if (isset($_GET['ok'])): ?>
-<div class="ok" role="alert">Impostazioni salvate.</div>
-<?php endif; ?>
-
-<?php if (!$migrationOk): ?>
-<div style="padding:24px">
-  <div class="warn"><strong>Setup incompleto.</strong> Eseguire il setup iniziale dalla pagina di installazione.</div>
-</div>
-<?php else: ?>
 <?php
 $swatchPalette = [
   '#2563eb'=>'Blu vivo',   '#3b5bdb'=>'Blu (default)','#1971c2'=>'Blu notte',  '#0284c7'=>'Azzurro',
@@ -251,6 +237,19 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
   </nav>
 
   <div class="imp-body">
+    <header class="topbar sh-top">
+      <strong>Impostazioni</strong>
+    </header>
+
+    <?php if (isset($_GET['ok'])): ?>
+    <div class="ok" role="alert">Impostazioni salvate.</div>
+    <?php endif; ?>
+
+    <?php if (!$migrationOk): ?>
+    <div style="padding:24px">
+      <div class="warn"><strong>Setup incompleto.</strong> Eseguire il setup iniziale dalla pagina di installazione.</div>
+    </div>
+    <?php else: ?>
 
     <!-- IDENTITÀ -->
     <div class="imp-section" id="identita">
@@ -718,6 +717,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
       </div>
     </div>
 
+    <?php endif; ?>
   </div>
 </div>
 
@@ -738,6 +738,4 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
   sections.forEach(function (s) { obs.observe(s); });
 }());
 </script>
-
-<?php endif; ?>
 </body></html>

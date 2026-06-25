@@ -560,6 +560,11 @@
   padding: 20px 24px
 }
 
+@media (max-width: 680px) {
+  .imp-sidenav { display: none }
+  .imp-body { margin-left: 0; padding: 16px 16px 64px }
+}
+
 @media (max-width: 600px) {
   .imp-srow {
     grid-template-columns: 1fr;
@@ -572,21 +577,20 @@
    ============================================================ */
 
 .imp-layout {
-  display: flex;
-  align-items: flex-start;
   min-height: calc(100vh - 52px)
 }
 
 .imp-sidenav {
-  width: 176px;
-  flex-shrink: 0;
-  position: sticky;
+  position: fixed;
+  left: 0;
   top: 52px;
+  width: 176px;
   height: calc(100vh - 52px);
   overflow-y: auto;
   background: var(--surface);
   border-right: 1px solid var(--border);
   padding: 14px 0;
+  z-index: 16;
   scrollbar-width: thin;
   scrollbar-color: var(--border2) transparent
 }
@@ -633,10 +637,8 @@
 }
 
 .imp-body {
-  flex: 1;
-  padding: 28px 36px 80px;
-  min-width: 0;
-  max-width: 780px
+  margin-left: 176px;
+  padding: 28px 36px 80px
 }
 
 .imp-section {
