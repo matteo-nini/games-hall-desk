@@ -524,6 +524,21 @@
   min-width: 0
 }
 
+/* Override core.css input width (110px) inside settings rows */
+.imp-srow-ctrl input[type=text],
+.imp-srow-ctrl input[type=password],
+.imp-srow-ctrl input[type=file],
+.imp-srow-ctrl select {
+  width: 100%
+}
+
+/* Form footer inside a settings row: no top border (the row already separates) */
+.imp-srow .imp-form-footer {
+  border-top: none;
+  padding-top: 10px;
+  margin-top: 10px
+}
+
 /* Card with header + body (Turni, Brand) */
 .imp-scard-head {
   padding: 16px 24px 14px;
