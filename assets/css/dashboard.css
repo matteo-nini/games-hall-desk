@@ -302,7 +302,11 @@
 }
 
 .op-table-wrap {
-  overflow-x: auto
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
 }
 
 .op-table {
@@ -311,25 +315,60 @@
   font-size: 13px
 }
 
-.op-table th {
-  padding: 6px 10px;
+.op-table thead th {
+  padding: 10px 14px;
   font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: .4px;
+  color: var(--faint);
+  background: var(--surface2);
   border-bottom: 1px solid var(--border);
+  text-align: left;
   white-space: nowrap
 }
 
+.op-th-ava { width: 52px }
+
 .op-table td {
-  padding: 9px 10px;
-  border-bottom: 1px solid var(--border)
+  padding: 11px 14px;
+  border-top: 1px solid var(--border)
 }
 
-.op-table tbody tr:last-child td {
-  border-bottom: none
+.op-table tbody tr:first-child td {
+  border-top: none
 }
+
+.op-table tbody tr:hover td {
+  background: var(--surface2)
+}
+
+/* Avatar */
+.op-td-ava {
+  padding: 10px 8px 10px 16px !important;
+  width: 52px
+}
+
+.op-ava {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none
+}
+
+.op-ava-c0 { background: var(--accent-weak);    color: var(--accent-ink) }
+.op-ava-c1 { background: var(--green-bg);        color: var(--green-ink) }
+.op-ava-c2 { background: var(--amber-bg);        color: var(--amber-ink) }
+.op-ava-c3 { background: var(--ava-purple-bg);   color: var(--ava-purple-ink) }
+.op-ava-c4 { background: var(--ava-teal-bg);     color: var(--ava-teal-ink) }
+.op-ava-c5 { background: var(--ava-rose-bg);     color: var(--ava-rose-ink) }
 
 .op-nome {
   font-weight: 600
@@ -381,3 +420,70 @@
   color: var(--muted);
   vertical-align: middle
 }
+
+/* ---- Performance card (dashboard operatore) ---- */
+.dash-perf-card {
+  margin: 0 24px 32px
+}
+
+.dash-perf-row {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 14px;
+  flex-wrap: wrap
+}
+
+.dash-perf-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px
+}
+
+.dash-perf-val {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums
+}
+
+.dash-perf-n {
+  color: var(--text)
+}
+
+.dp-ok  { color: var(--green-ink) }
+.dp-warn { color: var(--amber-ink) }
+.dp-bad  { color: var(--red-ink) }
+
+.dash-perf-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--faint);
+  margin-top: 2px
+}
+
+.dp-bars {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 44px
+}
+
+.dp-bar {
+  width: 9px;
+  border-radius: 2px 2px 0 0;
+  min-height: 4px;
+  flex-shrink: 0;
+  cursor: default;
+  transition: opacity .1s
+}
+
+.dp-bar:hover {
+  opacity: .7
+}
+
+.dp-bar-ok   { background: var(--green) }
+.dp-bar-warn { background: var(--amber) }
+.dp-bar-bad  { background: var(--red) }

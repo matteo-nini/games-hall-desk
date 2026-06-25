@@ -115,6 +115,37 @@ $mese1 = date('Y-m-01');
 $mese2 = date('Y-m-t');
 $turniMese = array_filter($miei_turni, fn($t) => $t['data'] >= $mese1 && $t['data'] <= $mese2);
 
+/* Mie performance ultimi 30 giorni */
+$miePerf    = [];
+$scostMed   = null;
+$pctOk      = null;
+$nTurniPerf = 0;
+$clsPerf    = '';
+try {
+    $stPerf = $pdo->prepare("
+        SELECT t.fondo_cassa, t.monete, t.bancomat, t.differenze, t.ii_cassa, t.rientri, g.data,
+               COALESCE((SELECT SUM(c.taglio*c.pezzi) FROM contanti c WHERE c.turno_id=t.id),0) AS contanti,
+               COALESCE((SELECT SUM(r.euro) FROM refill_awp r WHERE r.turno_id=t.id),0) AS refill,
+               COALESCE((SELECT SUM(s.importo) FROM scassettamenti s WHERE s.turno_id=t.id),0) AS scass,
+               COALESCE((SELECT SUM(tk.importo) FROM ticket tk WHERE tk.turno_id=t.id),0) AS ticket
+        FROM turni t JOIN giornate g ON g.id=t.giornata_id
+        WHERE t.operatore_id=? AND g.data >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        ORDER BY g.data DESC, t.numero DESC
+    ");
+    $stPerf->execute([$uid]);
+    foreach ($stPerf as $row) {
+        $calc      = calcola_turno((array)$row);
+        $miePerf[] = ['data' => $row['data'], 'errore' => abs($calc['errore'])];
+    }
+    $nTurniPerf = count($miePerf);
+    if ($nTurniPerf > 0) {
+        $nOkPerf  = count(array_filter($miePerf, fn($p) => $p['errore'] < 4));
+        $scostMed = array_sum(array_column($miePerf, 'errore')) / $nTurniPerf;
+        $pctOk    = (int)round($nOkPerf / $nTurniPerf * 100);
+        $clsPerf  = $scostMed < 4 ? 'ok' : ($scostMed <= 5 ? 'warn' : 'bad');
+    }
+} catch (PDOException $e) {}
+
 /* Label turno */
 $labelN = [1 => 'Mattino', 2 => 'Sera'];
 $orarioN = [
@@ -287,5 +318,37 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
     </section>
 
   </div><!-- /.dash-grid -->
+
+  <?php if ($nTurniPerf > 0): ?>
+  <section class="dash-card dash-perf-card">
+    <h2 class="dash-card-title">Le mie performance · ultimi 30 gg</h2>
+    <div class="dash-perf-row">
+      <div class="dash-perf-metric">
+        <span class="dash-perf-val dp-<?= $clsPerf ?>">€ <?= number_format($scostMed, 2, ',', '.') ?></span>
+        <span class="dash-perf-lbl">scostamento medio</span>
+      </div>
+      <div class="dash-perf-metric">
+        <span class="dash-perf-val <?= $pctOk >= 90 ? 'dp-ok' : ($pctOk >= 70 ? 'dp-warn' : 'dp-bad') ?>"><?= $pctOk ?>%</span>
+        <span class="dash-perf-lbl">turni ok (&lt; €4)</span>
+      </div>
+      <div class="dash-perf-metric">
+        <span class="dash-perf-val dash-perf-n"><?= $nTurniPerf ?></span>
+        <span class="dash-perf-lbl">turni registrati</span>
+      </div>
+    </div>
+    <?php if ($nTurniPerf > 2): ?>
+    <div class="dp-bars" aria-label="Grafico scostamenti per turno">
+      <?php foreach (array_reverse($miePerf) as $p):
+        $bc = $p['errore'] < 4 ? 'ok' : ($p['errore'] <= 5 ? 'warn' : 'bad');
+        $bh = min(40, max(4, (int)round($p['errore'] * 5)));
+      ?>
+      <span class="dp-bar dp-bar-<?= $bc ?>" style="height:<?= $bh ?>px"
+            title="<?= date('d/m', strtotime($p['data'])) ?> · €<?= number_format($p['errore'], 2, ',', '.') ?>"></span>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+  </section>
+  <?php endif; ?>
+
 </div><!-- /.dash-page -->
 </body></html>

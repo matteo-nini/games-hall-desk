@@ -205,21 +205,26 @@ for ($i = 5; $i >= 0; $i--) {
       <table class="op-table">
         <thead>
           <tr>
+            <th class="op-th-ava" aria-hidden="true"></th>
             <th>Operatore</th>
             <th class="rt">Turni</th>
             <th class="rt">Scost. medio</th>
             <th class="rt">Scost. max</th>
             <th class="rt">Turni ok</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($opStats as $op):
-            $med  = $op['turni'] > 0 ? $op['scost_tot'] / $op['turni'] : 0;
-            $pct  = $op['turni'] > 0 ? round($op['ok'] / $op['turni'] * 100) : 0;
-            $cls  = $med < 4 ? 'ok' : ($med <= 5 ? 'warn' : 'bad');
+            $med   = $op['turni'] > 0 ? $op['scost_tot'] / $op['turni'] : 0;
+            $pct   = $op['turni'] > 0 ? round($op['ok'] / $op['turni'] * 100) : 0;
+            $cls   = $med < 4 ? 'ok' : ($med <= 5 ? 'warn' : 'bad');
+            $cIdx  = abs(crc32($op['nome'])) % 6;
+            $initO = mb_strtoupper(mb_substr($op['nome'], 0, 1, 'UTF-8'), 'UTF-8');
           ?>
           <tr>
+            <td class="op-td-ava">
+              <div class="op-ava op-ava-c<?= $cIdx ?>" aria-hidden="true"><?= $h($initO) ?></div>
+            </td>
             <td class="op-nome"><?= $h($op['nome']) ?></td>
             <td class="rt"><?= $op['turni'] ?></td>
             <td class="rt"><span class="op-scost <?= $cls ?>"><?= eur($med) ?></span></td>
@@ -230,7 +235,6 @@ for ($i = 5; $i >= 0; $i--) {
               </span>
               <span class="op-ok-pct"><?= $pct ?>%</span>
             </td>
-            <td></td>
           </tr>
           <?php endforeach; ?>
         </tbody>

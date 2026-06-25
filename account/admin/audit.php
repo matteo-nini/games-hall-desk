@@ -80,8 +80,8 @@ $base = base_url();
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Audit log</title>
-<link rel="stylesheet" href="<?= $base ?>assets/css/core.css">
-<link rel="stylesheet" href="<?= $base ?>assets/css/audit.css">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/audit.css') ?>">
 </head><body>
 <?php require __DIR__ . '/../../includes/nav.php'; top_menu($user); ?>
 
