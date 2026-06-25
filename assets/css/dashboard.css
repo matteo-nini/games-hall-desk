@@ -529,3 +529,41 @@
 .dp-bar-bad {
   background: var(--red)
 }
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: .04em;
+  text-transform: uppercase
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  transition: opacity .2s
+}
+
+.live-dot.live-ok {
+  animation: live-pulse .6s ease-out
+}
+
+.live-dot.live-err {
+  background: var(--red)
+}
+
+@keyframes live-pulse {
+  0%   { transform: scale(1);   opacity: 1 }
+  50%  { transform: scale(1.6); opacity: .7 }
+  100% { transform: scale(1);   opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot.live-ok { animation: none }
+}

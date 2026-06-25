@@ -120,6 +120,11 @@ for ($i = 5; $i >= 0; $i--) {
     <strong>Ciao, <?= $h($user['nome'] ?: $user['username']) ?></strong>
     <span class="topbar-sub"><?= (int)date('j') ?> <?= $h($nomiMesi[(int)date('n')]) ?> <?= date('Y') ?></span>
   </div>
+  <div class="topbar-actions">
+    <span class="live-badge" id="live-badge" title="Aggiornamento dati in tempo reale">
+      <span class="live-dot" id="live-dot"></span>live
+    </span>
+  </div>
 </header>
 
 <div class="dash-page">
@@ -148,19 +153,19 @@ for ($i = 5; $i >= 0; $i--) {
   <div class="calcrow dash-kpi">
     <div class="mini">
       <div class="l">Incasso VLT oggi</div>
-      <div class="v"><?= eur($riepilogo['incasso_vlt']) ?></div>
+      <div class="v" id="kpi-incasso-oggi"><?= eur($riepilogo['incasso_vlt']) ?></div>
     </div>
     <div class="mini">
       <div class="l">Versamento oggi</div>
-      <div class="v"><?= eur($riepilogo['versamento']) ?></div>
+      <div class="v" id="kpi-versamento-oggi"><?= eur($riepilogo['versamento']) ?></div>
     </div>
     <div class="mini">
       <div class="l">Incasso VLT mese</div>
-      <div class="v"><?= eur((float)$mese['incasso']) ?></div>
+      <div class="v" id="kpi-incasso-mese"><?= eur((float)$mese['incasso']) ?></div>
     </div>
     <div class="mini">
       <div class="l">Giorni operativi mese</div>
-      <div class="v"><?= (int)$mese['giorni'] ?></div>
+      <div class="v" id="kpi-giorni-mese"><?= (int)$mese['giorni'] ?></div>
     </div>
   </div>
 
@@ -282,6 +287,35 @@ if(typeof Chart!=='undefined')(function(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:ttLabel}}},scales:{x:{grid:grid},y:yAxis}}
     });
   }catch(e){console.error('Chart init:',e);}
+})();
+</script>
+<script>
+(function(){
+  var INTERVAL = 30000;
+  var liveUrl = '<?= base_url('account/responsabile_live.php') ?>';
+  var dot = document.getElementById('live-dot');
+  var fmt = function(n){ return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(n); };
+  function set(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+  function pulse(ok){
+    if(!dot) return;
+    dot.classList.remove('live-ok','live-err');
+    void dot.offsetWidth;
+    dot.classList.add(ok ? 'live-ok' : 'live-err');
+  }
+  function poll(){
+    fetch(liveUrl, {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function(d){
+        set('kpi-incasso-oggi',   fmt(d.incasso_vlt));
+        set('kpi-versamento-oggi',fmt(d.versamento));
+        set('kpi-incasso-mese',   fmt(d.incasso_mese));
+        set('kpi-giorni-mese',    d.giorni_mese);
+        pulse(true);
+      })
+      .catch(function(){ pulse(false); });
+  }
+  setTimeout(poll, INTERVAL);
+  setInterval(poll, INTERVAL);
 })();
 </script>
 </body></html>
