@@ -125,3 +125,184 @@
   background: var(--red)
 }
 
+/* ---- Two-pane step layout ---- */
+.ob-panes {
+  display: grid;
+  grid-template-columns: 196px 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--sh)
+}
+
+.ob-step-nav {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  gap: 1px
+}
+
+.ob-snav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px 9px 16px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  width: 100%;
+  border-left: 2px solid transparent;
+  transition: background .08s, color .08s;
+  color: var(--muted)
+}
+
+.ob-snav-item:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.ob-snav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-weak)
+}
+
+.ob-snav-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface3);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .08s, color .08s
+}
+
+.ob-snav-item.active .ob-snav-num {
+  background: var(--accent);
+  color: #fff
+}
+
+.ob-snav-lbl {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0
+}
+
+.ob-pane-area {
+  padding: 28px 32px;
+  min-height: 400px
+}
+
+.ob-pane {
+  display: none
+}
+
+.ob-pane.active {
+  display: block;
+  animation: ob-slide .15s ease
+}
+
+@keyframes ob-slide {
+  from { opacity: 0; translate: 0 5px }
+  to   { opacity: 1; translate: 0 0 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-pane.active { animation: none }
+}
+
+.ob-pane-head {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 14px
+}
+
+.ob-ul {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 8px 0;
+  padding-left: 18px;
+  line-height: 1.65
+}
+
+.ob-ul li + li {
+  margin-top: 5px
+}
+
+.ob-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 8px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border)
+}
+
+.ob-footer p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 6px
+}
+
+@media (max-width: 640px) {
+  .ob-panes {
+    grid-template-columns: 1fr
+  }
+
+  .ob-step-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 6px 4px;
+    gap: 2px
+  }
+
+  .ob-step-nav::-webkit-scrollbar { display: none }
+
+  .ob-snav-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 6px 8px;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    min-width: 52px;
+    gap: 4px
+  }
+
+  .ob-snav-item.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--accent)
+  }
+
+  .ob-snav-lbl {
+    font-size: 9px;
+    max-width: 50px;
+    text-align: center
+  }
+
+  .ob-pane-area {
+    padding: 20px 16px
+  }
+
+  .ob-footer {
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start
+  }
+}
+

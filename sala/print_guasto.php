@@ -126,7 +126,6 @@ body {
 
 <div class="pg-strip">
   <div class="pg-strip-title">Macchina fuori servizio</div>
-  <?php if ($macchina): ?><div class="pg-machine"><?= $h($macchina) ?></div><?php endif; ?>
 </div>
 
 <p class="pg-sorry">

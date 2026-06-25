@@ -349,6 +349,8 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
             </div>
           </div>
 
+          <div class="ibp-mockup-wrap">
+            <span class="ibp-mockup-lbl">Anteprima live</span>
           <div class="ibp-mockup-v2" aria-hidden="true">
             <div class="ibp-mock-sb">
               <div class="ibp-mock-logo2" id="ibp-logo2"><?= $h(mb_strtoupper(mb_substr($cfg['nome_sala'] ?? 'GP', 0, 2))) ?></div>
@@ -372,6 +374,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
               </div>
             </div>
           </div>
+          </div><!-- /.ibp-mockup-wrap -->
         </div>
 
         <div class="imp-brand-footer">
@@ -408,9 +411,10 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
             document.documentElement.style.setProperty('--accent',      color);
             document.documentElement.style.setProperty('--accent-weak', weak);
             document.documentElement.style.setProperty('--accent-ink',  ink);
-            hexEl.textContent = color;
-            val.value         = color;
-            inp.value         = color;
+            hexEl.textContent  = color;
+            hexEl.style.color  = color;
+            val.value          = color;
+            inp.value          = color;
             var btn  = document.getElementById('ibp-mock-btn2');
             var chip = document.getElementById('ibp-mock-chip2');
             var num  = document.getElementById('ibp-mock-num2');
