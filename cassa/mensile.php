@@ -97,7 +97,8 @@ $mesi = nomi_mesi();
     <button>Mostra</button>
   </form>
   <div class="topbar-actions">
-    <a class="topbar-action-btn" href="<?= base_url('utils/export.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>">&#8595; CSV</a>
+    <a class="topbar-action-btn" href="<?= base_url('utils/export.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>&op=<?= $opFiltro ?>">&#8595; CSV</a>
+    <a class="topbar-action-btn" href="<?= base_url('utils/export_xlsx.php') ?>?anno=<?= $anno ?>&mese=<?= $mese ?>">&#8595; Excel</a>
     <button class="topbar-action-btn no-print" onclick="window.print()" type="button">&#128438; Stampa</button>
   </div>
 </header>
