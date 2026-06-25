@@ -259,75 +259,66 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <p>Nome, logo e colori dell'interfaccia — come la sala appare in ogni pagina e nella PWA</p>
       </div>
 
-      <div class="imp-identita-row">
-        <div class="imp-card">
-          <div class="imp-card-head">
-            <div class="imp-card-ico" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h16M4 18V8l6-5 6 5v10M8 18v-5h4v5"/></svg>
-            </div>
-            <div>
-              <h2 class="imp-card-title">Nome sala</h2>
-              <p class="imp-card-desc">Appare nell'header, nella PWA e nei documenti generati.</p>
-            </div>
-          </div>
-          <form method="post">
-            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-            <input type="hidden" name="azione" value="sala">
-            <div class="imp-field">
-              <label for="imp-sala">Nome</label>
-              <input id="imp-sala" type="text" name="nome_sala" maxlength="100"
-                     value="<?= $h($cfg['nome_sala'] ?? '') ?>" placeholder="Es. Sala Giochi Roma" required>
-            </div>
-            <div class="imp-form-footer">
-              <button type="submit">Salva nome</button>
-            </div>
-          </form>
-        </div>
+      <div class="imp-settings-card">
 
-        <div class="imp-card">
-          <div class="imp-card-head">
-            <div class="imp-card-ico" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="16" height="13" rx="1.5"/><path d="M2 8l5 4 4-3 7 5"/></svg>
-            </div>
-            <div>
-              <h2 class="imp-card-title">Logo</h2>
-              <p class="imp-card-desc">Sostituisce le iniziali nella sidebar. JPG, PNG, WebP, SVG — max 2 MB.</p>
-            </div>
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Nome sala</h3>
+            <p class="imp-srow-desc">Appare nell'header, nella PWA e nei documenti generati.</p>
           </div>
-          <?php $logoPath = $sett['logo_path'] ?? null; ?>
-          <?php if ($logoPath): ?>
-          <div class="imp-logo-preview">
-            <img src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo sala">
+          <div class="imp-srow-ctrl">
             <form method="post">
               <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-              <input type="hidden" name="azione" value="logo_del">
-              <button type="submit" class="ghost btn-sm">Rimuovi</button>
+              <input type="hidden" name="azione" value="sala">
+              <div class="imp-field">
+                <label for="imp-sala">Nome</label>
+                <input id="imp-sala" type="text" name="nome_sala" maxlength="100"
+                       value="<?= $h($cfg['nome_sala'] ?? '') ?>" placeholder="Es. Sala Giochi Roma" required>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva nome</button>
+              </div>
             </form>
           </div>
-          <?php endif; ?>
-          <form method="post" enctype="multipart/form-data">
-            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-            <input type="hidden" name="azione" value="logo">
-            <div class="imp-field">
-              <label for="imp-logo"><?= $logoPath ? 'Sostituisci logo' : 'Carica logo' ?></label>
-              <input id="imp-logo" type="file" name="logo_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" required>
-            </div>
-            <div class="imp-form-footer">
-              <button type="submit">Carica</button>
-            </div>
-          </form>
         </div>
+
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Logo</h3>
+            <p class="imp-srow-desc">Sostituisce le iniziali nella sidebar. JPG, PNG, WebP, SVG — max 2 MB.</p>
+          </div>
+          <div class="imp-srow-ctrl">
+            <?php $logoPath = $sett['logo_path'] ?? null; ?>
+            <?php if ($logoPath): ?>
+            <div class="imp-logo-preview">
+              <img src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo sala">
+              <form method="post">
+                <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+                <input type="hidden" name="azione" value="logo_del">
+                <button type="submit" class="ghost btn-sm">Rimuovi</button>
+              </form>
+            </div>
+            <?php endif; ?>
+            <form method="post" enctype="multipart/form-data">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="logo">
+              <div class="imp-field">
+                <label for="imp-logo"><?= $logoPath ? 'Sostituisci logo' : 'Carica logo' ?></label>
+                <input id="imp-logo" type="file" name="logo_file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" required>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Carica</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
 
       <div class="imp-card" style="margin-top:16px">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M5.3 5.3l1.4 1.4M13.3 13.3l1.4 1.4M3 10h2M15 10h2M5.3 14.7l1.4-1.4M13.3 6.7l1.4-1.4M10 3v2M10 15v2"/></svg>
-          </div>
-          <div>
-            <h2 class="imp-card-title">Brand colori</h2>
-            <p class="imp-card-desc">Colore accent di bottoni, link attivi e badge. Lascia vuoto per tornare al blu predefinito.</p>
-          </div>
+        <div class="imp-scard-head">
+          <h3 class="imp-srow-title">Brand colori</h3>
+          <p class="imp-srow-desc">Colore accent di bottoni, link attivi e badge. Lascia vuoto per tornare al blu predefinito.</p>
         </div>
 
         <div class="imp-brand-v2">
@@ -447,16 +438,12 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <h2>Turni</h2>
         <p>Numero, nomi, orari e costo dei turni giornalieri — si riflette sulla cassa, sul calendario e sui report</p>
       </div>
-      <div class="imp-card">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l2.5 2.5"/></svg>
-          </div>
-          <div>
-            <h2 class="imp-card-title">Configurazione turni</h2>
-            <p class="imp-card-desc">Scegli quanti turni al giorno, personalizza i nomi, gli orari e il compenso per operatore.</p>
-          </div>
+      <div class="imp-settings-card">
+        <div class="imp-scard-head">
+          <h3 class="imp-srow-title">Configurazione turni</h3>
+          <p class="imp-srow-desc">Scegli quanti turni al giorno, personalizza i nomi, gli orari e il compenso per operatore.</p>
         </div>
+        <div class="imp-scard-body">
         <form method="post" id="frm-turni">
           <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="turni">
@@ -498,7 +485,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
             </div>
             <div class="imp-turni-col imp-turni-prezzi">
               <p class="imp-sub-head">Costo per turno <span class="imp-unit">€</span></p>
-              <p class="imp-card-desc" style="margin-bottom:12px">Importo corrisposto all'operatore per ogni turno effettuato.</p>
+              <p class="imp-srow-desc" style="margin-bottom:12px">Importo corrisposto all'operatore per ogni turno effettuato.</p>
               <div class="imp-orari-stack">
               <?php for ($i = 1; $i <= 3; $i++):
                 $ptKey  = ['mattino','sera','notte'][$i-1];
@@ -527,6 +514,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
           });
         }
         </script>
+        </div><!-- /.imp-scard-body -->
       </div>
     </div>
 
@@ -536,39 +524,38 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <h2>Permessi operatori</h2>
         <p>Controllo delle azioni disponibili agli operatori sul calendario e sui turni giornalieri</p>
       </div>
-      <div class="imp-card">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="9" rx="1.5"/><path d="M7 9V7.5a3 3 0 0 1 6 0V9"/><circle cx="10" cy="14" r="1"/></svg>
+      <div class="imp-settings-card">
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Permessi</h3>
+            <p class="imp-srow-desc">Abilita o disabilita le azioni degli operatori sul calendario e sui dati di cassa.</p>
           </div>
-          <div>
-            <h2 class="imp-card-title">Permessi</h2>
-            <p class="imp-card-desc">Abilita o disabilita le azioni degli operatori sul calendario e sui dati di cassa.</p>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="permessi">
+              <div class="imp-opt-stack">
+                <label class="imp-opt">
+                  <input type="checkbox" name="operatori_modifica_turni" <?= ($sett['operatori_modifica_turni'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Modifica calendario</strong>
+                    <span>Gli operatori possono aggiungere e modificare i turni programmati nel calendario</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="turno_edit_libero" <?= ($sett['turno_edit_libero'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Modifica libera turni</strong>
+                    <span>Gli operatori possono modificare i dati di qualsiasi turno giornaliero, non solo il proprio — utile per correzioni e inserimento storico</span>
+                  </span>
+                </label>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva permessi</button>
+              </div>
+            </form>
           </div>
         </div>
-        <form method="post">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <input type="hidden" name="azione" value="permessi">
-          <div class="imp-opt-stack">
-            <label class="imp-opt">
-              <input type="checkbox" name="operatori_modifica_turni" <?= ($sett['operatori_modifica_turni'] ?? '1') === '1' ? 'checked' : '' ?>>
-              <span class="imp-opt-text">
-                <strong>Modifica calendario</strong>
-                <span>Gli operatori possono aggiungere e modificare i turni programmati nel calendario</span>
-              </span>
-            </label>
-            <label class="imp-opt">
-              <input type="checkbox" name="turno_edit_libero" <?= ($sett['turno_edit_libero'] ?? '1') === '1' ? 'checked' : '' ?>>
-              <span class="imp-opt-text">
-                <strong>Modifica libera turni</strong>
-                <span>Gli operatori possono modificare i dati di qualsiasi turno giornaliero, non solo il proprio — utile per correzioni e inserimento storico</span>
-              </span>
-            </label>
-          </div>
-          <div class="imp-form-footer">
-            <button type="submit">Salva permessi</button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -578,46 +565,45 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <h2>Moduli aggiuntivi</h2>
         <p>Attiva o disattiva le sezioni opzionali — i link scompaiono dalla barra laterale quando disabilitati</p>
       </div>
-      <div class="imp-card">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
+      <div class="imp-settings-card">
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Moduli attivi</h3>
+            <p class="imp-srow-desc">I moduli disabilitati scompaiono dalla barra laterale senza cancellare i dati.</p>
           </div>
-          <div>
-            <h2 class="imp-card-title">Moduli</h2>
-            <p class="imp-card-desc">Abilita solo le funzionalità necessarie alla sala per mantenere l'interfaccia pulita.</p>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="moduli">
+              <div class="imp-opt-stack">
+                <label class="imp-opt">
+                  <input type="checkbox" name="modulo_assistenze" <?= ($sett['modulo_assistenze'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Ticket assistenza</strong>
+                    <span>Gestione manutenzione e segnalazioni su macchine</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="modulo_prestiti" <?= ($sett['modulo_prestiti'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Prestiti e rientri</strong>
+                    <span>Tracciamento movimenti di cassa extra per persone</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="modulo_documenti" <?= ($sett['modulo_documenti'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Documenti</strong>
+                    <span>Caricamento e stampa di documenti operativi (moduli, avvisi, istruzioni)</span>
+                  </span>
+                </label>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva moduli</button>
+              </div>
+            </form>
           </div>
         </div>
-        <form method="post">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <input type="hidden" name="azione" value="moduli">
-          <div class="imp-opt-stack">
-            <label class="imp-opt">
-              <input type="checkbox" name="modulo_assistenze" <?= ($sett['modulo_assistenze'] ?? '1') === '1' ? 'checked' : '' ?>>
-              <span class="imp-opt-text">
-                <strong>Ticket assistenza</strong>
-                <span>Gestione manutenzione e segnalazioni su macchine</span>
-              </span>
-            </label>
-            <label class="imp-opt">
-              <input type="checkbox" name="modulo_prestiti" <?= ($sett['modulo_prestiti'] ?? '1') === '1' ? 'checked' : '' ?>>
-              <span class="imp-opt-text">
-                <strong>Prestiti e rientri</strong>
-                <span>Tracciamento movimenti di cassa extra per persone</span>
-              </span>
-            </label>
-            <label class="imp-opt">
-              <input type="checkbox" name="modulo_documenti" <?= ($sett['modulo_documenti'] ?? '1') === '1' ? 'checked' : '' ?>>
-              <span class="imp-opt-text">
-                <strong>Documenti</strong>
-                <span>Caricamento e stampa di documenti operativi (moduli, avvisi, istruzioni)</span>
-              </span>
-            </label>
-          </div>
-          <div class="imp-form-footer">
-            <button type="submit">Salva moduli</button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -627,40 +613,39 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <h2>Assistenza tecnica</h2>
         <p>Recapiti mostrati agli operatori quando aprono un ticket di assistenza per una macchina</p>
       </div>
-      <div class="imp-card">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 5 5l.72-.85a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 20.5 15l.42 1.92z"/></svg>
+      <div class="imp-settings-card">
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Contatti assistenza</h3>
+            <p class="imp-srow-desc">Numero, codice lock e password mostrati nel dialog quando si apre un ticket.</p>
           </div>
-          <div>
-            <h2 class="imp-card-title">Contatti assistenza</h2>
-            <p class="imp-card-desc">Numero di telefono, codice lock e password da mostrare nel dialog del ticket.</p>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="assistenza">
+              <div class="imp-price-row">
+                <div class="imp-field">
+                  <label for="imp-atel">Numero</label>
+                  <input id="imp-atel" type="text" name="assistenza_numero" maxlength="200"
+                         value="<?= $h($sett['assistenza_numero'] ?? '') ?>" placeholder="es. 800-123-456">
+                </div>
+                <div class="imp-field">
+                  <label for="imp-alock">N° Lock</label>
+                  <input id="imp-alock" type="text" name="assistenza_lock" maxlength="200"
+                         value="<?= $h($sett['assistenza_lock'] ?? '') ?>" placeholder="es. 123456">
+                </div>
+                <div class="imp-field">
+                  <label for="imp-apwd">Password</label>
+                  <input id="imp-apwd" type="text" name="assistenza_password" maxlength="200"
+                         value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123">
+                </div>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva dati assistenza</button>
+              </div>
+            </form>
           </div>
         </div>
-        <form method="post">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <input type="hidden" name="azione" value="assistenza">
-          <div class="imp-price-row">
-            <div class="imp-field">
-              <label for="imp-atel">Numero assistenza</label>
-              <input id="imp-atel" type="text" name="assistenza_numero" maxlength="200"
-                     value="<?= $h($sett['assistenza_numero'] ?? '') ?>" placeholder="es. 800-123-456">
-            </div>
-            <div class="imp-field">
-              <label for="imp-alock">N° Lock</label>
-              <input id="imp-alock" type="text" name="assistenza_lock" maxlength="200"
-                     value="<?= $h($sett['assistenza_lock'] ?? '') ?>" placeholder="es. 123456">
-            </div>
-            <div class="imp-field">
-              <label for="imp-apwd">Password</label>
-              <input id="imp-apwd" type="text" name="assistenza_password" maxlength="200"
-                     value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123">
-            </div>
-          </div>
-          <div class="imp-form-footer">
-            <button type="submit">Salva dati assistenza</button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -671,71 +656,65 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <p>Fuso orario e politica di retention dei log di audit</p>
       </div>
 
-      <div class="imp-card">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M5 10l3 3 7-7"/></svg>
+      <div class="imp-settings-card">
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Fuso orario</h3>
+            <p class="imp-srow-desc">Usato per determinare il turno corrente e le date di chiusura. Effettivo alla sessione successiva.</p>
           </div>
-          <div>
-            <h2 class="imp-card-title">Fuso orario</h2>
-            <p class="imp-card-desc">Usato per determinare il turno corrente e le date di chiusura. Un cambio diventa effettivo alla sessione successiva.</p>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="timezone">
+              <div class="imp-field">
+                <label for="imp-tz">Timezone</label>
+                <select id="imp-tz" name="timezone">
+                  <?php
+                  $curTz = config()['timezone'] ?? 'Europe/Rome';
+                  $popular = ['Europe/Rome','Europe/London','Europe/Paris','Europe/Berlin','Europe/Madrid',
+                              'America/New_York','America/Los_Angeles','America/Chicago','America/Sao_Paulo',
+                              'Asia/Dubai','Asia/Tokyo','Australia/Sydney','Pacific/Auckland'];
+                  $allTz   = DateTimeZone::listIdentifiers();
+                  ?>
+                  <optgroup label="Comuni">
+                  <?php foreach ($popular as $tz): ?>
+                    <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
+                  <?php endforeach; ?>
+                  </optgroup>
+                  <optgroup label="Tutti">
+                  <?php foreach ($allTz as $tz): if (in_array($tz, $popular, true)) continue; ?>
+                    <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
+                  <?php endforeach; ?>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva fuso orario</button>
+              </div>
+            </form>
           </div>
         </div>
-        <form method="post">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <input type="hidden" name="azione" value="timezone">
-          <div class="imp-field">
-            <label for="imp-tz">Fuso orario</label>
-            <select id="imp-tz" name="timezone">
-              <?php
-              $curTz = config()['timezone'] ?? 'Europe/Rome';
-              $popular = ['Europe/Rome','Europe/London','Europe/Paris','Europe/Berlin','Europe/Madrid',
-                          'America/New_York','America/Los_Angeles','America/Chicago','America/Sao_Paulo',
-                          'Asia/Dubai','Asia/Tokyo','Australia/Sydney','Pacific/Auckland'];
-              $allTz   = DateTimeZone::listIdentifiers();
-              ?>
-              <optgroup label="Comuni">
-              <?php foreach ($popular as $tz): ?>
-                <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
-              <?php endforeach; ?>
-              </optgroup>
-              <optgroup label="Tutti">
-              <?php foreach ($allTz as $tz): if (in_array($tz, $popular, true)) continue; ?>
-                <option value="<?= $h($tz) ?>" <?= $tz === $curTz ? 'selected' : '' ?>><?= $h($tz) ?></option>
-              <?php endforeach; ?>
-              </optgroup>
-            </select>
-          </div>
-          <div class="imp-form-footer">
-            <button type="submit">Salva fuso orario</button>
-          </div>
-        </form>
-      </div>
 
-      <div class="imp-card" style="margin-top:16px">
-        <div class="imp-card-head">
-          <div class="imp-card-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><line x1="12" y1="9" x2="12" y2="12"/><line x1="12" y1="15" x2="12.01" y2="15"/></svg>
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Retention log audit</h3>
+            <p class="imp-srow-desc">I log più vecchi del limite possono essere eliminati dalla pagina Audit. Minimo 7 giorni.</p>
           </div>
-          <div>
-            <h2 class="imp-card-title">Retention log audit</h2>
-            <p class="imp-card-desc">I log più vecchi del limite impostato possono essere eliminati dalla pagina Audit. Minimo 7 giorni.</p>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="retention">
+              <div class="imp-field" style="max-width:160px">
+                <label for="imp-ret">Mantieni per <span class="imp-unit">giorni</span></label>
+                <input id="imp-ret" type="number" min="7" max="3650" name="retention_giorni"
+                       value="<?= $h($sett['retention_giorni'] ?? '90') ?>">
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva politica</button>
+              </div>
+            </form>
           </div>
         </div>
-        <form method="post">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-          <input type="hidden" name="azione" value="retention">
-          <div class="imp-price-row">
-            <div class="imp-field">
-              <label for="imp-ret">Mantieni log per <span class="imp-unit">giorni</span></label>
-              <input id="imp-ret" type="number" min="7" max="3650" name="retention_giorni"
-                     value="<?= $h($sett['retention_giorni'] ?? '90') ?>">
-            </div>
-          </div>
-          <div class="imp-form-footer">
-            <button type="submit">Salva politica</button>
-          </div>
-        </form>
       </div>
     </div>
 
