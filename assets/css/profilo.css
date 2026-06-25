@@ -3,7 +3,10 @@
    ============================================================ */
 
 .profilo-page {
-  padding: 1var(--rxs) 24px 40px
+  padding: 16px 24px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .profilo-avatar-section {
@@ -93,8 +96,13 @@
 
 
 @media (max-width: 760px) {
-  .profilo-grid { grid-template-columns: 1fr }
-  .profilo-avatar-section { flex-wrap: wrap }
+  .profilo-grid {
+    grid-template-columns: 1fr
+  }
+
+  .profilo-avatar-section {
+    flex-wrap: wrap
+  }
 }
 
 /* ---- Crop modal ---- */
@@ -102,7 +110,7 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0,0,0,.6);
+  background: rgba(0, 0, 0, .6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,7 +125,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
   padding: 20px;
   display: flex;
   flex-direction: column;

@@ -95,7 +95,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 14px;
-  align-items: start
+  align-items: start;
+  margin: 14px 24px;
 }
 
 .dash-grid-2col {
@@ -328,7 +329,9 @@
   white-space: nowrap
 }
 
-.op-th-ava { width: 52px }
+.op-th-ava {
+  width: 52px
+}
 
 .op-table td {
   padding: 11px 14px;
@@ -363,12 +366,35 @@
   user-select: none
 }
 
-.op-ava-c0 { background: var(--accent-weak);    color: var(--accent-ink) }
-.op-ava-c1 { background: var(--green-bg);        color: var(--green-ink) }
-.op-ava-c2 { background: var(--amber-bg);        color: var(--amber-ink) }
-.op-ava-c3 { background: var(--ava-purple-bg);   color: var(--ava-purple-ink) }
-.op-ava-c4 { background: var(--ava-teal-bg);     color: var(--ava-teal-ink) }
-.op-ava-c5 { background: var(--ava-rose-bg);     color: var(--ava-rose-ink) }
+.op-ava-c0 {
+  background: var(--accent-weak);
+  color: var(--accent-ink)
+}
+
+.op-ava-c1 {
+  background: var(--green-bg);
+  color: var(--green-ink)
+}
+
+.op-ava-c2 {
+  background: var(--amber-bg);
+  color: var(--amber-ink)
+}
+
+.op-ava-c3 {
+  background: var(--ava-purple-bg);
+  color: var(--ava-purple-ink)
+}
+
+.op-ava-c4 {
+  background: var(--ava-teal-bg);
+  color: var(--ava-teal-ink)
+}
+
+.op-ava-c5 {
+  background: var(--ava-rose-bg);
+  color: var(--ava-rose-ink)
+}
 
 .op-nome {
   font-weight: 600
@@ -451,9 +477,17 @@
   color: var(--text)
 }
 
-.dp-ok  { color: var(--green-ink) }
-.dp-warn { color: var(--amber-ink) }
-.dp-bad  { color: var(--red-ink) }
+.dp-ok {
+  color: var(--green-ink)
+}
+
+.dp-warn {
+  color: var(--amber-ink)
+}
+
+.dp-bad {
+  color: var(--red-ink)
+}
 
 .dash-perf-lbl {
   font-size: 11px;
@@ -484,6 +518,14 @@
   opacity: .7
 }
 
-.dp-bar-ok   { background: var(--green) }
-.dp-bar-warn { background: var(--amber) }
-.dp-bar-bad  { background: var(--red) }
+.dp-bar-ok {
+  background: var(--green)
+}
+
+.dp-bar-warn {
+  background: var(--amber)
+}
+
+.dp-bar-bad {
+  background: var(--red)
+}
