@@ -16,8 +16,17 @@ try {
     $pdo->query('SELECT 1 FROM prezzi_turni LIMIT 0');
     $migrationOk = true;
 } catch (PDOException) {}
-$sett   = $migrationOk ? get_settings($pdo) : [];
+$sett     = $migrationOk ? get_settings($pdo) : [];
 $logoPath = $sett['logo_path'] ?? null;
+
+$brandAccent = $sett['brand_accent'] ?? null;
+$brandCss    = '';
+if ($brandAccent && preg_match('/^#[0-9a-fA-F]{6}$/', $brandAccent)) {
+    $bvars = brand_derive($brandAccent);
+    $brandCss = ':root{';
+    foreach ($bvars as $prop => $val) $brandCss .= htmlspecialchars($prop) . ':' . htmlspecialchars($val) . ';';
+    $brandCss .= '}';
+}
 
 $err    = '';
 if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,7 +46,8 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="stylesheet" href="../assets/css/core.css">
 <link rel="stylesheet" href="../assets/css/login.css">
 <link rel="manifest" href="../manifest.php">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="<?= $brandAccent ? $h($brandAccent) : '#2563eb' ?>">
+<?php if ($brandCss): ?><style><?= $brandCss ?></style><?php endif; ?>
 </head><body class="login-page">
 <div class="login-wrap">
   <div class="login-box">
