@@ -1,7 +1,8 @@
 var ICO_OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
 var ICO_WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>';
 var GP_SUPPLIERS=GP_SUPPLIERS||{}, GP_LAST_TURN=GP_LAST_TURN||2, GP_TURNS=GP_TURNS||[];
-var ACTIVE=parseInt(localStorage.getItem('gp_tab'))||GP_LAST_TURN, RES={};
+var GP_TAB_KEY='gp_tab_'+(new URLSearchParams(location.search).get('data')||'');
+var ACTIVE=parseInt(localStorage.getItem(GP_TAB_KEY))||1, RES={};
 function eur(v){v=Math.round(v*100)/100; if(Object.is(v,-0))v=0; return v.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function num(el){var v=parseFloat((el.value||'').toString().replace(',','.'));return isNaN(v)?0:v;}
 function recalcTurno(sec){
@@ -61,7 +62,7 @@ function recalcAll(){
 }
 function showTab(n){
   ACTIVE=n;
-  localStorage.setItem('gp_tab',n);
+  localStorage.setItem(GP_TAB_KEY,n);
   var sf=document.getElementById('salva_turno');if(sf)sf.value=n;
   document.querySelectorAll('.turno').forEach(function(s){var a=+s.dataset.turno===n;s.dataset.hidden=a?'0':'1';s.setAttribute('aria-hidden',a?'false':'true');});
   document.querySelectorAll('.tab[role="tab"]').forEach(function(t){var a=+t.dataset.tab===n;t.classList.toggle('active',a);t.setAttribute('aria-selected',a?'true':'false');});
