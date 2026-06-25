@@ -227,6 +227,13 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
         ?></small></button>
         <?php endforeach; ?>
       </div>
+      <?php if (count($turns) > 1): ?>
+      <div class="gp-swipe-hint" aria-hidden="true">
+        <?php foreach ($turns as $n => $turn): ?>
+        <span class="gp-swipe-dot<?= $n === $lastTurn ? ' active' : '' ?>" data-dot="<?= $n ?>"></span>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
       <div class="sh-stats-wrap">
         <div class="sh-stats" aria-label="Dati chiusura turno">
           <span class="ss-item"><span class="ss-l">Fondo</span><span class="ss-v" id="m-fondo">—</span></span>

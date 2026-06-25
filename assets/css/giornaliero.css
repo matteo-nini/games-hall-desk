@@ -1561,6 +1561,45 @@ textarea.note:focus {
   }
 }
 
+/* ---- Mobile touch improvements ---- */
+@media (max-width: 640px) {
+  /* Tap targets più grandi per i tab turno */
+  .tab { min-height: 44px; font-size: 14px; padding: 0 20px }
+
+  /* Indicatore swipe */
+  .gp-swipe-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--faint);
+    padding: 4px 0 2px;
+    user-select: none
+  }
+
+  .gp-swipe-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border2);
+    transition: background .15s, transform .15s
+  }
+
+  .gp-swipe-dot.active {
+    background: var(--accent);
+    transform: scale(1.4)
+  }
+
+  /* Bottone salva sticky in basso su mobile */
+  .save-btn {
+    position: sticky;
+    bottom: 12px;
+    z-index: 10;
+    box-shadow: var(--sh-popup)
+  }
+}
+
 /* Auto-save indicator */
 .as-ind {
   font-size: 11px;

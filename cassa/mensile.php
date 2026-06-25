@@ -34,11 +34,36 @@ $st->execute([$primo,$ultimo]);
 foreach ($st as $row) if (isset($bw[$row['fornitore']])) $bw[$row['fornitore']] = ['g'=>(float)$row['g'],'p'=>(float)$row['p']];
 $ins = array_fill_keys($fornitori, 0);
 foreach ($righe as $r) foreach ($fornitori as $f) $ins[$f] = ($ins[$f] ?? 0) + ($r['scass'][$f] ?? 0);
+// delta vs mese precedente
+$mesePre = $mese - 1; $annoPre = $anno;
+if ($mesePre < 1) { $mesePre = 12; $annoPre--; }
+$ngPre = (int)date('t', mktime(0,0,0,$mesePre,1,$annoPre));
+$totPre = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
+for ($d = 1; $d <= $ngPre; $d++) {
+    $rp = riepilogo_giornata($pdo, sprintf('%04d-%02d-%02d', $annoPre, $mesePre, $d));
+    $totPre['incasso']    += $rp['incasso_vlt'];
+    $totPre['ticket']     += $rp['ticket'];
+    $totPre['bancomat']   += $rp['bancomat'];
+    $totPre['versamento'] += $rp['versamento'];
+}
+$delta = function(float $cur, float $pre): string {
+    if ($pre == 0) return $cur > 0 ? '<span class="delta-pos">+∞</span>' : '—';
+    $pct = ($cur - $pre) / abs($pre) * 100;
+    $cls = $pct >= 0 ? 'delta-pos' : 'delta-neg';
+    return '<span class="' . $cls . '">' . ($pct >= 0 ? '+' : '') . number_format($pct, 1, ',', '.') . '%</span>';
+};
 $mesi = nomi_mesi();
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>"></head><body>
+<title>Riepilogo <?= $h($mesi[$mese].' '.$anno) ?></title>
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<style>
+.delta-row td { font-size:12px; color:var(--muted); padding:4px 8px }
+.delta-pos { color:var(--green); font-weight:600 }
+.delta-neg { color:var(--red); font-weight:600 }
+</style>
+</head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <header class="topbar no-print">
   <div><strong><?= $h($cfg['nome_sala']) ?></strong> · Riepilogo mensile</div>
@@ -66,6 +91,11 @@ $mesi = nomi_mesi();
     <?php endfor; ?>
     <tr class="tot"><td>TOT</td><td class="rt"><?= eur($tot['incasso']) ?></td><td class="rt"><?= eur($tot['ticket']) ?></td>
         <td class="rt"><?= eur($tot['bancomat']) ?></td><td class="rt"><?= eur($tot['versamento']) ?></td></tr>
+    <tr class="delta-row"><td>vs <?= $h($mesi[$mesePre]) ?></td>
+        <td class="rt"><?= $delta($tot['incasso'], $totPre['incasso']) ?></td>
+        <td class="rt"><?= $delta($tot['ticket'], $totPre['ticket']) ?></td>
+        <td class="rt"><?= $delta($tot['bancomat'], $totPre['bancomat']) ?></td>
+        <td class="rt"><?= $delta($tot['versamento'], $totPre['versamento']) ?></td></tr>
   </table>
 </div>
 

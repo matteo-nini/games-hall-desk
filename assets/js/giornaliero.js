@@ -65,6 +65,7 @@ function showTab(n){
   var sf=document.getElementById('salva_turno');if(sf)sf.value=n;
   document.querySelectorAll('.turno').forEach(function(s){var a=+s.dataset.turno===n;s.dataset.hidden=a?'0':'1';s.setAttribute('aria-hidden',a?'false':'true');});
   document.querySelectorAll('.tab[role="tab"]').forEach(function(t){var a=+t.dataset.tab===n;t.classList.toggle('active',a);t.setAttribute('aria-selected',a?'true':'false');});
+  document.querySelectorAll('.gp-swipe-dot').forEach(function(d){d.classList.toggle('active',+d.dataset.dot===n);});
   updateActive();
 }
 (function(){
@@ -125,4 +126,23 @@ if(tt){setTimeout(function(){tt.classList.add('hide');},2600);}
       ind.hidden=false;
     }
   }
+})();
+// Swipe tra turni su dispositivi touch
+(function () {
+  if (!('ontouchstart' in window)) return;
+  var form = document.getElementById('frm');
+  if (!form) return;
+  var maxTab = GP_TURNS ? GP_TURNS.length : 2;
+  var sx = 0, sy = 0;
+  form.addEventListener('touchstart', function (e) {
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  form.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - sx;
+    var dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 55 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+    if (dx < 0 && ACTIVE < maxTab) showTab(ACTIVE + 1);
+    if (dx > 0 && ACTIVE > 1) showTab(ACTIVE - 1);
+  }, { passive: true });
 })();
