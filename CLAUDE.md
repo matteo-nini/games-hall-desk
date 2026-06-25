@@ -14,6 +14,8 @@ Dopo ogni modifica significativa (nuova feature, cambio schema DB, nuovo modulo)
 
 **Regola SQL**: nessun file di migration nel progetto. Aggiornare solo `install/schema.sql`. Per le istallazioni esistenti, dettare la query all'utente.
 
+**Regola branch**: ogni nuova feature o redesign significativo va su un branch dedicato (`feat/<nome>` o `fix/<nome>`), poi si mergea su `main` con PR o merge diretto dopo review. Non lavorare direttamente su `main` se non per hotfix urgenti o aggiornamenti doc.
+
 ---
 
 ## Panoramica progetto
