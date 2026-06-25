@@ -54,6 +54,22 @@ $delta = function(float $cur, float $pre): string {
     $cls = $pct >= 0 ? 'delta-pos' : 'delta-neg';
     return '<span class="' . $cls . '">' . ($pct >= 0 ? '+' : '') . number_format($pct, 1, ',', '.') . '%</span>';
 };
+// incasso per macchina VLT nel mese
+$opJoin  = $opFiltro > 0 ? ' AND t.operatore_id = ?' : '';
+$vltArgs = $opFiltro > 0 ? [$opFiltro, $primo, $ultimo] : [$primo, $ultimo];
+$stVlt = $pdo->prepare("
+    SELECT m.codice, m.fornitore, COALESCE(SUM(s.importo),0) AS tot
+    FROM macchine m
+    LEFT JOIN scassettamenti s ON s.macchina_id = m.id
+    LEFT JOIN turni t ON t.id = s.turno_id{$opJoin}
+    LEFT JOIN giornate g ON g.id = t.giornata_id AND g.data BETWEEN ? AND ?
+    WHERE m.tipo = 'VLT' AND m.attiva = 1
+    GROUP BY m.id, m.codice, m.fornitore
+    ORDER BY tot DESC
+");
+$stVlt->execute($vltArgs);
+$vltMacchine = $stVlt->fetchAll();
+
 $mesi = nomi_mesi();
 ?>
 <!doctype html><html lang="it"><head>
@@ -128,4 +144,24 @@ $mesi = nomi_mesi();
   </table>
 </div>
 </div>
+
+<?php if ($vltMacchine): $totVlt = array_sum(array_column($vltMacchine, 'tot')); ?>
+<div class="cols" style="margin-top:0">
+<div class="riepilogo">
+  <h3>Incasso VLT per macchina — <?= $h($mesi[$mese].' '.$anno) ?></h3>
+  <table class="grid">
+    <tr><th>Macchina</th><th>Fornitore</th><th class="rt">Incasso</th><th class="rt">% sul totale</th></tr>
+    <?php foreach ($vltMacchine as $mac): ?>
+    <tr>
+      <td><?= $h($mac['codice']) ?></td>
+      <td><?= $h($mac['fornitore']) ?></td>
+      <td class="rt"><?= eur((float)$mac['tot']) ?></td>
+      <td class="rt"><?= $totVlt > 0 ? number_format((float)$mac['tot'] / $totVlt * 100, 1, ',', '.') . '%' : '—' ?></td>
+    </tr>
+    <?php endforeach; ?>
+    <tr class="tot"><td colspan="2">TOTALE</td><td class="rt"><?= eur($totVlt) ?></td><td class="rt">100%</td></tr>
+  </table>
+</div>
+</div>
+<?php endif; ?>
 </body></html>
