@@ -107,7 +107,7 @@
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: 14px;
-  margin-top: 14px;
+  margin: 14px 0;
   align-items: start
 }
 
@@ -117,8 +117,13 @@
   gap: 14px
 }
 
-.muted-text { color: var(--muted) }
-.ok-text    { color: var(--green-ink) }
+.muted-text {
+  color: var(--muted)
+}
+
+.ok-text {
+  color: var(--green-ink)
+}
 
 .dash-card {
   background: var(--surface);
@@ -243,15 +248,33 @@
 
 
 @media (max-width: 900px) {
-  .resp-cols { grid-template-columns: 1fr }
+  .resp-cols {
+    grid-template-columns: 1fr
+  }
 }
 
 @media (max-width: 760px) {
-  .dash-grid { grid-template-columns: 1fr }
-  .dash-hero { flex-wrap: wrap; gap: 12px }
-  .dash-earn-row { flex-direction: column }
-  .dash-earn-item { border-right: none; border-bottom: 1px solid var(--border) }
-  .dash-earn-item:last-child { border-bottom: none }
+  .dash-grid {
+    grid-template-columns: 1fr
+  }
+
+  .dash-hero {
+    flex-wrap: wrap;
+    gap: 12px
+  }
+
+  .dash-earn-row {
+    flex-direction: column
+  }
+
+  .dash-earn-item {
+    border-right: none;
+    border-bottom: 1px solid var(--border)
+  }
+
+  .dash-earn-item:last-child {
+    border-bottom: none
+  }
 }
 
 /* Analytics charts */
@@ -268,7 +291,9 @@
 }
 
 @media (max-width: 760px) {
-  .dash-charts { grid-template-columns: 1fr }
+  .dash-charts {
+    grid-template-columns: 1fr
+  }
 }
 
 /* Operatori stats */
@@ -302,9 +327,13 @@
   border-bottom: 1px solid var(--border)
 }
 
-.op-table tbody tr:last-child td { border-bottom: none }
+.op-table tbody tr:last-child td {
+  border-bottom: none
+}
 
-.op-nome { font-weight: 600 }
+.op-nome {
+  font-weight: 600
+}
 
 .op-scost {
   display: inline-block;
@@ -314,9 +343,20 @@
   font-weight: 600
 }
 
-.op-scost.ok   { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green) }
-.op-scost.warn { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber) }
-.op-scost.bad  { background: color-mix(in srgb, var(--red)   15%, transparent); color: var(--red)   }
+.op-scost.ok {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  color: var(--green)
+}
+
+.op-scost.warn {
+  background: color-mix(in srgb, var(--amber) 15%, transparent);
+  color: var(--amber)
+}
+
+.op-scost.bad {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  color: var(--red)
+}
 
 .op-ok-bar {
   display: inline-block;
