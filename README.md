@@ -10,6 +10,7 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 
 ### Cassa giornaliera
 - **1–3 turni configurabili** (nomi e orari personalizzabili: Mattino · Sera · Notte) con schede separate — il salvataggio è sempre isolato al turno attivo
+- **Swipe tra turni** su mobile con dot indicator; tap target 44 px per i tab; bottone Salva sticky in basso
 - Conteggio banconote per taglio (5 € – 500 €) con totale automatico
 - Scassettamenti VLT per macchina, raggruppati per fornitore configurabile (NOVO · INSPIRED · SPIELO o qualsiasi altro)
 - Refill AWP con orario e importo per singola macchina
@@ -22,11 +23,17 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 
 ### Report e analisi
 - **Settimanale** — dati Bet/Win SNAI con totali per fornitore, versamenti, bancomat e calcolo payout; badge +/−% a confronto con la settimana precedente
-- **Mensile** — riepilogo per giorno con stampa/PDF nativa del browser
-- **Annuale** — panoramica mese per mese con link diretto al mensile
+- **Mensile** — riepilogo per giorno; riga Δ% vs mese precedente in fondo ai totali; filtro per singolo operatore; tabella incasso VLT per macchina; stampa/PDF nativa
+- **Annuale** — panoramica mese per mese con filtro operatore; link diretto al mensile
 - **Export CSV** mensile e settimanale (separatore `;`, BOM UTF-8, numeri con virgola per Excel Italia)
-- **Dashboard responsabile**: grafici Chart.js — andamento incassi ultimi 30 giorni e ultimi 6 mesi; statistiche per operatore: turni compilati, scostamento medio, % turni corretti
+- **Export Excel .xlsx** mensile — writer PHP nativo, zero dipendenze; include cassa giornaliera, Bet/Win SNAI e VLT per macchina con stili grassetto e formato valuta €
+- **Dashboard responsabile**: KPI aggiornati ogni 30 secondi via polling JSON; badge live con pulse animation; grafici Chart.js — andamento incassi ultimi 30 giorni e ultimi 6 mesi; statistiche per operatore: turni compilati, scostamento medio, % turni corretti
 - **Le mie performance** nella dashboard operatore: mini-grafico ultimi 30 turni, scostamento medio e % turni ok
+- **Confronto mensile Δ%**: variazione percentuale vs mese precedente su incasso, ticket, bancomat e versamento
+
+### Esperienza utente
+- **Dark mode** — toggle luna/sole nella sidebar, persistenza `localStorage`, anti-FOUC; colori derivati con `color-mix()` in srgb per le varianti accent; compatibile con brand colore dinamico
+- **Onboarding tour interattivo** — spotlight contest uale al primo accesso; steps diversi per giornaliero e dashboard; resettabile da Guida → "Rivedi guida popup"
 
 ### Sala
 - **AWP** — registro refill con macchina, importo e orario
@@ -131,6 +138,7 @@ return [
 5. **Elimina la cartella `install/`** dopo aver verificato l'accesso
 6. Verifica che `sw.js` sia raggiungibile dalla root del dominio (necessario per la PWA)
 7. Verifica che `account/uploads/` sia scrivibile dal web server
+8. Verifica che `ZipArchive` sia abilitato in PHP (necessario per export Excel; standard in PHP 8+)
 
 ---
 
@@ -172,6 +180,7 @@ Implementate in `includes/lib.php → calcola_turno()` (fonte di verità lato se
 | Salva dati Bet/Win settimanale | ✓ | ✓ | ✗ |
 | Visualizza report | ✓ | ✓ | ✓ |
 | Export CSV e Stampa PDF | ✓ | ✓ | ✓ |
+| Export Excel .xlsx | ✓ | ✓ | ✓ |
 | Gestione macchine | ✗ | ✓ | ✗ |
 | Gestione utenti e password | ✗ | ✓ | ✗ |
 | Impostazioni sala | ✗ | ✓ | ✗ |
@@ -190,7 +199,8 @@ games-palace-desk/
 │   ├── login.php                Accesso con logo e brand colore sala
 │   ├── logout.php               Logout + distruzione sessione
 │   ├── dashboard.php            Dashboard operatore (avvio turni, performance 30gg)
-│   ├── responsabile.php         Dashboard responsabile (KPI, grafici, stats operatori)
+│   ├── responsabile.php         Dashboard responsabile (KPI live, grafici, stats operatori)
+│   ├── responsabile_live.php    Endpoint JSON per polling KPI ogni 30s
 │   ├── profilo.php              Profilo utente + cambio password + foto
 │   ├── uploads/
 │   │   ├── sala/                Logo sala (caricato da Impostazioni)
@@ -203,10 +213,10 @@ games-palace-desk/
 │       └── audit.php            Log operazioni con filtri e pulizia
 │
 ├── cassa/
-│   ├── giornaliero.php          Cassa giornaliera (1-3 turni, auto-save localStorage)
+│   ├── giornaliero.php          Cassa giornaliera (1-3 turni, swipe mobile, auto-save)
 │   ├── settimanale.php          Bet/Win SNAI settimanale + export CSV/stampa
-│   ├── mensile.php              Riepilogo mensile + stampa/PDF
-│   └── annuale.php              Report annuale + export CSV/stampa
+│   ├── mensile.php              Riepilogo mensile (Δ%, filtro op, VLT per macchina, Excel)
+│   └── annuale.php              Report annuale (filtro op) + export CSV/stampa
 │
 ├── sala/
 │   ├── awp.php                  Refill macchine AWP
@@ -219,17 +229,25 @@ games-palace-desk/
 │
 ├── utils/
 │   ├── export.php               Export CSV aggregato
+│   ├── export_xlsx.php          Export Excel .xlsx (cassa + Bet/Win + VLT per macchina)
 │   └── onboarding.php           Guida operativa interattiva per ruolo
 │
 ├── includes/
 │   ├── auth.php                 Autenticazione, CSRF, rate limiting, ruoli
-│   ├── lib.php                  Business logic: calcola_turno(), brand_derive(), helpers
+│   ├── lib.php                  Business logic: calcola_turno(), riepilogo_giornata(), helpers
 │   ├── db.php                   Connessione PDO singleton + config()
-│   └── nav.php                  Sidebar dinamica per ruolo + iniezione brand CSS
+│   ├── nav.php                  Sidebar dinamica + brand CSS + dark mode + tour
+│   └── XlsxWriter.php           Writer XLSX nativo (ZIP + OpenXML, zero dipendenze)
 │
 ├── assets/
-│   ├── css/                     core.css + fogli per componente
-│   └── js/                      sidebar.js, giornaliero.js, turni.js, toast.js, ...
+│   ├── css/
+│   │   ├── core.css             Design system: variabili, dark mode, layout base
+│   │   ├── tour.css             Stili tour onboarding (spotlight + tooltip)
+│   │   └── ...                  Fogli per componente/pagina
+│   └── js/
+│       ├── tour.js              Motore tour onboarding (spotlight, step, localStorage)
+│       ├── giornaliero.js       Calcolo live + swipe + auto-save
+│       └── ...                  sidebar.js, turni.js, toast.js, ob-banners.js, ...
 │
 ├── install/
 │   ├── setup.php                Wizard installazione (eliminare dopo il setup)
@@ -245,7 +263,7 @@ games-palace-desk/
 
 ## Note operative
 
-- Il tab attivo (Mattino / Sera) nel giornaliero persiste in `localStorage` tra sessioni
+- Il tab attivo (Mattino / Sera) nel giornaliero persiste in `localStorage` tra sessioni (`gp_tab`)
 - L'auto-salvataggio locale del giornaliero si attiva dopo 500 ms di inattività; viene azzerato al submit
 - Salvare un turno non tocca mai i dati dell'altro turno (campo `salva_turno` nel form)
 - Le macchine disattivate non compaiono nel giornaliero ma rimangono nello storico e nei ticket
@@ -253,3 +271,7 @@ games-palace-desk/
 - Il log audit include: utente, IP, entità modificata, dettaglio — un record per ogni scrittura significativa
 - I documenti caricati vengono rinominati con UUID casuale e richiedono sempre autenticazione via `doc_view.php`
 - Il brand accent aggiornato in Impostazioni ha effetto immediato su tutta l'interfaccia inclusa la pagina di login; l'anteprima live usa `document.documentElement.style.setProperty()` prima del salvataggio
+- Dark mode: il tema si salva in `localStorage` (`gp-theme`); lo script anti-FOUC in `nav.php` applica `data-theme="dark"` prima del primo paint per evitare il flash bianco
+- Tour onboarding: lo stato si salva in `localStorage` (`gp_wizard_done`); per farlo ripartire vai in Guida → "Rivedi guida popup"
+- Export Excel: richiede l'estensione PHP `ZipArchive` (abilitata di default in PHP 8+, verificare su hosting condivisi)
+- Dashboard live: il polling si avvia 30 s dopo il caricamento pagina e si ripete ogni 30 s — non genera richieste immediate all'apertura

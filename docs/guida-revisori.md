@@ -21,6 +21,12 @@ Dalla barra laterale hai accesso a:
 
 ---
 
+## Tema chiaro/scuro
+
+Nella barra laterale in basso trovi il bottone con l'icona luna/sole. Clicca per passare al tema scuro o tornare a quello chiaro. La preferenza viene ricordata tra sessioni.
+
+---
+
 ## Report settimanale (`cassa/settimanale.php`)
 
 Visualizza i dati Bet/Win SNAI per settimana.
@@ -45,8 +51,15 @@ Riepilogo giornaliero per il mese selezionato.
 
 **Come leggere la tabella**
 - Una riga per ogni giorno del mese
-- Colonne: incasso VLT, ticket, bancomat, versamento, scassettamenti per fornitore
-- In fondo: totali mensili e medie giornaliere
+- Colonne: incasso VLT, ticket, bancomat, versamento
+- Riga **Δ%** in fondo: variazione percentuale rispetto al mese precedente (verde = miglioramento, rosso = calo)
+- **Tabella VLT per macchina**: in fondo alla pagina, incasso per singola macchina con percentuale sul totale
+
+**Filtro operatore**
+Puoi selezionare un singolo operatore dal dropdown per vedere solo i dati dei turni compilati da lui/lei.
+
+**Esporta Excel**
+Premi **Excel** per scaricare un file `.xlsx` con tre sezioni: cassa giornaliera, Bet/Win SNAI e incasso VLT per macchina. Apri direttamente con Excel o LibreOffice.
 
 **Stampa / PDF**
 Ottimizzata per stampa A4 orizzontale. Usa il pulsante **Stampa** o Ctrl+P.
@@ -57,10 +70,10 @@ Ottimizzata per stampa A4 orizzontale. Usa il pulsante **Stampa** o Ctrl+P.
 
 Panoramica anno per mese.
 
-**Come leggere i grafici**
-- Un grafico per ogni metrica principale: incasso VLT, ticket, bancomat, versamento
-- Asse X: mesi dell'anno, Asse Y: importi
-- Clicca sul nome di un mese nella tabella per aprire il mensile corrispondente
+**Come leggere la tabella**
+- Una riga per ogni mese con giorni operativi, incasso, ticket, bancomat, versamento
+- Clicca sul nome di un mese per aprire il mensile corrispondente
+- Il filtro operatore selezionato si propaga al mensile
 
 **Esporta CSV**
 Premi **Esporta CSV** per scaricare il riepilogo annuale.

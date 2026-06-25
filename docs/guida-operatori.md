@@ -1,184 +1,160 @@
 # Guida operatori — Games Palace Desk
 
-Guida passo-passo per chi compila la cassa, gestisce i turni e usa la sala giochi ogni giorno.
+Guida passo per passo per l'uso quotidiano del sistema di cassa.
 
 ---
 
-## Accesso e navigazione
+## Accesso
 
-### Login
-Apri l'app nel browser (o dalla schermata home se installata come PWA). Inserisci username e password assegnati dal responsabile. Dopo 5 tentativi falliti consecutivi l'IP viene bloccato per 15 minuti: aspetta o contatta il responsabile.
+Apri l'URL della sala nel browser. Inserisci username e password. Se hai installato la PWA (l'app sul telefono), il login funziona allo stesso modo.
 
-### La barra laterale
-A sinistra trovi la navigazione principale:
-- **Cassa** → Giornaliero, Settimanale, Mensile, Annuale
-- **Sala** → AWP, Turni, Ticket assistenza, Prestiti, Documenti (se abilitati)
-- **Guida** → tutorial interattivo
-- **Profilo** → cambia nome, password, foto
+**Al primo accesso** compare una guida interattiva: un tour passo per passo che evidenzia i componenti principali. Puoi saltarla in qualsiasi momento. Per riavviarla vai su **Guida** → "Rivedi guida popup".
 
 ---
 
 ## Cassa giornaliera (`cassa/giornaliero.php`)
 
-La pagina principale del lavoro quotidiano. Hai sempre a disposizione i tab dei turni configurati (Mattino, Sera o Notte).
+### Selezionare la giornata
 
-### Flusso di compilazione turno
+- La cassa si apre automaticamente sulla giornata odierna
+- Per consultare o correggere una giornata precedente usa il selettore data in alto
+- Se ieri è rimasta aperta, compare un avviso giallo in cima alla pagina
 
-1. **Seleziona la data** — di default è oggi. Cambia se stai compilando un turno precedente.
-2. **Scegli il tab del turno** — Mattino o Sera (o Notte se configurato).
-3. **Contanti per taglio** — inserisci quanti pezzi hai per ogni taglio (5 €, 10 €, 20 €, 50 €, 100 €, 200 €, 500 €). Il totale si calcola automaticamente.
-4. **Refill AWP** — se hai rifornito macchine AWP, inserisci importo e ora per ciascuna. Puoi farlo anche dalla sezione AWP dedicata.
-5. **Scassettamenti VLT** — per ogni macchina VLT, inserisci l'importo incassato dal cassetto. Le macchine sono raggruppate per fornitore.
-6. **Ticket vincite** — inserisci i ticket pagati per fornitore (NOVO, INSPIRED, SPIELO, …).
-7. **Monete, Bancomat, Differenze** — campi aggiuntivi per completare la riconciliazione.
-8. **II Cassa** e **Rientri** — fondi cassa aggiuntivi e contanti rientrati.
-9. **Fondo cassa** — importo fisso configurato dal responsabile.
+### Navigare tra turni
 
-### Calcolo automatico
-Mentre inserisci i dati, la pagina aggiorna in tempo reale:
-- **Cassetto** = Contanti + Refill + Differenze − II Cassa − Rientri
-- **Versamento** = Scassettamenti − Bancomat − Ticket
-- **Totale cassa** = Cassetto + Monete − Versamento
-- **Scostamento** = Totale − Fondo cassa
+La pagina ha 1, 2 o 3 tab in base alla configurazione della sala (es. Mattino · Sera).
 
-Il banner in cima cambia colore:
-- Verde (< 4 €) → tutto ok
-- Giallo (4–5 €) → leggero scostamento, verifica
-- Rosso (> 5 €) → da verificare prima di chiudere
+- Clicca sul tab per cambiare turno
+- **Su mobile**: puoi scorrere con uno swipe destra/sinistra — i pallini sotto i tab indicano il turno attivo
+- Ogni nuova giornata parte sempre dal **primo turno** (Mattino)
 
-### Auto-salvataggio locale
-La pagina salva automaticamente quello che stai scrivendo ogni mezzo secondo. Se la pagina si ricarica accidentalmente, i dati vengono ripristinati. **Attenzione**: questo salvataggio è locale al browser, non sostituisce il salvataggio ufficiale sul server.
+### Cosa inserire
 
-### Salva turno
-Premi **Salva turno** per inviare i dati al server. Il bottone salva solo il turno attivo — l'altro turno non viene toccato.
+| Campo | Significato |
+|---|---|
+| **Fondo cassa** | Importo in cassa all'inizio del turno |
+| **Contanti** | Conta le banconote per taglio — il totale si calcola da solo |
+| **Monete** | Totale monete in cassa (importo unico) |
+| **Bancomat** | Incasso POS del turno |
+| **Ticket pagati** | Totale ticket vincita per fornitore |
+| **2ª cassa** | Eventuale seconda cassa del turno |
+| **Rientri** | Denaro che rientra in cassa (es. da prestiti) |
+| **Differenze** | Aggiustamenti manuali (valore positivo o negativo) |
 
-### Chiudi giornata
-Quando entrambi i turni sono compilati, premi **Chiudi giornata**. La giornata passa allo stato "chiusa" e non è più modificabile (solo il responsabile può riaprirla).
+### Scassettamenti VLT
 
-### Alert giornata precedente aperta
-Se ieri la giornata non è stata chiusa, compare un avviso in rosso in cima alla pagina. Chiudi prima quella giornata.
+Per ogni macchina VLT inserisci l'importo prelevato dalla cassetta. Lascia a zero le macchine non scassettate nel turno.
+
+### Refill AWP
+
+Ogni refill è denaro che esce dalla cassa e va nella macchina AWP. Inserisci numero macchina, importo e ora. Puoi aggiungere più refill con il pulsante +.
+
+### La barra di stato (statusbar)
+
+In cima vedi in tempo reale:
+
+- **Fondo** — fondo cassa inserito
+- **Contanti** — totale banconote contate
+- **Cassetto** — contanti + refill + differenze − 2ª cassa − rientri
+- **Versamento** — scassettamenti − bancomat − ticket
+- **Scostamento** — differenza tra cassetto calcolato e fondo dichiarato
+
+Il banner cambia colore:
+- **Verde** — scostamento < 4 € (quadratura corretta)
+- **Giallo** — 4–5 € (tollerabile)
+- **Rosso** — > 5 € (da verificare)
+
+### Note del turno
+
+Campo libero per annotazioni (eventi, anomalie, ricariche particolari).
+
+### Salvare
+
+Clicca **Salva turno**. Il sistema salva solo il turno che stai visualizzando, senza toccare l'altro.
+
+**Auto-salvataggio locale**: ogni 500 ms il form salva automaticamente nel browser. Se la pagina si ricarica accidentalmente, i dati vengono ripristinati.
+
+### Chiudere la giornata
+
+Dopo aver compilato e salvato tutti i turni, clicca **Chiudi giornata**. Una giornata chiusa non può essere modificata dagli operatori.
 
 ---
 
-## Refill AWP (`sala/awp.php`)
+## Tema chiaro/scuro
 
-Tieni traccia dei rifornimenti alle macchine AWP durante il turno.
-
-- Seleziona la data e il turno
-- Clicca **+ Aggiungi refill** e inserisci: macchina, importo in euro, ora
-- Salva — i refill entrano automaticamente nel calcolo della cassa giornaliera per quel turno
-
----
-
-## Turni programmati (`sala/turni.php`)
-
-### Prenotazione turno
-Se il responsabile ha abilitato la modifica del calendario, puoi prenotarti per un turno futuro:
-1. Clicca sul giorno e turno che ti interessa
-2. Se il posto è libero, clicca **Prendimi questo turno**
-3. Il turno appare nel tuo calendario con il tuo nome
-
-### Vedere i propri turni
-Nella vista calendario vedi i tuoi turni evidenziati. I turni degli altri operatori sono visibili ma non modificabili (se il responsabile non ha abilitato la modifica libera).
+Nella barra laterale in basso trovi il bottone con l'icona luna/sole. Clicca per passare al tema scuro o tornare a quello chiaro. La preferenza viene ricordata tra sessioni.
 
 ---
 
 ## Ticket assistenza (`sala/ticket.php`)
 
-Se il modulo è abilitato, gestisci le segnalazioni di guasti sulle macchine.
+Se una macchina ha un guasto:
 
-### Aprire un ticket
-1. Clicca **+ Apri ticket** in alto a destra
-2. Compila: data apertura, macchina, descrizione del problema (e ID ticket se hai già chiamato l'assistenza)
-3. Se configurati, i contatti dell'assistenza (numero, lock, password) compaiono nel riquadro in alto al dialog
-4. Premi **Apri ticket**
-5. Compare una finestra che chiede se stampare l'avviso guasto per la macchina — se sì, si apre una pagina di stampa automatica
+1. Clicca **+ Nuovo ticket** in alto a destra
+2. Inserisci la macchina, descrivi il problema e (se disponibile) il codice ticket del fornitore
+3. Clicca **Apri ticket**
 
-### Chiudere un ticket
-Clicca **Chiudi ticket** sulla card del ticket aperto. Inserisci:
-- Data chiusura
-- ID ticket (se non era stato inserito all'apertura)
-- Descrizione della risoluzione
+Dopo l'apertura compare un popup con i contatti dell'assistenza tecnica e l'opzione di **stampare un avviso da esporre sulla macchina**.
 
-Premi **Segna risolto**.
+Quando il problema è risolto, apri il ticket e clicca **Chiudi con risoluzione**: inserisci cosa è stato fatto.
 
-### Filtri
-Usa i filtri in alto (Tutti / Aperti / Risolti) per trovare rapidamente i ticket.
+---
+
+## AWP — Refill (`sala/awp.php`)
+
+Registro storico dei refill. Utile per consultare quando e quanto è stato inserito nelle singole macchine AWP.
+
+---
+
+## Turni programmati (`sala/turni.php`)
+
+Il calendario mostra chi è programmato per ogni turno. Se il responsabile ha abilitato la modifica, puoi segnare la tua disponibilità cliccando sul giorno.
 
 ---
 
 ## Prestiti e rientri (`sala/prestiti.php`)
 
-Se il modulo è abilitato, tieni traccia dei prestiti a persone (clienti o colleghi).
+Traccia i movimenti di denaro con persone specifiche:
 
-### Aggiungere una persona
-1. Clicca **+ Nuova persona**
-2. Inserisci il nome e il saldo iniziale (se la persona ha già un debito)
-3. Salva
+- **Prestito**: denaro dato → il saldo aumenta
+- **Rientro**: denaro restituito → il saldo diminuisce
 
-### Registrare un movimento
-1. Clicca sulla riga della persona
-2. Scegli il tipo: **Prestito** (soldi dati) o **Rientro** (soldi ricevuti)
-3. Inserisci importo, data, nota facoltativa
-4. Salva
-
-Il saldo corrente si aggiorna automaticamente.
+Il saldo attuale compare accanto al nome della persona.
 
 ---
 
 ## Documenti (`sala/documenti.php`)
 
-Se il modulo è abilitato, qui trovi i documenti caricati dal responsabile (moduli, avvisi, istruzioni).
+Raccoglie i moduli e le istruzioni caricati dal responsabile.
 
-- Clicca su un documento per aprirlo o scaricarlo
-- I file si aprono nel browser o vengono scaricati a seconda del tipo (PDF in-browser, Excel in download)
-- Non puoi caricare documenti: questa operazione è riservata al responsabile
+- **Apri**: visualizza il documento nel browser
+- **↓ Scarica**: salva sul dispositivo
+- Per stampare: apri il documento e usa Ctrl+P (Cmd+P su Mac)
 
 ---
 
 ## Report
 
-### Settimanale (`cassa/settimanale.php`)
-Riepilogo della settimana con dati Bet/Win per fornitore, versamenti, bancomat e payout. I badge +/−% mostrano il confronto con la settimana precedente.
+Hai accesso ai report in sola lettura:
 
-### Mensile (`cassa/mensile.php`)
-Tutti i giorni del mese con riepilogo finanziario. Usa il pulsante **Stampa** per generare un PDF dal browser.
+- **Settimanale** — dati Bet/Win per settimana
+- **Mensile** — cassa giorno per giorno, confronto con il mese precedente (Δ%)
+- **Annuale** — panoramica mese per mese
 
-### Annuale (`cassa/annuale.php`)
-Panoramica anno per mese. Clicca su un mese per aprire il mensile di quel mese.
+Tutti i report hanno i pulsanti **CSV** (per Excel) e **Stampa** (per PDF).
 
-### Export CSV
-In settimanale e mensile trovi il pulsante **Esporta CSV** per scaricare i dati in formato compatibile con Excel (separatore `;`, codifica UTF-8 con BOM).
+Nel mensile trovi anche un bottone **Excel** che scarica un file `.xlsx` con tre sezioni: cassa giornaliera, Bet/Win SNAI e incasso VLT per macchina.
 
 ---
 
 ## Profilo (`account/profilo.php`)
 
-- **Cambia nome** — il nome visualizzato nella sidebar e nei report
-- **Cambia password** — inserisci la password attuale poi quella nuova (min 8 caratteri)
-- **Foto profilo** — carica un'immagine JPG o PNG (max 5 MB). Se non carichi nessuna foto, le tue iniziali vengono generate automaticamente
+- Cambia il nome visualizzato
+- Cambia la password (serve inserire quella attuale)
+- Carica una foto profilo (JPG o PNG, max 5 MB)
 
 ---
 
-## Guida interattiva (`utils/onboarding.php`)
+## Installare l'app sul telefono (PWA)
 
-La sezione **Guida** nella barra laterale contiene un tutorial interattivo con spiegazioni dettagliate su ogni sezione. Consulta la nel primo periodo di utilizzo.
-
----
-
-## Domande frequenti
-
-**Il browser si è chiuso: ho perso i dati della cassa?**
-No, il salvataggio automatico locale li ha conservati. Riapri la pagina giornaliero sulla stessa data e troverai i dati ripristinati. Ricorda poi di premere **Salva turno**.
-
-**Ho sbagliato a inserire uno scassettamento — posso correggerlo?**
-Sì, finché la giornata è aperta puoi modificare qualsiasi campo e salvare di nuovo.
-
-**La giornata è chiusa ma ho sbagliato qualcosa.**
-Solo il responsabile può riaprire una giornata chiusa.
-
-**Non vedo la sezione Ticket / Prestiti / Documenti.**
-Il responsabile potrebbe averli disabilitati da Impostazioni → Moduli.
-
-**Lo scostamento è rosso ma i dati sono giusti.**
-Verifica di non aver dimenticato un refill AWP o un ticket vincita. Se sei sicuro che i dati siano corretti, segnalalo al responsabile.
+Apri l'URL della sala nel browser mobile. Il browser mostra un banner o nel menu trovi "Aggiungi alla schermata Home". Una volta installata, l'app si avvia come un'app nativa, senza barra del browser.

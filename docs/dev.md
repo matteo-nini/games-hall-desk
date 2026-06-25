@@ -61,11 +61,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 | `get_turns()` | `(array): array` | Turni configurati (indicizzati 1-3) da settings |
 | `base_url()` | `(string): string` | URL base + path, calcolato dinamicamente |
 | `asset_url()` | `(string): string` | URL asset con cache-busting (?v=filemtime) |
-| `sums_turno()` | `(PDO, int): array` | Somme aggregrate di un turno (contanti, refill, scass, ticket) |
-| `riepilogo_giornata()` | `(PDO, string): array` | Riepilogo finanziario giornata |
+| `sums_turno()` | `(PDO, int): array` | Somme aggregate di un turno (contanti, refill, scass, ticket) |
+| `riepilogo_giornata()` | `(PDO, string, int=0): array` | Riepilogo finanziario giornata; il terzo parametro filtra per `operatore_id` |
 | `get_fornitori()` | `(PDO): array` | Fornitori attivi con fallback |
 | `nomi_mesi()` | `(): array` | Array mesi 1-12 in italiano |
 | `arrotonda_versamento()` | `(float): float` | Arrotonda a multiplo di 5 |
+
+### Note su `riepilogo_giornata()`
+
+```php
+// Tutte le giornate (comportamento standard)
+riepilogo_giornata($pdo, '2026-06-01');
+
+// Solo i turni dell'operatore 3
+riepilogo_giornata($pdo, '2026-06-01', 3);
+```
+
+Quando `$opId > 0`, la query rimuove il `LIMIT 1` e aggiunge `AND operatore_id = $opId`, restituendo la somma di tutti i turni di quell'operatore nel giorno.
 
 ---
 
@@ -135,14 +147,35 @@ login_attempts    (id, ip, attempted_at)
 --text            /* testo principale */
 --muted           /* testo secondario */
 --faint           /* testo terzario */
---green / --green-bg / --green-bd
---amber / --amber-bg
---red / --red-bg / --red-bd
+--green / --green-bg / --green-bd / --green-ink
+--amber / --amber-bg / --amber-border / --amber-ink
+--red / --red-bg / --red-bd / --red-ink
 --r               /* border-radius card */
---rxs             /* border-radius small */
+--rs / --rxs      /* border-radius medium / small */
+--rpill           /* border-radius pill */
 --sh              /* box-shadow card */
+--sh-popup        /* box-shadow modal / tooltip */
 --sidebar-w       /* larghezza sidebar principale (220px) */
 ```
+
+### Dark mode (`html[data-theme="dark"]`)
+
+Il blocco `html[data-theme="dark"]` in `core.css` ridefinisce tutte le variabili di colore. La specificità `(0,1,1)` supera `:root` `(0,1,0)`, quindi overrida anche le variabili iniettate da `nav.php` (brand accent PHP).
+
+Per le varianti accent in dark mode si usa `color-mix()`:
+```css
+--accent-weak: color-mix(in srgb, var(--accent) 20%, #111827);
+--accent-ink:  color-mix(in srgb, var(--accent) 55%, #e8edf5);
+```
+
+Questo adatta automaticamente le varianti a qualsiasi colore accent impostato come brand.
+
+**Toggle e persistenza**:
+- `localStorage` key: `gp-theme` (`'dark'` o `'light'`)
+- Anti-FOUC: script inline all'inizio di `top_menu()` in `nav.php` che applica `data-theme` prima del primo paint
+- Bottone `.sf-theme` con icone `.th-moon` / `.th-sun` (mostrata solo in dark mode) nel footer sidebar
+
+**Aggiungere dark mode a un nuovo foglio CSS**: usa `html[data-theme="dark"] .nuova-classe` invece di `@media (prefers-color-scheme: dark)` per coerenza con il sistema.
 
 ### Brand derive (`brand_derive(string $hex): array`)
 
@@ -156,7 +189,7 @@ Formule:
 - `accent-weak`: `rgb(255*.85 + c*.15)` per ogni canale (bianco al 85% + accent al 15%)
 - `accent-ink`: `rgb(c * .60)` per ogni canale (accent scurito al 60%)
 
-Iniettato in ogni pagina da `nav.php` con `<style>:root{...}</style>`.
+Iniettato in ogni pagina da `nav.php` con `<style>:root{...}</style>`. Specificità inferiore a `html[data-theme="dark"]` quindi il dark mode vince sempre.
 
 ### Classi riusabili principali
 
@@ -175,6 +208,79 @@ Iniettato in ogni pagina da `nav.php` con `<style>:root{...}</style>`.
 | `.ghost` | Bottone outline |
 | `.btnlink` | Link stilizzato come bottone primario |
 | `.ok / .warn / .bad` | Banner status (verde/giallo/rosso) |
+| `.sf-theme` | Bottone dark mode toggle nella sidebar footer |
+
+---
+
+## XlsxWriter — writer XLSX nativo (`includes/XlsxWriter.php`)
+
+Writer senza dipendenze esterne che produce file `.xlsx` validi (ZIP + OpenXML). Richiede `ZipArchive` (default in PHP 8+).
+
+```php
+require_once __DIR__ . '/../includes/XlsxWriter.php';
+$xlsx = new XlsxWriter('Nome foglio');
+
+// Ogni cella è [valore, tipo, stile]
+// tipo: 's' = stringa, 'n' = numero
+// stile: 0=normale, 1=grassetto, 2=valuta€, 3=grassetto+valuta€
+$xlsx->addRow([
+    ['Intestazione', 's', 1],
+    ['Importo', 's', 1],
+]);
+$xlsx->addRow([
+    ['Riga dati', 's', 0],
+    [1234.56, 'n', 2],
+]);
+$xlsx->output('file.xlsx'); // invia gli header HTTP e il file
+```
+
+Stili predefiniti:
+- `0` — normale (Calibri 10)
+- `1` — grassetto
+- `2` — valuta `#,##0.00 €`
+- `3` — grassetto + valuta
+
+---
+
+## Tour onboarding (`assets/js/tour.js`, `assets/css/tour.css`)
+
+Sistema tour spotlight contestuale. Si attiva al primo accesso (flag `gp_wizard_done` in `localStorage`).
+
+```js
+// Definisci i passi per la pagina corrente
+GP_Tour.init([
+  { selector: '.tabs',     title: 'Titolo',     body: 'Descrizione HTML sicura.' },
+  { selector: '.save-btn', title: 'Salva',       body: 'Clicca per salvare il turno.' },
+  { selector: null,        title: 'Passo libero', body: 'Nessun elemento evidenziato.' },
+]);
+```
+
+- `selector` — qualsiasi selettore CSS valido; `null` mostra il tooltip centrato senza spotlight
+- `title` — testo puro (viene escaped)
+- `body` — HTML (non escaped — usa testo sicuro o literal HTML)
+
+Il tour usa opacity crossfade (nessuna animazione su proprietà layout). Il tooltip si posiziona automaticamente sopra o sotto l'elemento evidenziato in base allo spazio disponibile.
+
+Per resettare il tour: `localStorage.removeItem('gp_wizard_done')` oppure il pulsante "Rivedi guida popup" in `utils/onboarding.php`.
+
+---
+
+## Dashboard live (`account/responsabile_live.php`)
+
+Endpoint JSON autenticato (solo responsabile) che restituisce i KPI della giornata corrente e del mese:
+
+```json
+{
+  "ts": 1750000000,
+  "stato": "aperta",
+  "incasso_vlt": 1234.56,
+  "versamento": 890.00,
+  "incasso_mese": 45678.90,
+  "giorni_mese": 18
+}
+```
+
+La dashboard (`account/responsabile.php`) fa polling ogni 30 secondi con `fetch()` e aggiorna i 4 KPI card tramite `document.getElementById()`. Il badge `.live-badge` mostra un'animazione pulse dopo ogni fetch riuscita.
 
 ---
 
@@ -267,13 +373,13 @@ asset_url('assets/css/core.css')
 ## Struttura directory
 
 ```
-includes/       auth.php, lib.php, db.php, nav.php
-account/        login, logout, dashboard, profilo + admin/
+includes/       auth.php, lib.php, db.php, nav.php, XlsxWriter.php
+account/        login, logout, dashboard, profilo, responsabile, responsabile_live + admin/
 cassa/          giornaliero, settimanale, mensile, annuale
 sala/           awp, turni, ticket, prestiti, documenti, doc_view, print_guasto
-utils/          export, onboarding
-assets/css/     core.css + fogli per pagina
-assets/js/      sidebar.js, giornaliero.js, turni.js, toast.js, ...
+utils/          export, export_xlsx, onboarding
+assets/css/     core.css + fogli per pagina + tour.css
+assets/js/      sidebar.js, giornaliero.js, turni.js, toast.js, tour.js, ...
 install/        schema.sql, setup.php, config.php (non versionare)
 ```
 

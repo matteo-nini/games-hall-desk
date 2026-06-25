@@ -7,11 +7,13 @@ Guida completa per la gestione amministrativa della sala: configurazione, superv
 ## Dashboard responsabile (`account/responsabile.php`)
 
 Alla login arrivi direttamente alla dashboard responsabile. Trovi:
-- **KPI del mese corrente**: giorni operativi, incasso VLT, ticket pagati, bancomat
-- **Riepilogo odierno**: andamento della giornata in corso
+- **KPI del giorno e del mese corrente**: incasso VLT, versamento, incasso mese, giorni operativi — aggiornati **automaticamente ogni 30 secondi** senza ricaricare la pagina
+- **Badge live**: pallino verde in alto che lampeggia ad ogni aggiornamento riuscito
 - **Grafici**: incasso ultimi 30 giorni (barre) e ultimi 6 mesi (linea)
-- **Statistiche operatori**: per ogni operatore — turni compilati, scostamento medio, % turni corretti negli ultimi 30 giorni
+- **Statistiche operatori**: per ogni operatore — turni compilati, scostamento medio, scostamento massimo e % turni corretti negli ultimi 30 giorni
 - **Ultime 10 giornate** con incasso: accesso rapido alle singole giornate
+
+Il tour onboarding al primo accesso guida alla scoperta dei componenti principali della dashboard.
 
 ---
 
@@ -146,9 +148,15 @@ Se un operatore non ha chiuso la giornata, puoi chiuderla tu dalla pagina giorna
 
 **Settimanale** — dati Bet/Win per settimana. Puoi inserire i dati SNAI direttamente dalla tabella.
 
-**Mensile** — riepilogo giornaliero per il mese. Usa **Stampa / PDF** per i report da conservare.
+**Mensile** — riepilogo giornaliero per il mese. Novità:
+- Riga **Δ%** in fondo alla tabella: variazione percentuale vs mese precedente su incasso, ticket, bancomat e versamento
+- **Filtro operatore**: seleziona un operatore dal dropdown per vedere solo i turni compilati da lui/lei
+- **Tabella VLT per macchina**: in fondo alla pagina, incasso ordinato per importo decrescente con % sul totale
+- Bottone **Excel** → scarica `.xlsx` completo (3 sezioni: cassa, Bet/Win, VLT per macchina)
+- Bottone **CSV** → export compatibile con Excel Italia (separatore `;`)
+- Usa **Stampa / PDF** per i report da conservare
 
-**Annuale** — panoramica mese per mese. Usa **Esporta CSV** per elaborazioni in Excel.
+**Annuale** — panoramica mese per mese. Il filtro operatore si propaga ai link mensili. Usa **Esporta CSV** per elaborazioni in Excel.
 
 ### Statistiche operatori
 Nella dashboard responsabile vedi per ogni operatore:
@@ -177,6 +185,12 @@ Formati supportati: PDF, PNG, JPG, JPEG, WebP, DOCX, XLSX, ODT, ODS — max 20 M
 
 ---
 
+## Tema chiaro/scuro
+
+Nella barra laterale in basso trovi il bottone luna/sole. Il tema dark è comodo in ambienti con poca luce. Si salva automaticamente e si ripristina ad ogni sessione.
+
+---
+
 ## Domande frequenti
 
 **Un operatore ha sbagliato la cassa: come correggo?**
@@ -196,3 +210,9 @@ Sì, crea più utenti con ruolo responsabile. Tutti hanno gli stessi permessi.
 
 **Come installo l'app sul telefono?**
 Apri l'URL della sala nel browser mobile. Il browser mostra un banner o nel menu "Aggiungi alla schermata Home". L'app funziona come un'app nativa.
+
+**La dashboard non si aggiorna in automatico.**
+I KPI si aggiornano 30 secondi dopo il caricamento della pagina, poi ogni 30 secondi. Se il badge live diventa rosso, c'è un problema di connessione al server — ricarica la pagina.
+
+**Come posso vedere l'incasso di un singolo operatore nel mese?**
+Vai in Mensile, seleziona l'operatore nel dropdown in alto e clicca Mostra. Il filtro si propaga anche all'annuale e alla tabella VLT per macchina.

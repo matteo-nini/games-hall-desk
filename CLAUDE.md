@@ -50,6 +50,7 @@ $pdo  = db();                          // connessione PDO (singleton)
 - `brand_derive(string $hex): array` — ricava `--accent`, `--accent-weak`, `--accent-ink` da un hex colore
 - `calcola_turno(array $t): array` — riconciliazione server-side di un turno (ritorna errore, cassetto, versamento, totale)
 - `get_settings($pdo): array` — tutte le chiavi da tabella `impostazioni` come array associativo
+- `riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array` — riepilogo finanziario di una giornata; passare `$opId > 0` per filtrare i turni di un singolo operatore
 
 ### Sicurezza
 
@@ -103,6 +104,51 @@ In `nav.php` i moduli vengono letti via `$navSett = get_settings($pdo)` e il nav
 
 Le varianti si derivano con `brand_derive($hex)`. L'accent-weak è il colore a 85% bianco + 15% accent (badge, sfondi); l'accent-ink è l'accent × 0.60 (hover, testo su weak). Tenere questa proporzione coerente in futuro (approccio C: full wizard con contrast checker).
 
+**Priorità CSS**: il blocco `:root` iniettato da PHP ha specificità `(0,1,0)`. Il blocco dark mode `html[data-theme="dark"]` ha specificità `(0,1,1)` — vince sempre. Le varianti accent in dark mode usano `color-mix()` per adattarsi a qualsiasi brand accent dinamicamente.
+
+## Dark mode
+
+- Toggle luna/sole nel footer della sidebar (`.sf-theme` in `nav.php`)
+- `localStorage` key: `gp-theme` — valori `'dark'` o `'light'`
+- Anti-FOUC: script inline all'inizio di `top_menu()` in `nav.php` che applica `data-theme` prima del primo paint
+- CSS: blocco `html[data-theme="dark"]` in `core.css` ridefinisce tutte le variabili; `color-scheme: dark` per form controls nativi
+- Accent-weak e accent-ink in dark mode: `color-mix(in srgb, var(--accent) 20%, #111827)` e `color-mix(in srgb, var(--accent) 55%, #e8edf5)`
+
+## Tour onboarding (`assets/js/tour.js`)
+
+Sistema spotlight contestuale, si attiva al primo accesso (flag `gp_wizard_done` in `localStorage`).
+
+```js
+// Nella pagina che deve mostrare il tour:
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof GP_Tour === 'undefined') return;
+  GP_Tour.init([
+    { selector: '.elemento', title: 'Titolo', body: 'Testo descrittivo.' },
+    { selector: null,         title: 'Fine',   body: 'Tour completato.' },
+  ]);
+});
+```
+
+- `selector` — qualsiasi CSS selector o `null` (tooltip centrato, no spotlight)
+- Il tour non si mostra se `gp_wizard_done` è già in localStorage
+- Reset: `localStorage.removeItem('gp_wizard_done')` o bottone in `utils/onboarding.php`
+
+## Export Excel (`includes/XlsxWriter.php`, `utils/export_xlsx.php`)
+
+Writer XLSX nativo (ZIP + OpenXML), richiede `ZipArchive` (default PHP 8+).
+
+```php
+require_once 'includes/XlsxWriter.php';
+$x = new XlsxWriter('Foglio1');
+$x->addRow([['Testo', 's', 1], [123.45, 'n', 2]]);
+// stile: 0=normale, 1=grassetto, 2=valuta€, 3=grassetto+valuta€
+$x->output('nome.xlsx'); // invia header HTTP e body
+```
+
+## Dashboard live (`account/responsabile_live.php`)
+
+Endpoint JSON (solo responsabile) con KPI giornata + mese. Risponde con `Content-Type: application/json` e `Cache-Control: no-store`. La dashboard fa polling ogni 30 secondi con `fetch()` e aggiorna i KPI card.
+
 ## Documenti — file upload
 
 - Upload dir: `account/uploads/documenti/` (creata automaticamente se mancante)
@@ -136,15 +182,18 @@ Soglie scostamento per il banner colorato (giornaliero.php):
 
 ## Frontend (JS in giornaliero.php)
 
-- `ACTIVE` = turno attivo (1=mattino, 2=sera), persistito in `localStorage` chiave `gp_tab`
+- `ACTIVE` = turno attivo (1=mattino, 2=sera), persistito in `localStorage` chiave `gp_tab_<data>` (scoped per data — ogni nuova giornata parte dal turno 1)
 - `recalcAll()` → ricalcola tutti i turni → aggiorna `RES[n]`
 - `updateActive()` → aggiorna il banner statusbar con i dati di `RES[ACTIVE]`
-- `showTab(n)` → cambia tab attivo, aggiorna localStorage e il campo hidden `salva_turno`
+- `showTab(n)` → cambia tab attivo, aggiorna localStorage, il campo hidden `salva_turno` e i dot indicator `.gp-swipe-dot`
 - Il campo `<input name="salva_turno">` garantisce che il POST salvi solo il turno attivo
+- Swipe touch su `#frm`: `touchstart` + `touchend`, soglia 55 px, ignora swipe verticali
 
 ## CSS (core.css + fogli modulo)
 
-Variabili CSS in `:root`: `--accent`, `--accent-weak`, `--accent-ink`, `--green`, `--amber`, `--red`, `--bg`, `--surface`, `--border`, etc.
+Variabili CSS in `:root`: `--accent`, `--accent-weak`, `--accent-ink`, `--green`, `--amber`, `--red`, `--bg`, `--surface`, `--border`, `--sh`, `--sh-popup`, etc.
+
+Il blocco `html[data-theme="dark"]` ridefinisce tutte le variabili di colore con specificità `(0,1,1)`.
 
 Classi riusabili:
 - `.mini` + `.calcrow` — card metriche in griglia
@@ -154,6 +203,10 @@ Classi riusabili:
 - `.ul-table` / `.pm-table` — tabelle con header sticky, avatar, sort su `th[data-sort]`
 - `.ob-*` — classi onboarding
 - `th[data-sort]` — intestazione cliccabile per sort client-side (JS IIFE, `data-val` sulle `<td>`)
+- `.gp-tour-hl` / `.gp-tour-tip` — spotlight e tooltip del tour (in `tour.css`)
+- `.sf-theme` — bottone dark mode toggle nella sidebar
+- `.live-badge` / `.live-dot` — badge live con pulse animation (in `dashboard.css`)
+- `.gp-swipe-hint` / `.gp-swipe-dot` — dot indicator swipe nel giornaliero
 
 ## Convenzioni da rispettare
 
