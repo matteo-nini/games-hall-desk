@@ -2,7 +2,7 @@
 
 **Sistema di gestione cassa per sale giochi VLT/AWP**
 
-Applicazione web completa per il controllo operativo quotidiano di una sala giochi: cassa, scassettamenti, bet/win SNAI, ticket di assistenza, turni e reportistica. Progettata per l'uso quotidiano da parte di operatori e responsabili, con interfaccia ottimizzata per desktop e mobile.
+Applicazione web completa per il controllo operativo quotidiano di una sala giochi: cassa, scassettamenti, bet/win SNAI, ticket di assistenza, turni e reportistica. Progettata per l'uso quotidiano da parte di operatori e responsabili, con interfaccia ottimizzata per desktop e mobile. Architettura white-label pronta per la rivendita.
 
 ---
 
@@ -27,13 +27,18 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - **Export CSV** mensile e settimanale (separatore `;`, BOM UTF-8 per Excel Italia)
 - **Export Stampa/PDF** su tutti e tre i livelli: view HTML ottimizzata per la stampa con auto-trigger `window.print()`
 - **Dashboard responsabile** con grafici Chart.js: andamento incassi ultimi 30 giorni (barre) e ultimi 6 mesi (linea); **statistiche per operatore** — turni compilati, scostamento medio e percentuale turni corretti degli ultimi 30 giorni
+- **Le mie performance** nella dashboard operatore: mini bar chart degli ultimi 30 turni, scostamento medio e % turni ok
 - **Confronto settimana precedente** nel riepilogo settimanale: badge +/−% accanto a ogni totale per confronto immediato con la settimana scorsa
 
 ### Sala
 - **AWP** — registro refill con data, importo e macchina
 - **Turni** — calendario turni programmati per operatore
-- **Ticket assistenza** — apertura, chiusura con risoluzione e storico per macchina; i contatti dell'assistenza tecnica (numero, lock, password) compaiono automaticamente nel dialog di apertura
+- **Ticket assistenza** — apertura, chiusura con risoluzione e storico per macchina; i contatti dell'assistenza tecnica (numero, lock, password) compaiono automaticamente nel dialog di apertura. Dopo ogni apertura ticket compare un popup che propone di stampare un **avviso guasto** da esporre sulla macchina
 - **Prestiti e rientri** — registro movimenti per persona con saldo corrente
+- **Documenti** *(modulo opzionale)* — caricamento e distribuzione di documenti operativi (moduli, avvisi, istruzioni). Solo il responsabile può caricare; tutti i ruoli possono aprire e scaricare. I file sono serviti in modo autenticato (nessun accesso diretto alla cartella upload)
+
+### Avviso guasto — stampa istantanea
+Quando si apre un ticket di assistenza, il sistema propone di stampare un avviso da esporre sulla macchina interessata. La pagina `sala/print_guasto.php` include il logo sala (o le iniziali se assente), il nome della macchina e un messaggio standard di fuori servizio. La stampa parte automaticamente al caricamento. Aggiungere `?noprint=1` per l'anteprima senza auto-stampa.
 
 ### Gestione macchine
 - Parco macchine VLT e AWP con tipo, fornitore (dalla lista fornitori configurabile), ordine di visualizzazione
@@ -45,8 +50,8 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 
 | Ruolo | Accesso |
 |---|---|
-| **Operatore** | Cassa giornaliera, AWP, turni, ticket, prestiti |
-| **Responsabile** | Tutto + admin (macchine, utenti, impostazioni, audit) |
+| **Operatore** | Cassa giornaliera, AWP, turni, ticket, prestiti, documenti |
+| **Responsabile** | Tutto + admin (macchine, utenti, impostazioni, audit) + caricamento documenti |
 | **Revisore** | Solo report in sola lettura: settimanale, mensile, annuale |
 
 - Creazione utenti con descrizione esplicita di ciascun ruolo
@@ -56,21 +61,23 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 
 ### Impostazioni configurabili
 - **Logo sala**: caricabile da impostazioni e mostrato nella barra laterale al posto delle iniziali — personalizzazione white-label immediata
-- **Numero di turni** (1–3) con nome e orari personalizzabili per turno — adattabile a qualsiasi organizzazione della sala
-- **Fornitori configurabili**: lista supplier modificabile, rinominabile e riordinabile tramite drag-and-drop — propaga automaticamente a ticket, scassettamenti, Bet/Win e macchine
-- **Fuso orario**: selezionabile tra tutti i timezone PHP/IANA — utile per sale fuori dall'Europa/Roma
+- **Brand colori**: color picker per il colore accent dell'interfaccia (bottoni, link, badge). 8 swatches predefiniti + picker libero con anteprima live. Lasciare vuoto per il blu default. Le varianti `--accent-weak` e `--accent-ink` vengono derivate automaticamente
+- **Numero di turni** (1–3) con nome e orari personalizzabili per turno
+- **Fornitori configurabili**: lista supplier modificabile, rinominabile e riordinabile tramite drag-and-drop
+- **Fuso orario**: selezionabile tra tutti i timezone PHP/IANA
 - Costo orario per turno (visibile nei guadagni operatori)
 - **Permessi operatori**: modifica turni nel calendario; modifica turni giornalieri (solo propri o qualsiasi)
-- Moduli opzionali: Ticket assistenza · Prestiti e rientri
+- **Moduli opzionali**: Ticket assistenza · Prestiti e rientri · Documenti
 - **Dati assistenza tecnica**: numero di telefono, codice lock, password — mostrati agli operatori all'apertura di ogni ticket
 - Retention log audit (minimo 7 giorni)
 
 ### Sicurezza
 - Autenticazione con `password_hash` / `password_verify`
 - CSRF token su ogni form POST
-- **Rate limiting login**: blocco IP per 15 minuti dopo 5 tentativi falliti (tabella DB auto-creata)
+- **Rate limiting login**: blocco IP per 15 minuti dopo 5 tentativi falliti
 - Tutti gli input utente passano per `htmlspecialchars` prima dell'output
 - Query esclusivamente con prepared statement PDO
+- I file del modulo Documenti sono serviti via `doc_view.php` con verifica di sessione (nessun accesso diretto alla cartella)
 - Audit log completo con IP, utente, entità, dettaglio per ogni operazione significativa
 - Sessioni con `cookie_httponly` e `cookie_samesite=Lax` (attivare `cookie_secure` in produzione HTTPS)
 
@@ -108,8 +115,11 @@ Apri `install/setup.php` nel browser: il wizard guida l'installazione in 6 passi
 # 1. Crea il database
 mysql -u root -p -e "CREATE DATABASE cassa_sala CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
-# 2. Installa lo schema (file unico)
+# 2. Installa lo schema base
 mysql -u root -p cassa_sala < install/schema.sql
+
+# 3. (Opzionale) Attiva il modulo Documenti
+mysql -u root -p cassa_sala < sql/documenti_migration.sql
 ```
 
 ### Configurazione
@@ -139,10 +149,18 @@ Da `account/admin/macchine.php` inserisci VLT e AWP con fornitore, seriale e CIV
 ### Impostazioni sala
 
 Da `account/admin/impostazioni.php` configura:
+- **Brand colori**: colore accent con anteprima live
 - Orari turni mattino/sera
 - Permessi operatori (modifica turni propri o qualsiasi)
 - Dati assistenza tecnica (numero, lock, password)
-- Moduli opzionali (ticket assistenza, prestiti)
+- Moduli opzionali (ticket assistenza, prestiti, documenti)
+
+### Attivare il modulo Documenti
+
+1. Eseguire `sql/documenti_migration.sql` sul database
+2. Andare in Impostazioni → Moduli → attivare "Documenti"
+
+La cartella `account/uploads/documenti/` viene creata automaticamente al primo upload.
 
 ---
 
@@ -154,6 +172,7 @@ Da `account/admin/impostazioni.php` configura:
 4. Attiva HTTPS → imposta `'cookie_secure' => true` in `includes/auth.php`
 5. **Elimina la cartella `install/`** dopo aver verificato l'accesso
 6. Verifica che `sw.js` sia raggiungibile dalla root del dominio (necessario per la PWA)
+7. Se usi il modulo Documenti, verifica che la cartella `account/uploads/` sia scrivibile dal web server
 
 ---
 
@@ -190,12 +209,14 @@ Implementate in `includes/lib.php` → `calcola_turno()` (fonte di verità lato 
 | Apre/chiude ticket assistenza | ✓ | ✓ | ✗ |
 | Elimina ticket | ✗ | ✓ | ✗ |
 | Registra prestito/rientro | ✓ | ✓ | ✗ |
+| Visualizza documenti | ✓ | ✓ | ✗ |
+| Carica/elimina documenti | ✗ | ✓ | ✗ |
 | Salva dati Bet/Win settimanale | ✓ | ✓ | ✗ |
 | Visualizza report settimanale/mensile/annuale | ✓ | ✓ | ✓ |
 | Export CSV e Stampa PDF | ✓ | ✓ | ✓ |
 | Gestione macchine (seriale, CIV, attivazione) | ✗ | ✓ | ✗ |
 | Gestione utenti e reset password | ✗ | ✓ | ✗ |
-| Impostazioni sala | ✗ | ✓ | ✗ |
+| Impostazioni sala (incluso brand colori) | ✗ | ✓ | ✗ |
 | Audit log | ✗ | ✓ | ✗ |
 
 ---
@@ -210,13 +231,16 @@ games-palace-desk/
 ├── account/
 │   ├── login.php                Accesso con rate limiting
 │   ├── logout.php               Logout + distruzione sessione
-│   ├── dashboard.php            Dashboard operatore (KPI giorno + ultimi accessi)
-│   ├── responsabile.php         Dashboard responsabile + grafici Chart.js
+│   ├── dashboard.php            Dashboard operatore (KPI giorno + performance 30gg)
+│   ├── responsabile.php         Dashboard responsabile + grafici Chart.js + stats operatori
 │   ├── profilo.php              Profilo utente + cambio password + foto
+│   ├── uploads/
+│   │   ├── sala/                Logo sala caricato da Impostazioni
+│   │   └── documenti/           File del modulo Documenti (nomi UUID, accesso via doc_view.php)
 │   └── admin/
 │       ├── macchine.php         Parco macchine VLT/AWP (seriale, CIV, storico guasti)
 │       ├── utenti.php           Gestione utenti e ruoli
-│       ├── impostazioni.php     Impostazioni sala (orari, assistenza, moduli, retention)
+│       ├── impostazioni.php     Impostazioni sala (brand, turni, moduli, assistenza, retention)
 │       └── audit.php            Log operazioni con filtri e pulizia
 │
 ├── cassa/
@@ -228,21 +252,27 @@ games-palace-desk/
 ├── sala/
 │   ├── awp.php                  Refill macchine AWP
 │   ├── turni.php                Calendario turni programmati
-│   ├── ticket.php               Ticket assistenza tecnica
-│   └── prestiti.php             Registro prestiti e rientri
+│   ├── ticket.php               Ticket assistenza tecnica + popup stampa guasto
+│   ├── prestiti.php             Registro prestiti e rientri
+│   ├── documenti.php            Modulo documenti (lista + upload)
+│   ├── doc_view.php             Serve i file documenti con autenticazione
+│   └── print_guasto.php         Avviso fuori servizio stampabile (auto-print)
 │
 ├── utils/
 │   ├── export.php               Export CSV mensile aggregato
 │   └── onboarding.php           Guida operativa (tab per ruolo)
 │
+├── sql/
+│   └── documenti_migration.sql  Migration tabella documenti (eseguire manualmente)
+│
 ├── includes/
 │   ├── auth.php                 Autenticazione, CSRF, rate limiting, ruoli
-│   ├── lib.php                  Business logic, calcoli cassa, helpers
+│   ├── lib.php                  Business logic, calcoli cassa, brand_derive(), helpers
 │   ├── db.php                   Connessione PDO singleton + config()
-│   └── nav.php                  Sidebar di navigazione adattiva per ruolo
+│   └── nav.php                  Sidebar navigazione adattiva per ruolo + iniezione brand CSS
 │
 ├── assets/
-│   ├── css/                     Fogli di stile per componente
+│   ├── css/                     Fogli di stile per componente (core.css, dashboard.css, ...)
 │   ├── js/                      Script per componente
 │   └── img/                     Icone e immagini (gp-icon.svg per PWA)
 │
@@ -267,3 +297,5 @@ games-palace-desk/
 - Il banner dati assistenza nel dialog "Apri ticket" è visibile solo se almeno un campo è configurato in Impostazioni
 - Il rate limiting login è IP-based: dopo 5 tentativi falliti in 15 minuti l'IP viene bloccato automaticamente
 - Il log audit di ogni scrittura significativa include: utente, IP, entità modificata, dettaglio dell'operazione
+- I documenti caricati vengono rinominati con UUID casuale — la URL non è indovinabile ma richiede sempre l'autenticazione via `doc_view.php`
+- Il brand accent aggiornato in Impostazioni ha effetto immediato su tutta l'interfaccia; l'anteprima live nella pagina impostazioni usa `document.documentElement.style.setProperty()` prima ancora del salvataggio

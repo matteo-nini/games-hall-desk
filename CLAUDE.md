@@ -2,7 +2,7 @@
 
 ## Panoramica progetto
 
-**Games Palace Desk** è un'app PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT e AWP. Nessun framework: PHP 8+, PDO, HTML/CSS/JS vanilla.
+**Games Palace Desk** è un'app PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT e AWP. Nessun framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
 
 ## Pattern architetturali
 
@@ -29,6 +29,9 @@ $pdo  = db();                          // connessione PDO (singleton)
 - `ensure_turno($pdo, $gid, $n): array` — crea/recupera record turno (n=1 mattino, n=2 sera)
 - `csrf_token(): string` — genera/recupera token CSRF dalla sessione
 - `check_csrf(): void` — valida token POST, esce con 400 se non valido
+- `brand_derive(string $hex): array` — ricava `--accent`, `--accent-weak`, `--accent-ink` da un hex colore
+- `calcola_turno(array $t): array` — riconciliazione server-side di un turno (ritorna errore, cassetto, versamento, totale)
+- `get_settings($pdo): array` — tutte le chiavi da tabella `impostazioni` come array associativo
 
 ### Sicurezza
 
@@ -56,7 +59,46 @@ ticket_assistenza (id, data_apertura, macchina, problema, id_ticket, risoluzione
 prestiti_persone  (id, nome, saldo_iniziale, note)
 prestiti_movimenti(id, data, persona_id, tipo[prestito|rientro], quantita, note,
                    creato_da, creato_il)
+documenti         (id, nome, descrizione, filename, mime, ordine, visibile,
+                   caricato_da, caricato_il)  ← migration: sql/documenti_migration.sql
 ```
+
+## Moduli opzionali (tabella `impostazioni`)
+
+I moduli si attivano/disattivano da Impostazioni → Moduli. La chiave in `impostazioni` è `'1'` se abilitato, `'0'` se no. Default `'1'` per tutti.
+
+| chiave               | modulo                     | nav item           |
+|----------------------|----------------------------|--------------------|
+| `modulo_assistenze`  | Ticket assistenza          | sala/ticket.php    |
+| `modulo_prestiti`    | Prestiti e rientri         | sala/prestiti.php  |
+| `modulo_documenti`   | Documenti                  | sala/documenti.php |
+
+In `nav.php` i moduli vengono letti via `$navSett = get_settings($pdo)` e il nav item compare solo se la chiave è `'1'`.
+
+## White label / Brand colori
+
+`brand_accent` in `impostazioni` contiene un hex `#rrggbb`. Se presente, `nav.php` inietta in ogni pagina:
+
+```html
+<style>:root{--accent:#hex;--accent-weak:rgb(...);--accent-ink:rgb(...)}</style>
+```
+
+Le varianti si derivano con `brand_derive($hex)`. L'accent-weak è il colore a 85% bianco + 15% accent (badge, sfondi); l'accent-ink è l'accent × 0.60 (hover, testo su weak). Tenere questa proporzione coerente in futuro (approccio C: full wizard con contrast checker).
+
+## Documenti — file upload
+
+- Upload dir: `account/uploads/documenti/` (creata automaticamente se mancante)
+- Filename: UUID hex 16 byte + estensione (`bin2hex(random_bytes(16))`)
+- Estensioni consentite: pdf, png, jpg, jpeg, webp, docx, xlsx, odt, ods
+- Dimensione max: 20 MB
+- I file vengono serviti esclusivamente via `sala/doc_view.php?id=N` (autenticazione obbligatoria, no accesso diretto alla cartella)
+- Solo il responsabile può caricare ed eliminare; tutti i ruoli possono visualizzare/scaricare
+
+## Print guasto
+
+`sala/print_guasto.php` è una pagina standalone (nessun nav, solo CSS inline) che auto-stampa via `window.print()` al caricamento. Riceve `?macchina=<nome>` via GET. Il logo sala viene preso da `impostazioni.logo_path`; se assente usa le iniziali del nome sala. Aggiungere `?noprint=1` per disabilitare l'auto-stampa (utile per preview).
+
+Viene proposta dalla dialog in `sala/ticket.php` dopo la creazione di un nuovo ticket (`?print_mac=<nome>`).
 
 ## Logica cassa
 
@@ -82,17 +124,18 @@ Soglie scostamento per il banner colorato (giornaliero.php):
 - `showTab(n)` → cambia tab attivo, aggiorna localStorage e il campo hidden `salva_turno`
 - Il campo `<input name="salva_turno">` garantisce che il POST salvi solo il turno attivo
 
-## CSS (styles.css)
+## CSS (core.css + fogli modulo)
 
-Variabili CSS in `:root`: `--accent` blu, `--green`, `--amber`, `--red`, `--bg`, `--surface`, `--border`, etc.
+Variabili CSS in `:root`: `--accent`, `--accent-weak`, `--accent-ink`, `--green`, `--amber`, `--red`, `--bg`, `--surface`, `--border`, etc.
 
 Classi riusabili:
 - `.mini` + `.calcrow` — card metriche in griglia
 - `.badge.open` / `.badge.closed` — badge verde/grigio
-- `.recent-list` + `.recent-row` — lista cliccabile (usata in dashboard e prestiti)
-- `.ticket-new-wrap` + `.tnf-grid` — form collassabile con griglia campi (usato in ticket e prestiti)
+- `.recent-list` + `.recent-row` — lista cliccabile
+- `.ticket-new-wrap` + `.tnf-grid` — form collassabile con griglia campi
+- `.ul-table` / `.pm-table` — tabelle con header sticky, avatar, sort su `th[data-sort]`
 - `.ob-*` — classi onboarding
-- `.stickyhead` — header sticky (topbar + tabbar + statusbar insieme)
+- `th[data-sort]` — intestazione cliccabile per sort client-side (JS IIFE, `data-val` sulle `<td>`)
 
 ## Convenzioni da rispettare
 
@@ -101,3 +144,4 @@ Classi riusabili:
 - Redirect dopo ogni POST (`header('Location: ...'); exit;`)
 - `audit()` su ogni operazione di scrittura significativa
 - Non usare `is_responsabile()` per chiudere la giornata (operatori possono chiudere); usarlo invece per riaprire, eliminare, gestire macchine/utenti
+- I nuovi moduli opzionali vanno aggiunti a: tabella `impostazioni` (toggle), `nav.php` (var + nav item + icona SVG), `impostazioni.php` (checkbox + POST handler)
