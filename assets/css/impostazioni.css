@@ -478,6 +478,70 @@
 }
 
 /* ============================================================
+   Settings row layout — meta (left) + ctrl (right)
+   ============================================================ */
+
+.imp-settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
+}
+
+.imp-srow {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px 28px;
+  padding: 20px 24px;
+  align-items: start;
+  border-bottom: 1px solid var(--border2)
+}
+
+.imp-srow:last-child {
+  border-bottom: none
+}
+
+.imp-srow-meta {
+  padding-top: 2px
+}
+
+.imp-srow-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px
+}
+
+.imp-srow-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5
+}
+
+.imp-srow-ctrl {
+  min-width: 0
+}
+
+/* Card with header + body (Turni, Brand) */
+.imp-scard-head {
+  padding: 16px 24px 14px;
+  border-bottom: 1px solid var(--border2)
+}
+
+.imp-scard-body {
+  padding: 20px 24px
+}
+
+@media (max-width: 600px) {
+  .imp-srow {
+    grid-template-columns: 1fr;
+    gap: 10px
+  }
+}
+
+/* ============================================================
    Settings sidebar layout
    ============================================================ */
 
