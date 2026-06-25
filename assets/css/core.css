@@ -40,6 +40,41 @@
   --ava-rose-ink:   #8c1a5f;
 }
 
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111827;
+  --surface: #1e2736;
+  --surface2: #243044;
+  --surface3: #2c3a54;
+  --border: #2d3d58;
+  --border2: #384d6a;
+  --text: #e8edf5;
+  --muted: #8fa3be;
+  --faint: #5a7090;
+  --accent-weak: color-mix(in srgb, var(--accent) 20%, #111827);
+  --accent-ink: color-mix(in srgb, var(--accent) 55%, #e8edf5);
+  --green: #4ade94;
+  --green-bg: #0c2a1c;
+  --green-bd: #1a4d32;
+  --green-ink: #4ade94;
+  --red: #f87171;
+  --red-bg: #2d1515;
+  --red-bd: #5c2626;
+  --red-ink: #f87171;
+  --amber: #fbbf24;
+  --amber-bg: #2a1e08;
+  --amber-border: #5c4415;
+  --amber-ink: #fbbf24;
+  --ava-purple-bg: #2a1f48;
+  --ava-purple-ink: #c4a8f8;
+  --ava-teal-bg: #0a2830;
+  --ava-teal-ink: #5dd5e5;
+  --ava-rose-bg: #3a0e2c;
+  --ava-rose-ink: #f5a8d8;
+  --sh: 0 1px 3px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.3);
+  --sh-popup: 0 4px 20px rgba(0,0,0,.5), 0 1px 4px rgba(0,0,0,.25)
+}
+
 * {
   box-sizing: border-box
 }
@@ -49,6 +84,10 @@ body {
   margin: 0
 }
 
+html {
+  color-scheme: light
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
@@ -56,7 +95,8 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  margin-left: var(--sidebar-w)
+  margin-left: var(--sidebar-w);
+  transition: background-color .18s ease, color .18s ease
 }
 
 a {
@@ -949,6 +989,36 @@ table.grid {
   height: 16px;
   display: block
 }
+
+.sf-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rxs);
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .08s, color .08s
+}
+
+.sf-theme:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.sf-theme svg {
+  width: 16px;
+  height: 16px;
+  display: block
+}
+
+.th-sun { display: none }
+html[data-theme="dark"] .th-sun { display: block }
+html[data-theme="dark"] .th-moon { display: none }
 
 /* Hamburger toggle (hidden on desktop) */
 .sb-toggle {

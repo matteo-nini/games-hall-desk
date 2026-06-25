@@ -1,5 +1,7 @@
 <?php
 function top_menu(array $user): void {
+    /* Anti-FOUC: apply saved theme before first paint */
+    echo '<script>(function(){var t=localStorage.getItem("gp-theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");})()</script>' . "\n";
     $cur  = basename($_SERVER['SCRIPT_NAME']);
     $role = $user['ruolo'] ?? '';
     $nome = htmlspecialchars($user['nome'] ?: $user['username']);
@@ -146,6 +148,10 @@ function top_menu(array $user): void {
       <?php endif; ?>
     </a>
     <a href="<?= base_url('account/profilo.php') ?>" class="sf-name" title="Profilo"><?= $nome ?></a>
+    <button class="sf-theme" id="theme-toggle" type="button" aria-label="Cambia tema chiaro/scuro" title="Tema">
+      <svg class="th-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="th-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
     <a href="<?= base_url('account/logout.php') ?>" class="sf-exit" aria-label="Esci" title="Esci">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
@@ -167,6 +173,17 @@ function top_menu(array $user): void {
   var sn='<?= addslashes($navNomeSala) ?>';
   if(sn && document.title && document.title.indexOf(sn)===-1) document.title=document.title+' · '+sn;
   if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');
+  var btn = document.getElementById('theme-toggle');
+  if (btn) btn.addEventListener('click', function() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('gp-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('gp-theme', 'dark');
+    }
+  });
 })()</script>
 <?php
 // Brand accent CSS override
