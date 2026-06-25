@@ -237,7 +237,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
   </nav>
 
   <div class="imp-body">
-    <header class="topbar sh-top">
+    <header class="topbar sh-top" style="padding-left:0; position:sticky; top:30px">
       <strong>Impostazioni</strong>
     </header>
 

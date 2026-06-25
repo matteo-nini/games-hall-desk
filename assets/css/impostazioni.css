@@ -355,6 +355,7 @@
 }
 
 @media (max-width: 640px) {
+
   .imp-sala-cols,
   .imp-turni-layout {
     grid-template-columns: 1fr;
@@ -561,12 +562,20 @@
 }
 
 @media (max-width: 899px) {
-  .imp-sidenav { left: 0 }
+  .imp-sidenav {
+    left: 0
+  }
 }
 
 @media (max-width: 680px) {
-  .imp-sidenav { display: none }
-  .imp-body { margin-left: 0; padding: 16px 16px 64px }
+  .imp-sidenav {
+    display: none
+  }
+
+  .imp-body {
+    margin-left: 0;
+    padding: 16px 16px 64px
+  }
 }
 
 @media (max-width: 600px) {
@@ -586,10 +595,11 @@
 
 .imp-sidenav {
   position: fixed;
-  left: var(--sidebar-w);
-  top: 52px;
+  left: calc(var(--sidebar-w) + 20px);
+  border-radius: var(--rs);
+  top: 74px;
   width: 176px;
-  height: calc(100vh - 52px);
+  height: auto;
   overflow-y: auto;
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -641,13 +651,14 @@
 }
 
 .imp-body {
-  margin-left: 176px;
+  /* margin-left: 176px; */
   padding: 28px 36px 80px
 }
 
 .imp-section {
   margin-bottom: 64px;
-  scroll-margin-top: 68px
+  scroll-margin-top: 68px;
+  margin-left: 176px;
 }
 
 .imp-section-head {
@@ -672,7 +683,7 @@
 }
 
 /* Second card in Identità (brand colori) */
-.imp-section .imp-settings-card + .imp-settings-card {
+.imp-section .imp-settings-card+.imp-settings-card {
   margin-top: 12px
 }
 
@@ -755,12 +766,12 @@
   border: 2px solid transparent;
   cursor: pointer;
   transition: transform .12s, box-shadow .12s;
-  box-shadow: 0 1px 3px rgba(0,0,0,.18)
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .18)
 }
 
 .imp-swatch-v2:hover {
   transform: scale(1.1);
-  box-shadow: 0 3px 12px rgba(0,0,0,.28)
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .28)
 }
 
 .imp-swatch-v2.sel {
