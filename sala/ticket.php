@@ -142,11 +142,6 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     </div>
   </form>
 </dialog>
-<script>
-  <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-ticket').showModal();<?php endif; ?>
-  <?php if (!empty($_GET['print_mac'])): ?>document.getElementById('dlg-print-guasto').showModal();<?php endif; ?>
-</script>
-
 <?php if (!empty($_GET['print_mac'])): ?>
 <dialog id="dlg-print-guasto" class="form-dialog">
   <div class="dlg-head">
@@ -164,6 +159,12 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
   </div>
 </dialog>
 <?php endif; ?>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-ticket').showModal();<?php endif; ?>
+    <?php if (!empty($_GET['print_mac'])): ?>document.getElementById('dlg-print-guasto')?.showModal();<?php endif; ?>
+  });
+</script>
 
 <!-- Lista ticket -->
 <div class="ticket-list">

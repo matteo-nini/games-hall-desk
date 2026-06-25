@@ -476,3 +476,328 @@
   padding-top: 16px;
   border-top: 1px solid var(--border)
 }
+
+/* ============================================================
+   Settings sidebar layout
+   ============================================================ */
+
+.imp-layout {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(100vh - 52px)
+}
+
+.imp-sidenav {
+  width: 176px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 52px;
+  height: calc(100vh - 52px);
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 14px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent
+}
+
+.imp-snav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .1s, background .1s
+}
+
+.imp-snav-item:hover {
+  color: var(--text);
+  background: var(--surface2)
+}
+
+.imp-snav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-weak)
+}
+
+.imp-snav-item svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  opacity: .65
+}
+
+.imp-snav-item.active svg {
+  opacity: 1
+}
+
+.imp-snav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0
+}
+
+.imp-body {
+  flex: 1;
+  padding: 28px 36px 80px;
+  min-width: 0;
+  max-width: 780px
+}
+
+.imp-section {
+  margin-bottom: 52px;
+  scroll-margin-top: 68px
+}
+
+.imp-section-head {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border2)
+}
+
+.imp-section-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 3px
+}
+
+.imp-section-head p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5
+}
+
+/* Nome + Logo side by side */
+.imp-identita-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px
+}
+
+/* ============================================================
+   Brand colori v2 — palette estesa + mockup
+   ============================================================ */
+
+.imp-brand-v2 {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  align-items: flex-start
+}
+
+.imp-brand-v2-left {
+  flex: 1;
+  min-width: 240px
+}
+
+.imp-color-row-v2 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px
+}
+
+.imp-color-row-v2 input[type=color] {
+  width: 60px;
+  height: 60px;
+  padding: 4px;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--rs);
+  cursor: pointer;
+  background: var(--surface);
+  box-shadow: var(--sh);
+  flex-shrink: 0
+}
+
+.imp-color-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px
+}
+
+.imp-color-hex-v2 {
+  font-family: ui-monospace, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .02em;
+  line-height: 1
+}
+
+.imp-color-label {
+  font-size: 11px;
+  color: var(--muted)
+}
+
+.imp-swatches-v2 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px
+}
+
+.imp-swatch-v2 {
+  aspect-ratio: 1;
+  border-radius: var(--rxs);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18)
+}
+
+.imp-swatch-v2:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0,0,0,.28)
+}
+
+.imp-swatch-v2.sel {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text)
+}
+
+/* Mini UI mockup */
+.ibp-mockup-v2 {
+  width: 228px;
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: var(--sh);
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  height: 192px
+}
+
+.ibp-mock-sb {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0 0
+}
+
+.ibp-mock-logo2 {
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+  padding: 4px 8px 10px;
+  letter-spacing: .06em;
+  transition: color .2s
+}
+
+.ibp-mock-ni {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-left: 2px solid transparent;
+  color: var(--faint);
+  transition: all .15s;
+  white-space: nowrap;
+  overflow: hidden
+}
+
+.ibp-mock-ni.ibp-on {
+  font-weight: 700;
+  transition: all .15s
+}
+
+.ibp-mock-main2 {
+  display: flex;
+  flex-direction: column
+}
+
+.ibp-mock-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px
+}
+
+.ibp-mock-barlbl {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.ibp-mock-btn2 {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  color: #fff;
+  transition: background .2s;
+  white-space: nowrap
+}
+
+.ibp-mock-content {
+  padding: 10px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px
+}
+
+.ibp-mock-chip2 {
+  display: inline-block;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  transition: background .2s, color .2s;
+  align-self: flex-start
+}
+
+.ibp-mock-num2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1;
+  transition: color .2s
+}
+
+.ibp-mock-numlbl {
+  font-size: 8px;
+  color: var(--faint);
+  margin-top: 2px
+}
+
+.ibp-mock-link2 {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color .2s
+}
+
+@media (max-width: 680px) {
+  .imp-sidenav {
+    display: none
+  }
+
+  .imp-body {
+    padding: 16px 16px 60px
+  }
+
+  .ibp-mockup-v2 {
+    display: none
+  }
+
+  .imp-brand-v2 {
+    flex-direction: column
+  }
+
+  .imp-swatches-v2 {
+    grid-template-columns: repeat(4, 1fr)
+  }
+
+  .imp-identita-row {
+    grid-template-columns: 1fr
+  }
+}

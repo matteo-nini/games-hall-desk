@@ -17,6 +17,18 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 .ob-panel { display:none; }
 .ob-panel.active { display:block; }
 .ob-panel-link { display:inline-block; margin-top:4px; font-size:13px; font-weight:600; color:var(--accent); }
+.ob-step { position:relative; }
+.ob-step:not(:last-child)::after {
+  content:''; position:absolute; top:56px; left:17px; bottom:-1px;
+  width:2px; background:linear-gradient(to bottom, var(--border2), transparent);
+}
+.ob-num { box-shadow:0 0 0 4px var(--accent-weak); }
+.ob-tip { border-left:3px solid var(--accent); }
+.ob-badge {
+  display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.04em; color:var(--accent-ink);
+  background:var(--accent-weak); padding:2px 8px; border-radius:var(--rpill); margin-bottom:6px;
+}
 </style>
 </head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
@@ -79,10 +91,11 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
         <div class="ob-num" aria-hidden="true">3</div>
         <div class="ob-body">
           <h3>Scassettamenti VLT</h3>
-          <p>Per ogni macchina VLT inserisci l'importo prelevato dalla cassetta durante il turno.</p>
+          <p>Per ogni macchina <strong>VLT</strong> inserisci l'importo prelevato dalla cassetta durante il turno.</p>
           <ul>
             <li>Le macchine sono raggruppate per fornitore (NOVO, INSPIRED, SPIELO).</li>
-            <li>Lascia a zero le macchine non scassettate nel turno.</li>
+            <li>Lascia a zero le macchine non scassettate nel turno corrente.</li>
+            <li>Lo scassettamento riduce il versamento VLT: è il denaro che hai già incassato dalla cassa elettronica.</li>
           </ul>
         </div>
       </div>
@@ -90,17 +103,32 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
       <div class="ob-step">
         <div class="ob-num" aria-hidden="true">4</div>
         <div class="ob-body">
-          <h3>La quadratura — «I conti tornano»</h3>
-          <p>Il banner in cima cambia colore in base allo <strong>scostamento</strong>:</p>
-          <div class="ob-legend"><span class="ob-dot ob-green"></span> <strong>Verde</strong> &mdash; scostamento &lt; 4 € (ottimo)</div>
-          <div class="ob-legend"><span class="ob-dot ob-amber"></span> <strong>Giallo</strong> &mdash; scostamento 4–5 € (tollerabile)</div>
-          <div class="ob-legend"><span class="ob-dot ob-red"></span> <strong>Rosso</strong> &mdash; scostamento &gt; 5 € (verificare)</div>
-          <p style="margin-top:10px">In caso di scostamento elevato controlla: conteggio contanti, bancomat, ticket e scassettamenti.</p>
+          <h3>Refill AWP</h3>
+          <p>Le macchine <strong>AWP</strong> (slot da bar) funzionano diversamente dalle VLT: quando esauriscono le monete interne, si riforniscono manualmente con un "refill".</p>
+          <ul>
+            <li>Ogni refill è denaro che <em>esce dalla cassa</em> e va nella macchina — aumenta il cassetto stimato.</li>
+            <li>Registra ogni refill nel campo <strong>Refill AWP</strong> della scheda cassa: indica il numero macchina, l'importo in € e l'ora.</li>
+            <li>Puoi aggiungere più refill nello stesso turno (pulsante + sulla destra).</li>
+            <li>Il totale refill viene sommato automaticamente al cassetto nel calcolo finale.</li>
+          </ul>
+          <div class="ob-tip">Non confondere refill AWP e scassettamenti VLT: il refill <em>aggiunge</em> denaro alla macchina, lo scassettamento lo <em>preleva</em>. Direzioni opposte sul cassetto.</div>
         </div>
       </div>
 
       <div class="ob-step">
         <div class="ob-num" aria-hidden="true">5</div>
+        <div class="ob-body">
+          <h3>La quadratura — «I conti tornano»</h3>
+          <p>Il banner in cima cambia colore in base allo <strong>scostamento</strong>:</p>
+          <div class="ob-legend"><span class="ob-dot ob-green"></span> <strong>Verde</strong> &mdash; scostamento &lt; 4 € (ottimo)</div>
+          <div class="ob-legend"><span class="ob-dot ob-amber"></span> <strong>Giallo</strong> &mdash; scostamento 4–5 € (tollerabile)</div>
+          <div class="ob-legend"><span class="ob-dot ob-red"></span> <strong>Rosso</strong> &mdash; scostamento &gt; 5 € (verificare)</div>
+          <p style="margin-top:10px">In caso di scostamento elevato controlla: conteggio contanti, bancomat, ticket, refill AWP e scassettamenti.</p>
+        </div>
+      </div>
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">6</div>
         <div class="ob-body">
           <h3>Chiusura della giornata</h3>
           <p>Al termine del turno sera, dopo aver salvato, clicca <strong>«Chiudi giornata»</strong>. Una giornata chiusa non può essere modificata dagli operatori.</p>
@@ -109,16 +137,17 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
       </div>
 
       <div class="ob-step">
-        <div class="ob-num" aria-hidden="true">6</div>
+        <div class="ob-num" aria-hidden="true">7</div>
         <div class="ob-body">
           <h3>Ticket assistenza macchine</h3>
           <p>Se una macchina presenta un guasto, apri un ticket dalla sezione <strong>Assistenze</strong>. Inserisci la macchina, descrivi il problema e (se disponibile) il numero di ticket del fornitore. Chiudi il ticket quando il problema è risolto.</p>
+          <p style="margin-top:8px">Dopo aver aperto il ticket, il sistema propone di <strong>stampare un avviso</strong> da esporre sulla macchina. Clicca <em>Stampa avviso</em> nel popup per aprire la pagina di stampa con il nome della macchina e la data del guasto.</p>
           <a class="ob-panel-link" href="<?= base_url('sala/ticket.php') ?>">Vai alle assistenze →</a>
         </div>
       </div>
 
       <div class="ob-step">
-        <div class="ob-num" aria-hidden="true">7</div>
+        <div class="ob-num" aria-hidden="true">8</div>
         <div class="ob-body">
           <h3>Prestiti e rientri</h3>
           <p>La sezione <strong>Prestiti</strong> traccia i prestiti in denaro a clienti o collaboratori. Il saldo mostra quanto non è ancora rientrato.</p>
@@ -131,7 +160,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
       </div>
 
       <div class="ob-step">
-        <div class="ob-num" aria-hidden="true">8</div>
+        <div class="ob-num" aria-hidden="true">9</div>
         <div class="ob-body">
           <h3>Documenti operativi</h3>
           <p>La sezione <strong>Documenti</strong> raccoglie i moduli e le istruzioni caricati dal responsabile — ad esempio il modulo antiriciclaggio da stampare per le vincite alte.</p>
@@ -141,6 +170,20 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
             <li>Per le vincite che richiedono un modulo cartaceo, apri il documento e stampa direttamente dal browser.</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('sala/documenti.php') ?>">Vai ai documenti →</a>
+        </div>
+      </div>
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">10</div>
+        <div class="ob-body">
+          <h3>Dati Bet/Win settimanali</h3>
+          <p>La sezione <strong>Settimanale</strong> contiene anche i campi per inserire i dati Bet/Win di ogni fornitore (NOVO, INSPIRED, SPIELO). Questi valori sono usati dal responsabile per i report finanziari.</p>
+          <ul>
+            <li><strong>Giocato</strong>: totale puntate della settimana per quel fornitore.</li>
+            <li><strong>Pagato</strong>: totale vincite pagate nella settimana.</li>
+            <li>Inserisci i valori solo quando disponibili, tipicamente dopo aver ricevuto il bollettino settimanale.</li>
+          </ul>
+          <a class="ob-panel-link" href="<?= base_url('cassa/settimanale.php') ?>">Vai al settimanale →</a>
         </div>
       </div>
 
@@ -206,17 +249,32 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
           <h3>Report e analisi</h3>
           <p>Le sezioni di report aggregano i dati su periodi estesi:</p>
           <ul>
-            <li><strong>Settimanale</strong>: incassi giorno per giorno nella settimana.</li>
-            <li><strong>Mensile</strong>: totali per mese, con link ai dettagli giornalieri.</li>
+            <li><strong>Settimanale</strong>: incassi giorno per giorno con i dati Bet/Win per fornitore.</li>
+            <li><strong>Mensile</strong>: totali per mese, con link ai dettagli giornalieri e tabella fornitori.</li>
             <li><strong>Annuale</strong>: panoramica anno completo mese per mese.</li>
           </ul>
           <p>Ogni vista offre un pulsante <em>Esporta CSV</em> per il contabile o il commercialista.</p>
+          <p style="margin-top:8px">Nella <strong>dashboard operatori</strong> (sezione Responsabile) trovi le performance degli ultimi 30 giorni per ogni utente: scostamento medio, percentuale turni in quadratura e numero turni effettuati.</p>
           <a class="ob-panel-link" href="<?= base_url('cassa/annuale.php') ?>">Vai al report annuale →</a>
         </div>
       </div>
 
       <div class="ob-step">
         <div class="ob-num" aria-hidden="true">5</div>
+        <div class="ob-body">
+          <h3>Dati Bet/Win SNAI</h3>
+          <p>I dati <strong>Bet/Win</strong> (giocato/pagato per fornitore) vengono inseriti nella pagina Settimanale. È un campo libero: inseriscilo quando ricevi il bollettino dal concessionario.</p>
+          <ul>
+            <li>Naviga alla settimana di riferimento con le frecce ← →.</li>
+            <li>Per ogni fornitore inserisci <strong>Giocato</strong> e <strong>Pagato</strong> nella tabella e salva.</li>
+            <li>I valori compaiono nel report mensile e annuale per il calcolo della marginalità.</li>
+          </ul>
+          <a class="ob-panel-link" href="<?= base_url('cassa/settimanale.php') ?>">Vai al settimanale →</a>
+        </div>
+      </div>
+
+      <div class="ob-step">
+        <div class="ob-num" aria-hidden="true">6</div>
         <div class="ob-body">
           <h3>Modulo Documenti</h3>
           <p>La sezione <strong>Documenti</strong> permette di caricare moduli, avvisi e istruzioni accessibili a tutti gli operatori. Esempi di utilizzo:</p>
@@ -231,7 +289,7 @@ $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
       </div>
 
       <div class="ob-step">
-        <div class="ob-num" aria-hidden="true">6</div>
+        <div class="ob-num" aria-hidden="true">7</div>
         <div class="ob-body">
           <h3>Audit log e retention</h3>
           <p>La sezione <strong>Audit</strong> mostra tutte le operazioni effettuate nel sistema: login, salvataggi, chiusure giornata, modifiche impostazioni.</p>
