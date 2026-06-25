@@ -151,10 +151,10 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
   <div class="dlg-print-body">
     <p>Vuoi stampare l'avviso da esporre sulla macchina <strong><?= $h($_GET['print_mac']) ?></strong>?</p>
     <div class="dlg-actions">
-      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">No grazie</button>
+      <button type="button" class="ghost" onclick="this.closest('dialog').close()">No grazie</button>
       <a href="<?= base_url('sala/print_guasto.php') ?>?macchina=<?= rawurlencode($_GET['print_mac']) ?>"
          target="_blank" rel="noopener"
-         class="btn" onclick="setTimeout(function(){document.getElementById('dlg-print-guasto').close();},200)">Stampa avviso</a>
+         class="btnlink" onclick="setTimeout(function(){document.getElementById('dlg-print-guasto').close();},200)">Stampa avviso</a>
     </div>
   </div>
 </dialog>
