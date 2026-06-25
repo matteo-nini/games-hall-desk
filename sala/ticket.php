@@ -163,8 +163,47 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
   document.addEventListener('DOMContentLoaded', function () {
     <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-ticket').showModal();<?php endif; ?>
     <?php if (!empty($_GET['print_mac'])): ?>document.getElementById('dlg-print-guasto')?.showModal();<?php endif; ?>
+    var dlgChiudi = document.getElementById('dlg-chiudi');
+    document.querySelectorAll('.tc-chiudi-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.getElementById('dlg-chiudi-id').value = this.dataset.id;
+        document.getElementById('dlg-chiudi-mac').textContent = this.dataset.mac;
+        dlgChiudi.showModal();
+      });
+    });
   });
 </script>
+
+<!-- Dialog chiudi ticket -->
+<dialog id="dlg-chiudi" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Chiudi ticket — <span id="dlg-chiudi-mac"></span></strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <form method="post" class="ticket-new-form">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="chiudi">
+    <input type="hidden" name="id" id="dlg-chiudi-id">
+    <div class="tnf-grid">
+      <div class="field">
+        <label>Data chiusura</label>
+        <input type="date" name="data_chiusura" value="<?= date('Y-m-d') ?>">
+      </div>
+      <div class="field">
+        <label>ID Ticket (se mancante)</label>
+        <input type="text" name="id_ticket" placeholder="CAS-XXXXXXX">
+      </div>
+      <div class="field tnf-full">
+        <label>Risoluzione</label>
+        <input type="text" name="risoluzione" placeholder="es. Intervento remoto / Mandano tecnico" style="width:100%">
+      </div>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Segna risolto</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- Lista ticket -->
 <div class="ticket-list">
@@ -183,18 +222,12 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
     <?php if ($t['stato'] === 'risolto'): ?>
     <div class="tc-ris">&#10003; <?= $h($t['risoluzione'] ?? '—') ?><?php if ($t['data_chiusura']): ?> &middot; <span class="tc-dch">chiuso <?= $h(date('d/m/Y', strtotime($t['data_chiusura']))) ?></span><?php endif; ?></div>
     <?php else: ?>
-    <details class="tc-chiudi">
-      <summary>Chiudi ticket</summary>
-      <form method="post" class="tc-chiudi-form">
-        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-        <input type="hidden" name="azione" value="chiudi">
-        <input type="hidden" name="id" value="<?= $h($t['id']) ?>">
-        <div class="field"><label>Data chiusura</label><input type="date" name="data_chiusura" value="<?= date('Y-m-d') ?>"></div>
-        <div class="field"><label>ID Ticket (se mancante)</label><input type="text" name="id_ticket" placeholder="CAS-XXXXXXX"></div>
-        <div class="field tnf-full"><label>Risoluzione</label><input type="text" name="risoluzione" placeholder="es. Intervento remoto / Mandano tecnico" style="width:100%"></div>
-        <button type="submit">Segna risolto</button>
-      </form>
-    </details>
+    <div class="tc-chiudi-row">
+      <button type="button" class="ghost tc-chiudi-btn"
+              data-id="<?= $h($t['id']) ?>" data-mac="<?= $h($t['macchina']) ?>">
+        Chiudi ticket
+      </button>
+    </div>
     <?php endif; ?>
     <?php if (is_responsabile()): ?>
     <form method="post" class="tc-del" onsubmit="return confirm('Eliminare questo ticket?')">
