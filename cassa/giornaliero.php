@@ -337,4 +337,17 @@ var GP_LAST_TURN = <?= $lastTurn ?>;
 var GP_TURNS     = <?= json_encode($gpTurns) ?>;
 </script>
 <script src="<?= asset_url('assets/js/giornaliero.js') ?>"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof GP_Tour === 'undefined') return;
+  GP_Tour.init([
+    { selector: '.tabs',        title: 'Turni del giorno',    body: 'Passa da Mattino a Sera usando i tab. Su mobile puoi anche scorrere con uno swipe.' },
+    { selector: '.statusbar',   title: 'Stato in tempo reale', body: 'Cassetto, versamento e scostamento si aggiornano mentre compili i campi.' },
+    { selector: '.f-fondo_cassa', title: 'Fondo cassa',       body: 'Inserisci l\'importo presente in cassa all\'inizio del turno.' },
+    { selector: '.bills-grid',  title: 'Conta contanti',       body: 'Inserisci i pezzi per ogni taglio. Il totale contanti si calcola automaticamente.' },
+    { selector: '.scassettamenti', title: 'Scassettamenti VLT', body: 'Importo prelevato da ogni cassetta VLT durante il turno.' },
+    { selector: '.save-btn',    title: 'Salva e chiudi',       body: 'Salva il turno corrente. Dopo aver completato entrambi i turni, chiudi la giornata.' },
+  ]);
+});
+</script>
 </body></html>

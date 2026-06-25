@@ -290,6 +290,18 @@ if(typeof Chart!=='undefined')(function(){
 })();
 </script>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof GP_Tour === 'undefined') return;
+  GP_Tour.init([
+    { selector: '.dash-hero',       title: 'Stato della giornata',  body: 'Qui vedi se la giornata è aperta, chiusa o non ancora iniziata, con l\'incasso VLT corrente.' },
+    { selector: '.dash-kpi',        title: 'KPI del giorno e mese', body: 'Incasso e versamento di oggi e il totale del mese. Si aggiornano automaticamente ogni 30 secondi.' },
+    { selector: '#chart-30d',       title: 'Andamento ultimi 30 giorni', body: 'Ogni barra è un giorno. Passa il cursore per vedere l\'importo esatto.' },
+    { selector: '.dash-op-stats',   title: 'Performance operatori',  body: 'Scostamento medio e % turni in quadratura per ogni operatore degli ultimi 30 giorni.' },
+    { selector: '.live-badge',      title: 'Aggiornamento live',     body: 'Il pallino verde lampeggia ad ogni fetch riuscita. Dati sempre aggiornati senza ricaricare.' },
+  ]);
+});
+</script>
+<script>
 (function(){
   var INTERVAL = 30000;
   var liveUrl = '<?= base_url('account/responsabile_live.php') ?>';

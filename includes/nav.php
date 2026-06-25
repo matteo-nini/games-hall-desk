@@ -85,6 +85,7 @@ function top_menu(array $user): void {
     $navLogoUrl   = $navLogoPath ? base_url('account/uploads/sala/' . rawurlencode($navLogoPath)) : null;
 ?>
 <link rel="stylesheet" href="<?= asset_url('assets/css/ob-banners.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/tour.css') ?>">
 <aside class="sidebar" id="sidebar" data-role="<?= htmlspecialchars($role) ?>" aria-label="Navigazione principale">
 
   <div class="sb-head">
@@ -169,6 +170,7 @@ function top_menu(array $user): void {
 <script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';window.GP_SALA='<?= addslashes($navNomeSala) ?>';</script>
 <script src="<?= asset_url('assets/js/ob-banners.js') ?>" defer></script>
 <script src="<?= asset_url('assets/js/toast.js') ?>" defer></script>
+<script src="<?= asset_url('assets/js/tour.js') ?>" defer></script>
 <script>(function(){
   var sn='<?= addslashes($navNomeSala) ?>';
   if(sn && document.title && document.title.indexOf(sn)===-1) document.title=document.title+' · '+sn;
