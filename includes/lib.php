@@ -165,15 +165,20 @@ function sums_turno(PDO $pdo, int $tid): array {
 }
 
 /** Riepilogo finanziario di giornata: usa l'ultimo turno disponibile (massimo numero). */
-function riepilogo_giornata(PDO $pdo, string $data): array {
+function riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array {
     $fornitori = get_fornitori($pdo);
     $z = ['bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,'incasso_vlt'=>0.0,
           'scass'   => array_fill_keys($fornitori, 0.0)];
     $g = $pdo->prepare('SELECT id FROM giornate WHERE data=?'); $g->execute([$data]); $g = $g->fetch();
     if (!$g) return $z;
-    /* Usa sempre l'ultimo turno del giorno per il riepilogo finanziario */
-    $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? ORDER BY numero DESC LIMIT 1');
-    $ts->execute([$g['id']]);
+    if ($opId > 0) {
+        $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? AND operatore_id=? ORDER BY numero');
+        $ts->execute([$g['id'], $opId]);
+    } else {
+        /* Usa solo l'ultimo turno del giorno per il riepilogo finanziario */
+        $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? ORDER BY numero DESC LIMIT 1');
+        $ts->execute([$g['id']]);
+    }
     foreach ($ts as $t) {
         $s = sums_turno($pdo, (int)$t['id']);
         $c = calcola_turno([

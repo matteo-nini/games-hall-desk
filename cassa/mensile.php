@@ -13,12 +13,14 @@ $ngiorni = (int)date('t', mktime(0,0,0,$mese,1,$anno));
 $h        = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $pct      = fn($p,$g) => $g > 0 ? number_format($p/$g*100,1,',','.').'%' : '—';
 $fornitori = get_fornitori($pdo);
+$opFiltro = (int)($_GET['op'] ?? 0);
+$operatori = $pdo->query("SELECT id, COALESCE(NULLIF(nome,''), username) AS nome FROM utenti WHERE attivo=1 AND ruolo IN ('operatore','responsabile') ORDER BY nome")->fetchAll();
 
 // cassa per giorno
 $righe = []; $tot = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
 for ($d = 1; $d <= $ngiorni; $d++) {
     $data = sprintf('%04d-%02d-%02d', $anno, $mese, $d);
-    $r = riepilogo_giornata($pdo, $data);
+    $r = riepilogo_giornata($pdo, $data, $opFiltro);
     $righe[$d] = $r;
     $tot['incasso']    += $r['incasso_vlt'];
     $tot['ticket']     += $r['ticket'];
@@ -40,7 +42,7 @@ if ($mesePre < 1) { $mesePre = 12; $annoPre--; }
 $ngPre = (int)date('t', mktime(0,0,0,$mesePre,1,$annoPre));
 $totPre = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
 for ($d = 1; $d <= $ngPre; $d++) {
-    $rp = riepilogo_giornata($pdo, sprintf('%04d-%02d-%02d', $annoPre, $mesePre, $d));
+    $rp = riepilogo_giornata($pdo, sprintf('%04d-%02d-%02d', $annoPre, $mesePre, $d), $opFiltro);
     $totPre['incasso']    += $rp['incasso_vlt'];
     $totPre['ticket']     += $rp['ticket'];
     $totPre['bancomat']   += $rp['bancomat'];
@@ -70,6 +72,12 @@ $mesi = nomi_mesi();
   <form class="nav" method="get">
     <select name="mese"><?php foreach ($mesi as $k=>$v): ?><option value="<?= $k ?>" <?= $k==$mese?'selected':'' ?>><?= $v ?></option><?php endforeach; ?></select>
     <input type="number" name="anno" value="<?= $anno ?>" style="width:90px">
+    <select name="op">
+      <option value="0">Tutti gli operatori</option>
+      <?php foreach ($operatori as $op): ?>
+      <option value="<?= $op['id'] ?>" <?= $op['id']==$opFiltro?'selected':'' ?>><?= $h($op['nome']) ?></option>
+      <?php endforeach; ?>
+    </select>
     <button>Mostra</button>
   </form>
   <div class="topbar-actions">
