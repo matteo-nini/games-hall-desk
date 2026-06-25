@@ -265,9 +265,9 @@ $okMsg = match ($_GET['ok'] ?? '') {
       <thead>
         <tr>
           <th class="ul-th-ava" aria-hidden="true"></th>
-          <th>Utente</th>
-          <th>Ruolo</th>
-          <th>Stato</th>
+          <th data-sort="text">Utente</th>
+          <th data-sort="text">Ruolo</th>
+          <th data-sort="text">Stato</th>
           <th class="ul-th-menu" aria-hidden="true"></th>
         </tr>
       </thead>
@@ -292,7 +292,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
             <?php endif; ?>
           </td>
 
-          <td class="ul-td-user">
+          <td class="ul-td-user" data-val="<?= $h(mb_strtolower($displayN, 'UTF-8')) ?>">
             <span class="ul-nome">
               <?= $h($displayN) ?>
               <?php if ($isMe): ?><span class="ul-you">tu</span><?php endif; ?>
@@ -472,5 +472,28 @@ function validateReset(f) {
   if (pw.value !== rp.value) { rp.setCustomValidity('Le password non coincidono'); rp.reportValidity(); return false; }
   rp.setCustomValidity(''); return true;
 }
+
+(function () {
+  var tbl  = document.querySelector('.ul-table');
+  if (!tbl) return;
+  var ths  = tbl.querySelectorAll('th[data-sort]');
+  ths.forEach(function (th) {
+    th.addEventListener('click', function () {
+      var col  = th.cellIndex;
+      var dir  = th.dataset.dir === 'asc' ? 'desc' : 'asc';
+      ths.forEach(function (t) { delete t.dataset.dir; });
+      th.dataset.dir = dir;
+      var tbody = tbl.tBodies[0];
+      var rows  = [].slice.call(tbody.rows);
+      rows.sort(function (a, b) {
+        var av = a.cells[col].dataset.val !== undefined ? a.cells[col].dataset.val : a.cells[col].textContent.trim();
+        var bv = b.cells[col].dataset.val !== undefined ? b.cells[col].dataset.val : b.cells[col].textContent.trim();
+        var r  = av.localeCompare(bv, 'it', { sensitivity: 'base' });
+        return dir === 'asc' ? r : -r;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
+    });
+  });
+}());
 </script>
 </body></html>

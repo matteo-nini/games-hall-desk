@@ -209,10 +209,10 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
       <thead>
         <tr>
           <th class="pm-th-ava" aria-hidden="true"></th>
-          <th>Persona</th>
-          <th>Data</th>
-          <th>Tipo</th>
-          <th class="pm-th-num">Importo</th>
+          <th data-sort="text">Persona</th>
+          <th data-sort="date">Data</th>
+          <th data-sort="text">Tipo</th>
+          <th class="pm-th-num" data-sort="num">Importo</th>
           <th class="pm-th-note">Note</th>
           <?php if (is_responsabile()): ?><th class="pm-th-menu" aria-hidden="true"></th><?php endif; ?>
         </tr>
@@ -233,13 +233,13 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
             <?= $h($m['pnome']) ?>
             <?php endif; ?>
           </td>
-          <td class="pm-td-data"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></td>
+          <td class="pm-td-data" data-val="<?= $h($m['data']) ?>"><?= $h(date('d/m/Y', strtotime($m['data']))) ?></td>
           <td>
             <span class="pm-badge <?= $m['tipo']==='prestito'?'pm-out':'pm-in' ?>">
               <?= $m['tipo']==='prestito' ? 'Prestito' : 'Rientro' ?>
             </span>
           </td>
-          <td class="pm-td-num"><?= $nv($m['quantita']) ?> €</td>
+          <td class="pm-td-num" data-val="<?= (float)$m['quantita'] ?>"><?= $nv($m['quantita']) ?> €</td>
           <td class="pm-td-note"><?= $m['note'] ? $h($m['note']) : '' ?></td>
           <?php if (is_responsabile()): ?>
           <td class="pm-td-menu">
@@ -315,6 +315,30 @@ $tot_dare = array_sum(array_column($persone, 'dare'));
       if (!confirm('Eliminare il movimento di ' + f.dataset.qta + ' € per ' + f.dataset.nome + '?')) {
         e.preventDefault();
       }
+    });
+  });
+}());
+
+(function () {
+  var tbl  = document.querySelector('.pm-table');
+  if (!tbl) return;
+  var ths  = tbl.querySelectorAll('th[data-sort]');
+  ths.forEach(function (th) {
+    th.addEventListener('click', function () {
+      var col  = th.cellIndex;
+      var dir  = th.dataset.dir === 'asc' ? 'desc' : 'asc';
+      ths.forEach(function (t) { delete t.dataset.dir; });
+      th.dataset.dir = dir;
+      var tbody = tbl.tBodies[0];
+      var rows  = [].slice.call(tbody.rows);
+      var type  = th.dataset.sort;
+      rows.sort(function (a, b) {
+        var av = a.cells[col].dataset.val !== undefined ? a.cells[col].dataset.val : a.cells[col].textContent.trim();
+        var bv = b.cells[col].dataset.val !== undefined ? b.cells[col].dataset.val : b.cells[col].textContent.trim();
+        var r  = type === 'num' ? (parseFloat(av) - parseFloat(bv)) : av.localeCompare(bv, 'it', { sensitivity: 'base' });
+        return dir === 'asc' ? r : -r;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
     });
   });
 }());
