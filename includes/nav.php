@@ -9,6 +9,7 @@ function top_menu(array $user): void {
     $navNomeSala = $navSett['nome_sala'] ?? (config()['nome_sala'] ?? '');
     $modAssistenze = ($navSett['modulo_assistenze'] ?? '1') === '1';
     $modPrestiti   = ($navSett['modulo_prestiti']   ?? '1') === '1';
+    $modDocumenti  = ($navSett['modulo_documenti']  ?? '1') === '1';
 
     $ico = [
         'dashboard'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -24,6 +25,7 @@ function top_menu(array $user): void {
         'macchine'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2M7 11h5"/></svg>',
         'utenti'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
         'audit'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+        'documenti'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
         'impostazioni'=> '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>',
         'fornitori'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
         'profilo'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -50,8 +52,9 @@ function top_menu(array $user): void {
             'sala/awp.php'   => ['label' => 'AWP',   'ico' => 'awp'],
             'sala/turni.php' => ['label' => 'Turni', 'ico' => 'turni'],
         ];
-        if ($modAssistenze) $salaItems['sala/ticket.php']   = ['label' => 'Assistenze', 'ico' => 'ticket'];
-        if ($modPrestiti)   $salaItems['sala/prestiti.php'] = ['label' => 'Prestiti',   'ico' => 'prestiti'];
+        if ($modAssistenze) $salaItems['sala/ticket.php']    = ['label' => 'Assistenze', 'ico' => 'ticket'];
+        if ($modPrestiti)   $salaItems['sala/prestiti.php']  = ['label' => 'Prestiti',   'ico' => 'prestiti'];
+        if ($modDocumenti)  $salaItems['sala/documenti.php'] = ['label' => 'Documenti',  'ico' => 'documenti'];
     }
 
     $adminItems = ($role === 'responsabile') ? [
@@ -166,4 +169,13 @@ function top_menu(array $user): void {
   if('serviceWorker' in navigator)navigator.serviceWorker.register('<?= addslashes(base_url('sw.js')) ?>');
 })()</script>
 <?php
+// Brand accent CSS override
+$brandAccent = $navSett['brand_accent'] ?? null;
+if ($brandAccent && preg_match('/^#[0-9a-fA-F]{6}$/', $brandAccent)) {
+    $bvars = brand_derive($brandAccent);
+    echo '<style>:root{';
+    foreach ($bvars as $prop => $val) echo htmlspecialchars($prop) . ':' . htmlspecialchars($val) . ';';
+    echo '}</style>' . "\n";
 }
+}
+

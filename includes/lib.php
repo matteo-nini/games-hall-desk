@@ -82,6 +82,18 @@ function asset_url(string $path): string {
     return base_url($path) . ($v ? '?v=' . $v : '');
 }
 
+function brand_derive(string $hex): array {
+    if (!preg_match('/^#[0-9a-fA-F]{6}$/', $hex)) return [];
+    $r = hexdec(substr($hex, 1, 2));
+    $g = hexdec(substr($hex, 3, 2));
+    $b = hexdec(substr($hex, 5, 2));
+    return [
+        '--accent'      => $hex,
+        '--accent-weak' => 'rgb('.round(255*.85+$r*.15).','.round(255*.85+$g*.15).','.round(255*.85+$b*.15).')',
+        '--accent-ink'  => 'rgb('.round($r*.60).','.round($g*.60).','.round($b*.60).')',
+    ];
+}
+
 /**
  * Calcola la riconciliazione di un turno.
  * $t deve contenere: fondo_cassa, monete, bancomat, differenze, ii_cassa,

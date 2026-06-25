@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare('INSERT INTO ticket_assistenza (data_apertura,macchina,problema,id_ticket,stato,creato_da) VALUES (?,?,?,?,"aperto",?)')
             ->execute([$ap, $mac, $prb, $idt, $user['id']]);
         audit('ticket_aperto','ticket_assistenza',(int)$pdo->lastInsertId(),"$mac – $prb");
-        header('Location: ticket.php?ok=1'); exit;
+        header('Location: ticket.php?ok=1&print_mac=' . rawurlencode($mac)); exit;
     }
 
     if ($az === 'chiudi') {
@@ -144,7 +144,26 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
 </dialog>
 <script>
   <?php if (isset($_GET['nuovo'])): ?>document.getElementById('dlg-ticket').showModal();<?php endif; ?>
+  <?php if (!empty($_GET['print_mac'])): ?>document.getElementById('dlg-print-guasto').showModal();<?php endif; ?>
 </script>
+
+<?php if (!empty($_GET['print_mac'])): ?>
+<dialog id="dlg-print-guasto" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Ticket aperto</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <div class="dlg-print-body">
+    <p>Vuoi stampare l'avviso da esporre sulla macchina <strong><?= $h($_GET['print_mac']) ?></strong>?</p>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">No grazie</button>
+      <a href="<?= base_url('sala/print_guasto.php') ?>?macchina=<?= rawurlencode($_GET['print_mac']) ?>"
+         target="_blank" rel="noopener"
+         class="btn" onclick="setTimeout(function(){document.getElementById('dlg-print-guasto').close();},200)">Stampa avviso</a>
+    </div>
+  </div>
+</dialog>
+<?php endif; ?>
 
 <!-- Lista ticket -->
 <div class="ticket-list">
@@ -190,4 +209,8 @@ $n_aperti = (int)$pdo->query('SELECT COUNT(*) FROM ticket_assistenza WHERE stato
   <p class="ticket-empty">Nessun ticket trovato per il filtro selezionato.</p>
   <?php endif; ?>
 </div>
+<style>
+.dlg-print-body { padding: 16px 20px 4px }
+.dlg-print-body p { font-size: 14px; margin-bottom: 18px; line-height: 1.5 }
+</style>
 </body></html>

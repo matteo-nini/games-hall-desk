@@ -113,10 +113,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     if ($az === 'moduli') {
         $ma = isset($_POST['modulo_assistenze']) ? '1' : '0';
         $mp = isset($_POST['modulo_prestiti'])   ? '1' : '0';
+        $md = isset($_POST['modulo_documenti'])  ? '1' : '0';
         $st = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
         $st->execute(['modulo_assistenze', $ma]);
         $st->execute(['modulo_prestiti',   $mp]);
-        audit('impostazioni_moduli', null, null, "assistenze=$ma prestiti=$mp");
+        $st->execute(['modulo_documenti',  $md]);
+        audit('impostazioni_moduli', null, null, "assistenze=$ma prestiti=$mp documenti=$md");
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
+    if ($az === 'brand') {
+        $hex = strtolower(trim($_POST['brand_accent'] ?? ''));
+        if (preg_match('/^#[0-9a-fA-F]{6}$/', $hex)) {
+            $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
+                ->execute(['brand_accent', $hex]);
+            audit('impostazioni_brand', null, null, "accent=$hex");
+        } else {
+            $pdo->exec("DELETE FROM impostazioni WHERE chiave='brand_accent'");
+            audit('impostazioni_brand_reset', null, null, null);
+        }
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -247,6 +262,95 @@ $df    = ['19:00','01:00','09:00'];
         </form>
       </div>
     </div>
+  </section>
+
+  <section class="imp-card imp-card-wide">
+    <div class="imp-card-head">
+      <div class="imp-card-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M5.3 5.3l1.4 1.4M13.3 13.3l1.4 1.4M3 10h2M15 10h2M5.3 14.7l1.4-1.4M13.3 6.7l1.4-1.4M10 3v2M10 15v2"/></svg>
+      </div>
+      <div>
+        <h2 class="imp-card-title">Brand colori</h2>
+        <p class="imp-card-desc">Colore accent dell'interfaccia: bottoni, link attivi, badge. Lascia vuoto per tornare al blu predefinito.</p>
+      </div>
+    </div>
+    <div class="imp-brand-layout">
+      <div class="imp-brand-picker">
+        <div class="imp-field">
+          <label for="imp-accent">Colore accent</label>
+          <div class="imp-color-row">
+            <input type="color" id="imp-accent" value="<?= $h($sett['brand_accent'] ?? '#3b5bdb') ?>">
+            <span class="imp-color-hex" id="imp-accent-hex"><?= $h($sett['brand_accent'] ?? '#3b5bdb') ?></span>
+          </div>
+        </div>
+        <div class="imp-swatches" role="group" aria-label="Colori predefiniti">
+          <button type="button" class="imp-swatch" data-color="#3b5bdb" title="Blu (default)" style="background:#3b5bdb"></button>
+          <button type="button" class="imp-swatch" data-color="#2f9e44" title="Verde" style="background:#2f9e44"></button>
+          <button type="button" class="imp-swatch" data-color="#e03131" title="Rosso" style="background:#e03131"></button>
+          <button type="button" class="imp-swatch" data-color="#1971c2" title="Blu scuro" style="background:#1971c2"></button>
+          <button type="button" class="imp-swatch" data-color="#7048e8" title="Viola" style="background:#7048e8"></button>
+          <button type="button" class="imp-swatch" data-color="#0c8599" title="Teal" style="background:#0c8599"></button>
+          <button type="button" class="imp-swatch" data-color="#d9480f" title="Arancione" style="background:#d9480f"></button>
+          <button type="button" class="imp-swatch" data-color="#1098ad" title="Cyan" style="background:#1098ad"></button>
+        </div>
+      </div>
+      <div class="imp-brand-preview" id="imp-brand-preview" aria-label="Anteprima colore accent">
+        <span class="ibp-label">Anteprima</span>
+        <button class="ibp-btn" id="ibp-btn" type="button" tabindex="-1">Salva turno</button>
+        <span class="ibp-chip" id="ibp-chip">Aperta</span>
+        <a class="ibp-link" id="ibp-link" href="#" tabindex="-1" onclick="return false">Vedi storico →</a>
+      </div>
+    </div>
+    <div class="imp-brand-footer">
+      <form method="post" id="frm-brand">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="brand">
+        <input type="hidden" name="brand_accent" id="imp-accent-val" value="<?= $h($sett['brand_accent'] ?? '') ?>">
+        <button type="submit">Salva colore</button>
+      </form>
+      <?php if (!empty($sett['brand_accent'])): ?>
+      <form method="post">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="brand">
+        <input type="hidden" name="brand_accent" value="">
+        <button type="submit" class="ghost">Reset default</button>
+      </form>
+      <?php endif; ?>
+    </div>
+    <script>
+    (function () {
+      var inp  = document.getElementById('imp-accent');
+      var hexEl= document.getElementById('imp-accent-hex');
+      var val  = document.getElementById('imp-accent-val');
+      var btn  = document.getElementById('ibp-btn');
+      var chip = document.getElementById('ibp-chip');
+      var lnk  = document.getElementById('ibp-link');
+      function hexToRgb(h) {
+        var m = /^#([0-9a-f]{6})$/i.exec(h);
+        return m ? { r: parseInt(m[1].slice(0,2),16), g: parseInt(m[1].slice(2,4),16), b: parseInt(m[1].slice(4,6),16) } : null;
+      }
+      function applyAccent(color) {
+        var rgb = hexToRgb(color); if (!rgb) return;
+        var w = function(c) { return Math.round(255*.85 + c*.15); };
+        var k = function(c) { return Math.round(c*.60); };
+        var weak = 'rgb('+w(rgb.r)+','+w(rgb.g)+','+w(rgb.b)+')';
+        var ink  = 'rgb('+k(rgb.r)+','+k(rgb.g)+','+k(rgb.b)+')';
+        document.documentElement.style.setProperty('--accent',      color);
+        document.documentElement.style.setProperty('--accent-weak', weak);
+        document.documentElement.style.setProperty('--accent-ink',  ink);
+        btn.style.background  = color;
+        chip.style.background = weak; chip.style.color = ink;
+        lnk.style.color       = color;
+        hexEl.textContent = color;
+        val.value = color;
+      }
+      inp.addEventListener('input', function () { applyAccent(this.value); });
+      document.querySelectorAll('.imp-swatch').forEach(function (sw) {
+        sw.addEventListener('click', function () { inp.value = this.dataset.color; applyAccent(this.dataset.color); });
+      });
+      applyAccent(inp.value);
+    }());
+    </script>
   </section>
 
   <section class="imp-card imp-card-wide">
@@ -425,6 +529,13 @@ $df    = ['19:00','01:00','09:00'];
           <span class="imp-opt-text">
             <strong>Prestiti e rientri</strong>
             <span>Tracciamento movimenti di cassa extra per persone</span>
+          </span>
+        </label>
+        <label class="imp-opt">
+          <input type="checkbox" name="modulo_documenti" <?= ($sett['modulo_documenti'] ?? '1') === '1' ? 'checked' : '' ?>>
+          <span class="imp-opt-text">
+            <strong>Documenti</strong>
+            <span>Caricamento e stampa di documenti operativi (moduli, avvisi, istruzioni)</span>
           </span>
         </label>
       </div>
