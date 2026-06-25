@@ -43,8 +43,8 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accesso &middot; <?= htmlspecialchars($cfg['nome_sala'] ?? 'Cassa Sala') ?></title>
-<link rel="stylesheet" href="../assets/css/core.css">
-<link rel="stylesheet" href="../assets/css/login.css">
+<link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('assets/css/login.css') ?>">
 <link rel="manifest" href="../manifest.php">
 <meta name="theme-color" content="<?= $brandAccent ? $h($brandAccent) : '#2563eb' ?>">
 <?php if ($brandCss): ?><style><?= $brandCss ?></style><?php endif; ?>
@@ -52,7 +52,7 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-wrap">
   <div class="login-box">
     <?php if ($logoPath): ?>
-      <img class='login-logo' src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo">
+      <img class="login-logo" src="<?= asset_url('account/uploads/sala/' . $h($logoPath)) ?>" alt="Logo" style="display:block;height:100px;width:auto;max-width:100%">
     <?php else: ?>
       <div class="login-brand">&#9654;</div>
     <?php endif; ?>
