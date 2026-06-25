@@ -477,6 +477,17 @@
   border-top: 1px solid var(--border)
 }
 
+/* Brand card: usa imp-settings-card shell, padding gestito qui */
+.imp-settings-card .imp-brand-v2 {
+  padding: 20px 24px 0
+}
+
+.imp-settings-card .imp-brand-footer {
+  margin-top: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border2)
+}
+
 /* ============================================================
    Settings row layout — meta (left) + ctrl (right)
    ============================================================ */
@@ -629,28 +640,39 @@
 }
 
 .imp-section {
-  margin-bottom: 52px;
+  margin-bottom: 64px;
   scroll-margin-top: 68px
 }
 
 .imp-section-head {
-  margin-bottom: 20px;
-  padding-bottom: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--border2)
 }
 
 .imp-section-head h2 {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text);
-  margin: 0 0 3px
+  margin: 0 0 4px;
+  text-wrap: balance
 }
 
 .imp-section-head p {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin: 0;
-  line-height: 1.5
+  line-height: 1.55
+}
+
+/* Second card in Identità (brand colori) */
+.imp-section .imp-settings-card + .imp-settings-card {
+  margin-top: 12px
+}
+
+/* scard-head title sits above srow content — needs a step up */
+.imp-scard-head .imp-srow-title {
+  font-size: 14px
 }
 
 /* Nome + Logo side by side */

@@ -315,7 +315,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
 
       </div>
 
-      <div class="imp-card" style="margin-top:16px">
+      <div class="imp-settings-card">
         <div class="imp-scard-head">
           <h3 class="imp-srow-title">Brand colori</h3>
           <p class="imp-srow-desc">Colore accent di bottoni, link attivi e badge. Lascia vuoto per tornare al blu predefinito.</p>
