@@ -22,13 +22,15 @@ try { $pdo->query('SELECT 1 FROM documenti LIMIT 0');          $tableOk   = true
 try { $pdo->query('SELECT 1 FROM documenti_cartelle LIMIT 0'); $foldersOk = true; } catch (PDOException) {}
 try { $pdo->query('SELECT cartella_id FROM documenti LIMIT 0'); $colOk    = true; } catch (PDOException) {}
 
+$canEdit = $user['ruolo'] !== 'revisore';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tableOk) {
     check_csrf();
     $az = $_POST['azione'] ?? '';
 
-    // ---- Cartelle (responsabile only) ----
-    if ($foldersOk && is_responsabile()) {
-        if ($az === 'crea_cartella') {
+    // ---- Cartelle ----
+    if ($foldersOk) {
+        if ($az === 'crea_cartella' && $canEdit) {
             $nome = mb_substr(trim($_POST['nome'] ?? ''), 0, 120);
             if ($nome !== '') {
                 $pdo->prepare('INSERT INTO documenti_cartelle (nome, creata_da) VALUES (?,?)')
@@ -38,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tableOk) {
             header('Location: documenti.php?ok=1'); exit;
         }
 
-        if ($az === 'rinomina_cartella') {
+        if ($az === 'rinomina_cartella' && is_responsabile()) {
             $id   = (int)($_POST['id'] ?? 0);
             $nome = mb_substr(trim($_POST['nome'] ?? ''), 0, 120);
             if ($id && $nome !== '') {
@@ -48,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tableOk) {
             header('Location: documenti.php?ok=1'); exit;
         }
 
-        if ($az === 'elimina_cartella') {
+        if ($az === 'elimina_cartella' && is_responsabile()) {
             $id = (int)($_POST['id'] ?? 0);
             if ($id) {
                 if ($colOk) {
@@ -61,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tableOk) {
         }
     }
 
-    // ---- Sposta documento (responsabile only) ----
-    if ($az === 'sposta_doc' && is_responsabile() && $colOk) {
+    // ---- Sposta documento ----
+    if ($az === 'sposta_doc' && $canEdit && $colOk) {
         $id       = (int)($_POST['id'] ?? 0);
         $cartella = (int)($_POST['cartella_id'] ?? 0);
         if ($id) {
@@ -74,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tableOk) {
     }
 
     // ---- Upload ----
-    if ($az === 'upload' && is_responsabile()) {
+    if ($az === 'upload' && $canEdit) {
         $file     = $_FILES['documento'] ?? null;
         $nome     = mb_substr(trim($_POST['nome'] ?? ''), 0, 120);
         $desc     = mb_substr(trim($_POST['descrizione'] ?? ''), 0, 255) ?: null;
@@ -185,7 +187,7 @@ $totalDocs = count($docs);
     <span class="topbar-sub"><?= $totalDocs ?> <?= $totalDocs === 1 ? 'documento' : 'documenti' ?></span>
     <?php endif; ?>
   </div>
-  <?php if (is_responsabile() && $tableOk): ?>
+  <?php if ($canEdit && $tableOk): ?>
   <div class="topbar-actions">
     <?php if ($foldersOk): ?>
     <button type="button" class="topbar-action-btn ghost" onclick="document.getElementById('dlg-crea-folder').showModal()">+ Cartella</button>
@@ -228,12 +230,12 @@ $totalDocs = count($docs);
 
 <?php
 // ---- Render helper ----
-$renderDocItem = function(array $doc) use ($h, $folders, $foldersOk, $colOk): void {
+$renderDocItem = function(array $doc) use ($h, $folders, $foldersOk, $colOk, $canEdit): void {
     $ext      = strtolower(pathinfo($doc['filename'], PATHINFO_EXTENSION));
     $icoClass = doc_icon_class($doc['mime']);
     $viewUrl  = base_url('sala/doc_view.php') . '?id=' . (int)$doc['id'];
     $resp     = is_responsabile();
-    $canDrag  = $resp && $foldersOk && $colOk;
+    $canDrag  = $canEdit && $foldersOk && $colOk;
 ?>
   <div class="doc-item<?= $canDrag ? ' doc-draggable' : '' ?>"
        data-doc-id="<?= (int)$doc['id'] ?>"
@@ -267,7 +269,7 @@ $renderDocItem = function(array $doc) use ($h, $folders, $foldersOk, $colOk): vo
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Scarica
           </a>
-          <?php if ($resp && $foldersOk && $colOk && !empty($folders)): ?>
+          <?php if ($canEdit && $foldersOk && $colOk && !empty($folders)): ?>
           <button type="button" class="doc-menu-item" role="menuitem"
                   onclick="openSposta(<?= (int)$doc['id'] ?>, <?= (int)($doc['cartella_id'] ?? 0) ?>)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
@@ -362,7 +364,7 @@ endif;
 
 </div>
 
-<?php if (is_responsabile() && $tableOk): ?>
+<?php if ($canEdit && $tableOk): ?>
 
 <!-- Upload dialog -->
 <dialog id="dlg-upload" class="form-dialog">
@@ -481,7 +483,7 @@ endif;
 </dialog>
 <?php endif; // foldersOk ?>
 
-<?php endif; // is_responsabile ?>
+<?php endif; // canEdit ?>
 
 <script>var GP_CSRF='<?= addslashes(csrf_token()) ?>';</script>
 <script>
