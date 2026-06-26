@@ -51,6 +51,20 @@ $nomiGiorniBr = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
    ========================================================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_revisore()) {
     check_csrf();
+    if (isset($_POST['extra_submit'])) {
+        /* — salva dati verifica VLT — */
+        $tofl = fn($v) => is_numeric($v) ? round((float)$v, 2) : 0.0;
+        $pdo->prepare('INSERT INTO settimana_extra (anno, mese, settimana, addebito, sisal, assegni)
+                       VALUES (?,?,?,?,?,?)
+                       ON DUPLICATE KEY UPDATE addebito=VALUES(addebito), sisal=VALUES(sisal), assegni=VALUES(assegni)')
+            ->execute([$anno, $mese, $sett,
+                       $tofl($_POST['addebito'] ?? 0),
+                       $tofl($_POST['sisal']    ?? 0),
+                       $tofl($_POST['assegni']  ?? 0)]);
+        audit('salvataggio_extra_sett', 'settimana_extra', null, "$anno-$mese sett$sett");
+        header("Location: settimanale.php?anno=$anno&mese=$mese&sett=$sett&ok=1"); exit;
+    }
+    /* — salva dati bet/win — */
     $up = $pdo->prepare('INSERT INTO snai_betwin (data, fornitore, giocato, pagato) VALUES (?,?,?,?)
                          ON DUPLICATE KEY UPDATE giocato=VALUES(giocato), pagato=VALUES(pagato)');
     $num = fn($v) => is_numeric($v) ? (float)$v : 0.0;
@@ -71,6 +85,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_revisore()) {
 /* =========================================================
    Dati
    ========================================================= */
+/* =========================================================
+   Extra: verifica VLT (addebito / sisal / assegni)
+   ========================================================= */
+$extra = ['addebito' => 0, 'sisal' => 0, 'assegni' => 0];
+try {
+    $stm = $pdo->prepare('SELECT addebito, sisal, assegni FROM settimana_extra WHERE anno=? AND mese=? AND settimana=?');
+    $stm->execute([$anno, $mese, $sett]);
+    $row = $stm->fetch(PDO::FETCH_ASSOC);
+    if ($row) $extra = $row;
+} catch (PDOException $e) {}
+
 $h  = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv = fn($v) => ($v == 0 ? '' : rtrim(rtrim(number_format((float)$v, 2, '.', ''), '0'), '.'));
 $tot     = array_fill_keys($fornitori, ['g' => 0, 'p' => 0, 'i' => 0]);
@@ -343,6 +368,90 @@ if (($_GET['export'] ?? '') === 'csv') {
   <p class="sett-compare-note">vs settimana <?= $prevSett['sett'] ?> (<?= $prevDs ?>&ndash;<?= $prevDe ?> <?= $h($nomiMesi[$prevSett['mese']]) ?>)</p>
   <?php endif; ?>
 </div>
+
+<?php $versato_tot = $tot_banc + $tot_vers; ?>
+<div class="riepilogo vlt-box">
+  <h3>Verifica VLT</h3>
+  <form method="post" id="frm-extra">
+  <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+  <input type="hidden" name="extra_submit" value="1">
+  <table class="grid vlt-grid">
+    <tr>
+      <td>Versato</td>
+      <td></td>
+      <td class="rt"><strong><?= eur($versato_tot) ?></strong></td>
+    </tr>
+    <tr>
+      <td>Addebito</td>
+      <td class="vlt-inp">
+        <?php if (!is_revisore()): ?>
+        <input type="number" step="0.01" id="vlt-addebito" name="addebito" value="<?= $h($nv($extra['addebito'])) ?>">
+        <?php else: ?>
+        <span class="rt"><?= eur((float)$extra['addebito']) ?></span>
+        <?php endif; ?>
+      </td>
+      <td></td>
+    </tr>
+    <tr class="tot">
+      <td>Noi</td>
+      <td></td>
+      <td class="rt" id="vlt-noi"></td>
+    </tr>
+    <tr>
+      <td>SISAL</td>
+      <td class="vlt-inp">
+        <?php if (!is_revisore()): ?>
+        <input type="number" step="0.01" id="vlt-sisal" name="sisal" value="<?= $h($nv($extra['sisal'])) ?>">
+        <?php else: ?>
+        <span class="rt"><?= eur((float)$extra['sisal']) ?></span>
+        <?php endif; ?>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Differenza</td>
+      <td></td>
+      <td class="rt" id="vlt-diff"></td>
+    </tr>
+    <tr>
+      <td>Assegni</td>
+      <td class="vlt-inp">
+        <?php if (!is_revisore()): ?>
+        <input type="number" step="0.01" id="vlt-assegni" name="assegni" value="<?= $h($nv($extra['assegni'])) ?>">
+        <?php else: ?>
+        <span class="rt"><?= eur((float)$extra['assegni']) ?></span>
+        <?php endif; ?>
+      </td>
+      <td></td>
+    </tr>
+    <tr class="tot">
+      <td>Diff. finale</td>
+      <td></td>
+      <td class="rt" id="vlt-finale"></td>
+    </tr>
+  </table>
+  <?php if (!is_revisore()): ?>
+  <div class="vlt-actions">
+    <button type="submit" class="sett-save-btn">Salva</button>
+  </div>
+  <?php endif; ?>
+  </form>
+</div>
 </aside>
 </div>
+<script>
+(function(){
+  var V=<?= json_encode(round($versato_tot, 2)) ?>;
+  function eur(v){v=Math.round(v*100)/100;if(Object.is(v,-0))v=0;return v.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function num(id){var e=document.getElementById(id);if(!e)return 0;var v=parseFloat((e.value||'').replace(',','.'));return isNaN(v)?0:v;}
+  function set(id,v){var e=document.getElementById(id);if(!e)return;e.textContent=eur(v);e.className='rt vlt-calc'+(v<-0.005?' negative':v>0.005?' positive':'');}
+  function calc(){
+    var a=num('vlt-addebito'),s=num('vlt-sisal'),g=num('vlt-assegni');
+    var noi=V-a,diff=noi-s,finale=diff-g;
+    set('vlt-noi',noi);set('vlt-diff',diff);set('vlt-finale',finale);
+  }
+  ['vlt-addebito','vlt-sisal','vlt-assegni'].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener('input',calc);});
+  calc();
+})();
+</script>
 </body></html>

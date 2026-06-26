@@ -1016,9 +1016,24 @@ table.grid {
   display: block
 }
 
-.th-sun { display: none }
-html[data-theme="dark"] .th-sun { display: block }
-html[data-theme="dark"] .th-moon { display: none }
+.sf-theme .th-sun { display: none }
+html[data-theme="dark"] .sf-theme .th-sun { display: block }
+html[data-theme="dark"] .sf-theme .th-moon { display: none }
+
+/* Dark mode: sidebar active link più leggibile */
+html[data-theme="dark"] .sn-link.active {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+}
+
+/* Dark mode: input/select su superficie scura */
+html[data-theme="dark"] input[type=number],
+html[data-theme="dark"] input[type=text],
+html[data-theme="dark"] input[type=time],
+html[data-theme="dark"] input[type=password],
+html[data-theme="dark"] select {
+  background: var(--surface2);
+  border-color: var(--border2)
+}
 
 /* Hamburger toggle (hidden on desktop) */
 .sb-toggle {

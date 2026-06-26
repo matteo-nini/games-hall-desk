@@ -248,4 +248,16 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('modulo_prestiti',            '1'),
   ('modulo_documenti',           '1');
 
+-- ---------- Settimana Extra (verifica VLT) ----------
+CREATE TABLE IF NOT EXISTS settimana_extra (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  anno        YEAR        NOT NULL,
+  mese        TINYINT     NOT NULL,
+  settimana   TINYINT     NOT NULL,
+  addebito    DECIMAL(10,2) NOT NULL DEFAULT 0,
+  sisal       DECIMAL(10,2) NOT NULL DEFAULT 0,
+  assegni     DECIMAL(10,2) NOT NULL DEFAULT 0,
+  UNIQUE KEY uq_sett_extra (anno, mese, settimana)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET foreign_key_checks = 1;

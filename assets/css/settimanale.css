@@ -204,6 +204,50 @@
 }
 
 /* ============================================================
+   VLT Verifica box
+   ============================================================ */
+
+.vlt-box {
+  margin-top: 12px;
+  overflow-x: auto
+}
+
+.vlt-box h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px
+}
+
+.vlt-grid {
+  font-size: 11px;
+  width: 100%
+}
+
+.vlt-grid td {
+  padding: 5px 6px
+}
+
+.vlt-inp {
+  text-align: right
+}
+
+.vlt-inp input {
+  width: 90px;
+  padding: 4px 6px;
+  font-size: 11px
+}
+
+.vlt-actions {
+  margin-top: 8px;
+  text-align: right
+}
+
+.vlt-calc { font-weight: 600 }
+.vlt-calc.positive { color: var(--green) }
+.vlt-calc.negative { color: var(--red) }
+
+/* ============================================================
    Responsive
    ============================================================ */
 
