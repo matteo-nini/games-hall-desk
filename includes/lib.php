@@ -251,3 +251,18 @@ function get_settings(PDO $pdo): array {
 function setting(PDO $pdo, string $key, string $default = ''): string {
     return get_settings($pdo)[$key] ?? $default;
 }
+
+function avatar_initials(string $name): string {
+    $parts = preg_split('/\s+/', trim($name));
+    return mb_strtoupper(
+        mb_substr($parts[0], 0, 1, 'UTF-8') .
+        (isset($parts[1]) ? mb_substr($parts[1], 0, 1, 'UTF-8') : ''),
+        'UTF-8'
+    );
+}
+
+function avatar_style(string $name): string {
+    $h1 = abs(crc32($name)) % 360;
+    $h2 = ($h1 + 40) % 360;
+    return "background:linear-gradient(135deg,hsl({$h1},62%,46%),hsl({$h2},56%,36%))";
+}

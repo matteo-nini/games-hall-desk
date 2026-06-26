@@ -77,8 +77,10 @@ function top_menu(array $user): void {
         echo '</a>';
     };
 
-    $foto    = $user['foto'] ?? null;
-    $initial = mb_strtoupper(mb_substr($user['nome'] ?: $user['username'], 0, 1, 'UTF-8'), 'UTF-8');
+    $foto        = $user['foto'] ?? null;
+    $rawName     = $user['nome'] ?: $user['username'];
+    $initial     = avatar_initials($rawName);
+    $avatarStyle = avatar_style($rawName);
     $salaWords    = array_filter(array_slice(preg_split('/\s+/', trim($navNomeSala)), 0, 2));
     $salaInitials = mb_strtoupper(implode('', array_map(fn($w) => mb_substr($w, 0, 1, 'UTF-8'), $salaWords)), 'UTF-8') ?: 'CS';
     $navLogoPath  = $navSett['logo_path'] ?? null;
@@ -145,7 +147,7 @@ function top_menu(array $user): void {
       <?php if ($foto): ?>
         <img src="<?= base_url('account/uploads/profili/') . htmlspecialchars($foto) ?>" class="sf-avatar sf-avatar-img" alt="Foto profilo">
       <?php else: ?>
-        <span class="sf-avatar" aria-hidden="true"><?= $initial ?></span>
+        <span class="sf-avatar" aria-hidden="true" style="<?= $avatarStyle ?>"><?= $initial ?></span>
       <?php endif; ?>
     </a>
     <a href="<?= base_url('account/profilo.php') ?>" class="sf-name" title="Profilo"><?= $nome ?></a>
