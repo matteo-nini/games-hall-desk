@@ -109,8 +109,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
     default => ''
 };
 
-$fotoUrl = ($me['foto'] ?? null) ? 'uploads/profili/' . $me['foto'] : null;
-$initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'), 'UTF-8');
+$fotoUrl     = ($me['foto'] ?? null) ? 'uploads/profili/' . $me['foto'] : null;
+$rawName     = $me['nome'] ?: $me['username'];
+$initial     = avatar_initials($rawName);
+$avatarStyle = avatar_style($rawName);
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -136,7 +138,7 @@ $initial = mb_strtoupper(mb_substr($me['nome'] ?: $me['username'], 0, 1, 'UTF-8'
       <?php if ($fotoUrl): ?>
         <img src="<?= $h($fotoUrl) ?>" class="profilo-avatar-img" alt="Foto profilo">
       <?php else: ?>
-        <div class="profilo-avatar-initial"><?= $h($initial) ?></div>
+        <div class="profilo-avatar-initial" style="<?= $avatarStyle ?>"><?= $h($initial) ?></div>
       <?php endif; ?>
     </div>
     <div class="profilo-avatar-info">

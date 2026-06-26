@@ -218,10 +218,10 @@ $totalDocs = count($docs);
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
     <p class="doc-empty-title">Nessun documento</p>
     <p class="doc-empty-sub">
-      <?php if (is_responsabile()): ?>
+      <?php if ($canEdit): ?>
         Carica il primo documento con il pulsante in alto a destra.
       <?php else: ?>
-        I documenti caricati dal responsabile appariranno qui.
+        I documenti caricati dagli operatori appariranno qui.
       <?php endif; ?>
     </p>
   </div>
@@ -497,12 +497,14 @@ endif;
     });
   });
 
-  // ---- 3-dot menu ----
+  // ---- 3-dot menu (position:fixed to escape overflow:hidden) ----
   function closeAllMenus() {
     document.querySelectorAll('.doc-menu').forEach(function (m) {
       m.hidden = true;
-      var btn = m.previousElementSibling;
-      if (btn) btn.setAttribute('aria-expanded', 'false');
+      m.style.top = '';
+      m.style.right = '';
+      var b = m.previousElementSibling;
+      if (b) b.setAttribute('aria-expanded', 'false');
     });
   }
   document.addEventListener('click', function (e) {
@@ -513,6 +515,9 @@ endif;
       var wasHidden = menu.hidden;
       closeAllMenus();
       if (wasHidden) {
+        var r = btn.getBoundingClientRect();
+        menu.style.top   = (r.bottom + 4) + 'px';
+        menu.style.right = (window.innerWidth - r.right) + 'px';
         menu.hidden = false;
         btn.setAttribute('aria-expanded', 'true');
       }

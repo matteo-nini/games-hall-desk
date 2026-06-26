@@ -333,9 +333,7 @@
 }
 
 .doc-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
+  position: fixed;
   min-width: 150px;
   background: var(--surface);
   border: 1px solid var(--border2);

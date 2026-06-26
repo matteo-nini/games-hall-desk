@@ -277,10 +277,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
           $isActive = (bool)(int)$u['attivo'];
           $isResp   = $u['ruolo'] === 'responsabile';
           $isRev    = $u['ruolo'] === 'revisore';
-          $displayN = $u['nome'] ?: $u['username'];
-          $initial  = mb_strtoupper(mb_substr($displayN, 0, 1, 'UTF-8'), 'UTF-8');
-          $foto     = $u['foto'] ?? null;
-          $cIdx     = abs(crc32($u['username'])) % 6;
+          $displayN    = $u['nome'] ?: $u['username'];
+          $initial     = avatar_initials($displayN);
+          $avatarStyle = avatar_style($displayN);
+          $foto        = $u['foto'] ?? null;
         ?>
         <tr class="ul-row<?= $isActive ? '' : ' ul-row-off' ?>">
 
@@ -288,7 +288,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
             <?php if ($foto): ?>
               <img src="<?= base_url('account/uploads/profili/') . $h($foto) ?>" class="ul-ava ul-ava-img" alt="">
             <?php else: ?>
-              <div class="ul-ava ul-ava-c<?= $cIdx ?>" aria-hidden="true"><?= $h($initial) ?></div>
+              <div class="ul-ava" aria-hidden="true" style="<?= $avatarStyle ?>"><?= $h($initial) ?></div>
             <?php endif; ?>
           </td>
 
