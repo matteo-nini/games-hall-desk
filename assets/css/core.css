@@ -50,7 +50,7 @@ html[data-theme="dark"] {
   --border2: #384d6a;
   --text: #e8edf5;
   --muted: #8fa3be;
-  --faint: #5a7090;
+  --faint: #7a95b0;
   --accent-weak: color-mix(in srgb, var(--accent) 20%, #111827);
   --accent-ink: color-mix(in srgb, var(--accent) 55%, #e8edf5);
   --green: #4ade94;
@@ -1020,11 +1020,6 @@ table.grid {
 html[data-theme="dark"] .sf-theme .th-sun { display: block }
 html[data-theme="dark"] .sf-theme .th-moon { display: none }
 
-/* Dark mode: sidebar active link più leggibile */
-html[data-theme="dark"] .sn-link.active {
-  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
-}
-
 /* Dark mode: input/select su superficie scura */
 html[data-theme="dark"] input[type=number],
 html[data-theme="dark"] input[type=text],
@@ -1033,6 +1028,35 @@ html[data-theme="dark"] input[type=password],
 html[data-theme="dark"] select {
   background: var(--surface2);
   border-color: var(--border2)
+}
+
+/* Dark mode: --accent (#3b5bdb) su sfondo scuro = 2.65:1, insufficiente.
+   Link nudi nel testo (senza classe) usano accent-ink per contrasto adeguato.
+   Usiamo a:not([class]) per non toccare .sn-link, .topbar-action-btn, ecc. */
+html[data-theme="dark"] a:not([class]) {
+  color: var(--accent-ink)
+}
+
+/* Elementi specifici con colore accent usato come testo/icona */
+html[data-theme="dark"] .menu .brand .dot,
+html[data-theme="dark"] .subhead .st,
+html[data-theme="dark"] .panel h3 .ic,
+html[data-theme="dark"] th[data-sort][data-dir="asc"]::after,
+html[data-theme="dark"] th[data-sort][data-dir="desc"]::after {
+  color: var(--accent-ink)
+}
+
+/* Sidebar nav active link */
+html[data-theme="dark"] .sn-link.active,
+html[data-theme="dark"] .sn-link.active .sn-ico {
+  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface))
+}
+
+/* Top menu active */
+html[data-theme="dark"] .menu a.active {
+  color: var(--accent-ink);
+  border-bottom-color: var(--accent-ink)
 }
 
 /* Hamburger toggle (hidden on desktop) */

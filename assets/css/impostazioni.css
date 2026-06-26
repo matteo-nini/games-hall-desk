@@ -936,3 +936,12 @@
     grid-template-columns: 1fr
   }
 }
+
+html[data-theme="dark"] .imp-card-ico {
+  color: var(--accent-ink)
+}
+
+html[data-theme="dark"] .imp-snav-item.active {
+  color: var(--accent-ink);
+  border-left-color: var(--accent-ink)
+}

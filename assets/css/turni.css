@@ -613,3 +613,8 @@ body:has(.tp-layout)>.warn {
     min-width: auto
   }
 }
+
+html[data-theme="dark"] .tp-slot-add:hover {
+  color: var(--accent-ink);
+  border-color: var(--accent-ink)
+}
