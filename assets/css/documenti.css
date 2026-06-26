@@ -104,7 +104,8 @@
   border-radius: var(--rxs);
   cursor: pointer;
   color: var(--faint);
-  transition: color .1s, background .1s
+  transition: color .1s, background .1s;
+  padding: 0;
 }
 
 .doc-folder-act-btn svg {
@@ -319,7 +320,8 @@
   border-radius: var(--rxs);
   cursor: pointer;
   color: var(--muted);
-  transition: background .08s, color .08s
+  transition: background .08s, color .08s;
+  padding: 0;
 }
 
 .doc-menu-btn svg {
