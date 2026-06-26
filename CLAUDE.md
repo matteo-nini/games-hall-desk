@@ -51,6 +51,8 @@ $pdo  = db();                          // connessione PDO (singleton)
 - `calcola_turno(array $t): array` — riconciliazione server-side di un turno (ritorna errore, cassetto, versamento, totale)
 - `get_settings($pdo): array` — tutte le chiavi da tabella `impostazioni` come array associativo
 - `riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array` — riepilogo finanziario di una giornata; passare `$opId > 0` per filtrare i turni di un singolo operatore
+- `avatar_initials(string $name): string` — prime due iniziali (nome cognome) in maiuscolo; usare per l'avatar sidebar e operatori
+- `avatar_style(string $name): string` — restituisce `style="background:linear-gradient(…)"` deterministico dal nome (crc32 → HSL); garantisce consistenza tra sessioni
 
 ### Sicurezza
 
@@ -78,8 +80,9 @@ ticket_assistenza (id, data_apertura, macchina, problema, id_ticket, risoluzione
 prestiti_persone  (id, nome, saldo_iniziale, note)
 prestiti_movimenti(id, data, persona_id, tipo[prestito|rientro], quantita, note,
                    creato_da, creato_il)
+documenti_cartelle(id, nome, ordine, creata_da, creata_il)
 documenti         (id, nome, descrizione, filename, mime, ordine, visibile,
-                   caricato_da, caricato_il)
+                   cartella_id, caricato_da, caricato_il)
 ```
 
 ## Moduli opzionali (tabella `impostazioni`)
@@ -207,6 +210,11 @@ Classi riusabili:
 - `.sf-theme` — bottone dark mode toggle nella sidebar
 - `.live-badge` / `.live-dot` — badge live con pulse animation (in `dashboard.css`)
 - `.gp-swipe-hint` / `.gp-swipe-dot` — dot indicator swipe nel giornaliero
+- `.doc-folder-section` / `.doc-folder-header` / `.doc-folder-body` — sezione cartella documenti collassabile con D&D
+- `.doc-draggable[data-doc-id]` + `.doc-dropzone[data-folder-id]` — drag & drop HTML5 per spostare documenti tra cartelle
+- `.doc-btn-apri` / `.doc-btn-stampa` — azioni dirette riga documento (in `documenti.css`)
+- `.doc-menu-wrap` / `.doc-menu-btn` / `.doc-menu` / `.doc-menu-item` — menu 3-dot a dropdown per azioni secondarie (Scarica, Sposta, Elimina)
+- `.sf-avatar` con `style="background:linear-gradient(…)"` inline — avatar sidebar con doppia iniziale + gradiente deterministico
 
 ## Convenzioni da rispettare
 

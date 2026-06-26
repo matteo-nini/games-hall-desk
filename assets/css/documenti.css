@@ -6,32 +6,200 @@
   padding: 12px 24px 48px
 }
 
-/* Lista documenti */
-.doc-list {
+/* ---- Folder sections ---- */
+.doc-folders {
   display: flex;
   flex-direction: column;
-  gap: 10px
+  gap: 8px
+}
+
+.doc-folder-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden
+}
+
+.doc-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 12px 0 0;
+  min-height: 46px;
+  transition: background .1s
+}
+
+.doc-folder-header.doc-drag-over {
+  background: var(--accent-weak)
+}
+
+.doc-folder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  padding: 10px 10px 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text)
+}
+
+.doc-folder-ico {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0
+}
+
+.doc-folder-root .doc-folder-ico {
+  color: var(--muted)
+}
+
+.doc-folder-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1
+}
+
+.doc-folder-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--muted)
+}
+
+.doc-folder-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--faint);
+  transition: transform .18s ease
+}
+
+.doc-folder-toggle[aria-expanded="false"] .doc-folder-chevron {
+  transform: rotate(-90deg)
+}
+
+.doc-folder-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0
+}
+
+.doc-folder-act-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--rxs);
+  cursor: pointer;
+  color: var(--faint);
+  transition: color .1s, background .1s
+}
+
+.doc-folder-act-btn svg {
+  width: 15px;
+  height: 15px
+}
+
+.doc-folder-act-btn:hover {
+  color: var(--muted);
+  background: var(--surface2)
+}
+
+.doc-folder-del-btn:hover {
+  color: var(--red) !important;
+  background: color-mix(in srgb, var(--red) 10%, transparent) !important
+}
+
+.doc-folder-body {
+  border-top: 1px solid var(--border);
+  transition: background .1s
+}
+
+.doc-folder-body.doc-drag-over {
+  background: var(--accent-weak)
+}
+
+.doc-folder-body.doc-folder-collapsed {
+  display: none
+}
+
+.doc-folder-empty {
+  padding: 16px 20px;
+  font-size: 12px;
+  color: var(--faint);
+  text-align: center;
+  font-style: italic
+}
+
+/* ---- Document list ---- */
+.doc-list {
+  display: flex;
+  flex-direction: column
 }
 
 .doc-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 14px 16px;
-  box-shadow: var(--sh);
-  transition: border-color .1s
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background .08s;
+  position: relative
+}
+
+.doc-item:last-child {
+  border-bottom: none
 }
 
 .doc-item:hover {
-  border-color: var(--border2)
+  background: var(--surface2)
 }
 
+.doc-item.doc-dragging {
+  opacity: .45
+}
+
+/* Drag handle */
+.doc-drag-handle {
+  width: 16px;
+  height: 20px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--border2);
+  cursor: grab;
+  flex-shrink: 0
+}
+
+.doc-drag-handle svg {
+  width: 12px;
+  height: 12px
+}
+
+.doc-draggable .doc-drag-handle {
+  display: flex
+}
+
+.doc-draggable .doc-drag-handle:active {
+  cursor: grabbing
+}
+
+/* Icon */
 .doc-icon {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--rxs);
   display: flex;
   align-items: center;
@@ -40,8 +208,8 @@
 }
 
 .doc-icon svg {
-  width: 20px;
-  height: 20px
+  width: 18px;
+  height: 18px
 }
 
 .doc-icon-pdf {
@@ -59,6 +227,7 @@
   color: var(--accent)
 }
 
+/* Body */
 .doc-body {
   flex: 1;
   min-width: 0
@@ -76,7 +245,7 @@
 .doc-desc {
   font-size: 12px;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis
@@ -85,50 +254,147 @@
 .doc-meta {
   font-size: 11px;
   color: var(--faint);
-  margin-top: 4px;
+  margin-top: 3px;
   text-transform: uppercase;
   letter-spacing: .3px;
   font-weight: 600
 }
 
+/* Actions */
 .doc-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0
 }
 
-.doc-open-btn {
-  display: inline-block;
-  padding: 6px 14px;
-  background: var(--accent);
-  color: #fff;
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
   border-radius: var(--rxs);
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
+  transition: background .1s, color .1s;
+  border: none;
+  cursor: pointer;
   text-decoration: none;
-  transition: background .1s;
-  white-space: nowrap
+  font-family: inherit
 }
 
-.doc-open-btn:hover {
+.doc-btn-apri {
+  background: var(--accent);
+  color: #fff
+}
+
+.doc-btn-apri:hover {
   background: var(--accent-ink)
 }
 
-.doc-del-btn {
-  padding: 6px 10px;
+.doc-btn-stampa {
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border2)
+}
+
+.doc-btn-stampa:hover {
+  color: var(--text);
+  background: var(--surface3)
+}
+
+/* 3-dot menu */
+.doc-menu-wrap {
+  position: relative
+}
+
+.doc-menu-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: 1px solid var(--border2);
   border-radius: var(--rxs);
-  font-size: 12px;
-  color: var(--muted);
   cursor: pointer;
-  transition: border-color .1s, color .1s
+  color: var(--muted);
+  transition: background .08s, color .08s
 }
 
-.doc-del-btn:hover {
-  border-color: var(--red);
+.doc-menu-btn svg {
+  width: 16px;
+  height: 16px
+}
+
+.doc-menu-btn:hover {
+  background: var(--surface2);
+  color: var(--text)
+}
+
+.doc-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 150px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--rs);
+  box-shadow: var(--sh-popup);
+  z-index: 120;
+  padding: 4px 0;
+  overflow: hidden
+}
+
+.doc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background .08s
+}
+
+.doc-menu-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--muted)
+}
+
+.doc-menu-item:hover {
+  background: var(--surface2)
+}
+
+.doc-menu-del {
   color: var(--red)
+}
+
+.doc-menu-del svg {
+  color: var(--red)
+}
+
+.doc-menu-del:hover {
+  background: color-mix(in srgb, var(--red) 8%, transparent)
+}
+
+.doc-menu form {
+  display: contents
+}
+
+/* Drop zone active */
+.doc-dropzone {
+  outline: 2px dashed transparent;
+  outline-offset: -2px;
+  transition: outline-color .12s, background .12s
 }
 
 /* Empty state */
@@ -159,7 +425,7 @@
   color: var(--faint)
 }
 
-/* Upload dialog */
+/* Upload dialog hint */
 .doc-dlg-file-hint {
   font-size: 11px;
   font-weight: 400;
@@ -167,9 +433,33 @@
   margin-left: 6px
 }
 
+/* ---- Dark mode overrides ---- */
+html[data-theme="dark"] .doc-icon-file {
+  color: var(--accent-ink)
+}
+
+html[data-theme="dark"] .doc-folder-ico {
+  color: var(--accent-ink)
+}
+
+html[data-theme="dark"] .doc-folder-root .doc-folder-ico {
+  color: var(--muted)
+}
+
+html[data-theme="dark"] .doc-menu {
+  background: var(--surface2);
+  border-color: var(--border2)
+}
+
+/* ---- Mobile ---- */
 @media (max-width: 600px) {
+  .doc-page {
+    padding: 8px 12px 32px
+  }
+
   .doc-item {
-    flex-wrap: wrap
+    flex-wrap: wrap;
+    padding: 10px 12px
   }
 
   .doc-actions {
@@ -177,8 +467,8 @@
     padding-top: 8px;
     border-top: 1px solid var(--border)
   }
-}
 
-html[data-theme="dark"] .doc-icon-file {
-  color: var(--accent-ink)
+  .doc-drag-handle {
+    display: none !important
+  }
 }
