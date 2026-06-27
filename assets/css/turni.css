@@ -580,6 +580,12 @@ body:has(.tp-layout)>.warn {
 
 /* ---- Mobile ---- */
 @media (max-width: 760px) {
+  /* With tab bar, body must scroll normally */
+  body:has(.tp-layout) {
+    height: auto !important;
+    overflow: visible !important
+  }
+
   .tp-layout {
     grid-template-columns: 1fr;
     height: auto !important;
@@ -593,7 +599,9 @@ body:has(.tp-layout)>.warn {
 
   .tp-right {
     border-left: none;
-    border-top: 1px solid var(--border)
+    border-top: 1px solid var(--border);
+    margin: 0 0 0 0;
+    border-radius: 0
   }
 
   .tp-cal-cell {

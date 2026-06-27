@@ -9,7 +9,10 @@ ob_start(function(string $html): string {
     } catch (Throwable) { return $html; }
     $inject = '<link rel="icon" type="image/svg+xml" href="' . $fav . '">'
             . "\n<link rel=\"manifest\" href=\"" . $man . '">'
-            . "\n<meta name=\"theme-color\" content=\"#2563eb\">";
+            . "\n<meta name=\"theme-color\" content=\"#2563eb\">"
+            . "\n<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">"
+            . "\n<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">"
+            . "\n<meta name=\"mobile-web-app-capable\" content=\"yes\">";
     return substr($html, 0, $pos) . $inject . "\n" . substr($html, $pos);
 });
 // Autenticazione minima basata su sessione.

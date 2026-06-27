@@ -87,6 +87,28 @@ foreach ($stOp as $row) {
 }
 uasort($opStats, fn($a,$b) => $b['turni'] <=> $a['turni']);
 
+/* Stipendi mese corrente per operatore */
+$salariMese     = [];
+$salariMeseOk   = false;
+try {
+    $stSal = $pdo->prepare("
+        SELECT tp.operatore_id,
+               COALESCE(NULLIF(u.nome,''), u.username) AS nome,
+               SUM(CASE WHEN tp.data <= CURDATE() THEN pt.prezzo ELSE 0 END) AS guadagnato,
+               SUM(CASE WHEN tp.data  > CURDATE() THEN pt.prezzo ELSE 0 END) AS previsto,
+               COUNT(*) AS n_turni
+        FROM turni_programmati tp
+        JOIN utenti u  ON u.id  = tp.operatore_id
+        JOIN prezzi_turni pt ON pt.nome = CASE WHEN tp.numero=1 THEN 'mattino' ELSE 'sera' END
+        WHERE tp.data BETWEEN DATE_FORMAT(CURDATE(),'%Y-%m-01') AND LAST_DAY(CURDATE())
+        GROUP BY tp.operatore_id, u.nome, u.username
+        ORDER BY nome
+    ");
+    $stSal->execute();
+    $salariMese   = $stSal->fetchAll();
+    $salariMeseOk = true;
+} catch (PDOException) { /* migration non eseguita */ }
+
 /* Charts: ultimi 6 mesi */
 $nomiMesiBr = ['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 $st = $pdo->query("
@@ -243,6 +265,58 @@ for ($i = 5; $i >= 0; $i--) {
           </tr>
           <?php endforeach; ?>
         </tbody>
+      </table>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <?php if ($salariMeseOk && !empty($salariMese)):
+    $meseLabel = $nomiMesi[(int)date('n')] . ' ' . date('Y');
+    $totGuad = array_sum(array_column($salariMese, 'guadagnato'));
+    $totPrev = array_sum(array_column($salariMese, 'previsto'));
+  ?>
+  <section class="dash-card dash-op-stats" style="margin-top:14px">
+    <h2 class="dash-card-title">Stipendi operatori — <?= $h($meseLabel) ?></h2>
+    <div class="op-table-wrap">
+      <table class="op-table">
+        <thead>
+          <tr>
+            <th class="op-th-ava" aria-hidden="true"></th>
+            <th>Operatore</th>
+            <th class="rt">Turni</th>
+            <th class="rt">Guadagnato</th>
+            <th class="rt">Previsto</th>
+            <th class="rt">Totale mese</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($salariMese as $sal):
+            $guad  = (float)$sal['guadagnato'];
+            $prev  = (float)$sal['previsto'];
+            $tot   = $guad + $prev;
+            $initS = avatar_initials($sal['nome']);
+            $sSty  = avatar_style($sal['nome']);
+          ?>
+          <tr>
+            <td class="op-td-ava">
+              <div class="op-ava" aria-hidden="true" style="<?= $sSty ?>"><?= $h($initS) ?></div>
+            </td>
+            <td class="op-nome"><?= $h($sal['nome']) ?></td>
+            <td class="rt"><?= (int)$sal['n_turni'] ?></td>
+            <td class="rt"><?= eur($guad) ?></td>
+            <td class="rt muted-text"><?= eur($prev) ?></td>
+            <td class="rt"><strong><?= eur($tot) ?></strong></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+        <tfoot>
+          <tr class="op-sal-total">
+            <td colspan="3" class="muted-text" style="font-size:11px;padding:10px 14px">Totale</td>
+            <td class="rt"><?= eur($totGuad) ?></td>
+            <td class="rt muted-text"><?= eur($totPrev) ?></td>
+            <td class="rt"><strong><?= eur($totGuad + $totPrev) ?></strong></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </section>

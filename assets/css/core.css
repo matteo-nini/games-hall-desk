@@ -1522,3 +1522,68 @@ th[data-sort][data-dir="desc"]::after {
   content: ' ↓';
   color: var(--accent)
 }
+
+/* ============================================================
+   Mobile bottom tab bar
+   ============================================================ */
+.mob-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 10px rgba(20,30,55,.07);
+  padding-bottom: env(safe-area-inset-bottom, 0px)
+}
+
+.mob-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 9px 4px 8px;
+  text-decoration: none;
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 600;
+  transition: color .12s;
+  min-height: 54px;
+  flex: 1
+}
+
+.mob-tab svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0
+}
+
+.mob-tab-on {
+  color: var(--accent)
+}
+
+.mob-tab:hover {
+  color: var(--muted)
+}
+
+.mob-tab-on svg {
+  stroke-width: 2.2
+}
+
+html[data-theme="dark"] .mob-tab-bar {
+  box-shadow: 0 -1px 0 var(--border)
+}
+
+@media (max-width: 760px) {
+  .mob-tab-bar {
+    display: flex
+  }
+
+  /* Space for tab bar on standard pages */
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px))
+  }
+}

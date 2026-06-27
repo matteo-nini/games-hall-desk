@@ -110,10 +110,17 @@ try {
 $prossimi = array_values(array_filter($miei_turni, fn($t) => $t['data'] > $oggi));
 $prossimi = array_slice($prossimi, 0, 6);
 
-/* Turni questo mese (per conteggio) */
+/* Turni questo mese (per conteggio e stipendio) */
 $mese1 = date('Y-m-01');
 $mese2 = date('Y-m-t');
-$turniMese = array_filter($miei_turni, fn($t) => $t['data'] >= $mese1 && $t['data'] <= $mese2);
+$turniMese      = array_filter($miei_turni, fn($t) => $t['data'] >= $mese1 && $t['data'] <= $mese2);
+$guadagnatoMese = 0.0;
+$previstoMese   = 0.0;
+foreach ($turniMese as $mt) {
+    if ($mt['data'] <= $oggi) $guadagnatoMese += (float)$mt['prezzo'];
+    else                      $previstoMese   += (float)$mt['prezzo'];
+}
+$totaleMese = $guadagnatoMese + $previstoMese;
 
 /* Mie performance ultimi 30 giorni */
 $miePerf    = [];
@@ -240,26 +247,29 @@ $labelTurnoOggi = $nCorrente ? ($labelN[$nCorrente] . ' ' . $orarioN[$nCorrente]
 
   <div class="dash-grid">
 
-    <!-- ===== Guadagni ===== -->
+    <!-- ===== Stipendio del mese ===== -->
     <section class="dash-card">
-      <h2 class="dash-card-title">Guadagni</h2>
+      <h2 class="dash-card-title">Stipendio — <?= $h($nomiMesi[(int)date('n')]) ?> <?= date('Y') ?></h2>
       <div class="dash-earn-row">
         <div class="dash-earn-item">
           <span class="dash-earn-lbl">Guadagnato</span>
-          <span class="dash-earn-val"><?= $h($nv($guadagnato)) ?> €</span>
-          <span class="dash-earn-sub">ultimi 3 mesi</span>
+          <span class="dash-earn-val"><?= $h($nv($guadagnatoMese)) ?> €</span>
+          <span class="dash-earn-sub"><?= count(array_filter((array)$turniMese, fn($t) => $t['data'] <= $oggi)) ?> turni effettuati</span>
         </div>
         <div class="dash-earn-item">
           <span class="dash-earn-lbl">Previsto</span>
-          <span class="dash-earn-val dash-earn-muted"><?= $h($nv($previsto)) ?> €</span>
-          <span class="dash-earn-sub">turni futuri</span>
+          <span class="dash-earn-val dash-earn-muted"><?= $h($nv($previstoMese)) ?> €</span>
+          <span class="dash-earn-sub"><?= count(array_filter((array)$turniMese, fn($t) => $t['data'] > $oggi)) ?> turni futuri</span>
         </div>
         <div class="dash-earn-item">
-          <span class="dash-earn-lbl">Turni mese</span>
-          <span class="dash-earn-val dash-earn-count"><?= count($turniMese) ?></span>
-          <span class="dash-earn-sub"><?= $h($nomiMesi[(int)date('n')]) ?></span>
+          <span class="dash-earn-lbl">Totale mese</span>
+          <span class="dash-earn-val dash-earn-count"><?= $h($nv($totaleMese)) ?> €</span>
+          <span class="dash-earn-sub"><?= count($turniMese) ?> turni</span>
         </div>
       </div>
+      <?php if ($guadagnato > 0 || $previsto > 0): ?>
+      <p class="dash-earn-storico">Ultimi 3 mesi: <strong><?= $h($nv($guadagnato)) ?> €</strong> guadagnati · <strong><?= $h($nv($previsto)) ?> €</strong> in turni futuri</p>
+      <?php endif; ?>
       <a href="<?= base_url('sala/turni.php') ?>" class="dash-card-link">Vedi calendario turni &rarr;</a>
     </section>
 
