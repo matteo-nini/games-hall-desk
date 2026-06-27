@@ -105,6 +105,7 @@ $giorniMese   = (int)date('t', strtotime($primoGiorno));
 $nomiMesi     = nomi_mesi();
 $sett         = get_settings($pdo);
 $turns        = get_turns($sett);
+$mobTurniEdit = ($sett['mobile_turni_edit'] ?? '0') === '1';
 
 /* =========================================================
    GET — verifica migration (tutte e tre le dipendenze)
@@ -346,7 +347,7 @@ tr:nth-child(even) td{background:#fafbff}
 <title>Turni — <?= $h($nomiMesi[$mese]) ?> <?= $anno ?></title>
 <link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('assets/css/turni.css') ?>">
-</head><body>
+</head><body<?= !$mobTurniEdit ? ' class="gp-mob-ro-turni"' : '' ?>>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
