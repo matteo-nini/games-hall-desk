@@ -5,8 +5,9 @@ $user = require_login();
 require_not_revisore();
 $cfg  = config();
 $pdo  = db();
-$sett = get_settings($pdo);
-$TOL  = (float)($cfg['tolleranza'] ?? 5);
+$sett           = get_settings($pdo);
+$mobGiornaliero = ($sett['mobile_giornaliero'] ?? '0') === '1';
+$TOL            = (float)($cfg['tolleranza'] ?? 5);
 
 $data = $_GET['data'] ?? date('Y-m-d');
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) $data = date('Y-m-d');
@@ -202,7 +203,7 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>"></head><body>
+<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>"></head><body<?= !$mobGiornaliero ? ' class="gp-mob-ro"' : '' ?>>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <h1 class="sr-only">Cassa del <?= $h(date('d/m/Y', strtotime($data))) ?></h1>
 
@@ -312,6 +313,12 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
 </div>
 <?php endif; ?>
 <?php if ($readonly): ?><div class="warn">Giornata chiusa: sola lettura.</div><?php endif; ?>
+
+<div class="gp-mob-notice">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"/></svg>
+  <strong>Compilazione non disponibile da mobile</strong>
+  <p>Accedi da un computer per inserire i dati della cassa. Il responsabile può abilitare la compilazione da mobile in <em>Impostazioni → Mobile</em>.</p>
+</div>
 
 <form method="post" id="frm">
 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">

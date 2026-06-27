@@ -283,19 +283,28 @@
 
   .dash-hero {
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     padding: 14px 16px
+  }
+
+  .dash-hero-info {
+    flex: 1 1 auto
   }
 
   .dash-hero-turno {
     font-size: 16px
   }
 
+  .dash-hero-actions {
+    width: 100%
+  }
+
   .btn-dash-inizia,
   .btn-dash-cassa {
     width: 100%;
     text-align: center;
-    justify-content: center
+    justify-content: center;
+    display: block
   }
 
   .dash-earn-row {
@@ -317,6 +326,11 @@
     font-size: 17px
   }
 
+  /* Nasconde performance bar su mobile (troppo densa) */
+  .dash-perf-card {
+    display: none
+  }
+
   .dash-op-stats {
     margin: 0
   }
@@ -328,6 +342,11 @@
 
   .dash-quicklinks {
     display: none
+  }
+
+  /* Charts responsabile: 1 colonna su mobile */
+  .resp-cols {
+    grid-template-columns: 1fr
   }
 }
 

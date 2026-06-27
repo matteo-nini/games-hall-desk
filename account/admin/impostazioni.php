@@ -166,6 +166,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'mobile') {
+        $mg = isset($_POST['mobile_giornaliero']) ? '1' : '0';
+        $mt = isset($_POST['mobile_turni_edit'])  ? '1' : '0';
+        $st = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $st->execute(['mobile_giornaliero', $mg]);
+        $st->execute(['mobile_turni_edit',  $mt]);
+        audit('impostazioni_mobile', null, null, "giornaliero=$mg turni=$mt");
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     header('Location: impostazioni.php'); exit;
 }
 
@@ -224,6 +234,10 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
     <a class="imp-snav-item" href="#moduli">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
       Moduli
+    </a>
+    <a class="imp-snav-item" href="#mobile">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="1.5" width="9" height="17" rx="1.5"/><circle cx="10" cy="15.5" r=".7" fill="currentColor" stroke="none"/></svg>
+      Mobile
     </a>
     <div class="imp-snav-divider"></div>
     <a class="imp-snav-item" href="#assistenza">
@@ -599,6 +613,47 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
               </div>
               <div class="imp-form-footer">
                 <button type="submit">Salva moduli</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE -->
+    <div class="imp-section" id="mobile">
+      <div class="imp-section-head">
+        <h2>Mobile</h2>
+        <p>Funzioni abilitate quando si accede da smartphone (schermo ≤ 760 px) — di default le pagine complesse sono in sola lettura</p>
+      </div>
+      <div class="imp-settings-card">
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Permessi da mobile</h3>
+            <p class="imp-srow-desc">Abilita per consentire la compilazione e la modifica anche dagli smartphone. Lascia disabilitato per ridurre il rischio di inserimenti accidentali.</p>
+          </div>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="mobile">
+              <div class="imp-opt-stack">
+                <label class="imp-opt">
+                  <input type="checkbox" name="mobile_giornaliero" <?= ($sett['mobile_giornaliero'] ?? '0') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Compilazione cassa da mobile</strong>
+                    <span>Permette di inserire e salvare i dati del giornaliero da smartphone</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="mobile_turni_edit" <?= ($sett['mobile_turni_edit'] ?? '0') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Modifica turni da mobile</strong>
+                    <span>Permette di assegnare e rimuovere turni dal calendario su smartphone</span>
+                  </span>
+                </label>
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva opzioni mobile</button>
               </div>
             </form>
           </div>
