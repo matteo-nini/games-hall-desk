@@ -9,9 +9,10 @@ function top_menu(array $user): void {
     $navPdo      = db();
     $navSett     = get_settings($navPdo);
     $navNomeSala = $navSett['nome_sala'] ?? (config()['nome_sala'] ?? '');
-    $modAssistenze = ($navSett['modulo_assistenze'] ?? '1') === '1';
-    $modPrestiti   = ($navSett['modulo_prestiti']   ?? '1') === '1';
-    $modDocumenti  = ($navSett['modulo_documenti']  ?? '1') === '1';
+    $modAssistenze    = ($navSett['modulo_assistenze']  ?? '1') === '1';
+    $modPrestiti      = ($navSett['modulo_prestiti']    ?? '1') === '1';
+    $modDocumenti     = ($navSett['modulo_documenti']   ?? '1') === '1';
+    $mobGiornalerioOk = ($navSett['mobile_giornaliero'] ?? '0') === '1';
 
     $ico = [
         'dashboard'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -180,10 +181,12 @@ function top_menu(array $user): void {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <span>Home</span>
   </a>
+  <?php if ($mobGiornalerioOk): ?>
   <a class="mob-tab<?= $cassaActive ? ' mob-tab-on' : '' ?>" href="<?= base_url('cassa/giornaliero.php') ?>">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span>Cassa</span>
   </a>
+  <?php endif; ?>
   <a class="mob-tab<?= $turniActive ? ' mob-tab-on' : '' ?>" href="<?= base_url('sala/turni.php') ?>">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
     <span>Turni</span>

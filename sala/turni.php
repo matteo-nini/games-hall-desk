@@ -347,12 +347,7 @@ tr:nth-child(even) td{background:#fafbff}
 <title>Turni — <?= $h($nomiMesi[$mese]) ?> <?= $anno ?></title>
 <link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('assets/css/turni.css') ?>">
-<?php if (!$mobTurniEdit): ?>
-<style>@media(max-width:760px){
-.tp-slot-add,.tp-slot-del,.tp-del-form{display:none!important}
-}</style>
-<?php endif; ?>
-</head><body<?= !$mobTurniEdit ? ' class="gp-mob-ro-turni"' : '' ?>>
+</head><body>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 
 <header class="topbar">
@@ -402,7 +397,7 @@ tr:nth-child(even) td{background:#fafbff}
         $slotM   = $calendario[$dc][1] ?? null;
         $slotS   = $calendario[$dc][2] ?? null;
     ?>
-    <div class="tp-cal-cell <?= $isToday ? 'tp-oggi' : '' ?> <?= $isPast ? 'tp-passato' : '' ?>">
+    <div class="tp-cal-cell <?= $isToday ? 'tp-oggi' : '' ?> <?= $isPast ? 'tp-passato' : '' ?>" data-date="<?= $h($dc) ?>">
       <div class="tp-cal-day">
         <?= $g ?>
         <?php if ($isToday): ?><span class="tp-oggi-badge">oggi</span><?php endif; ?>
@@ -691,6 +686,139 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
 </div><!-- /.tp-layout -->
 
 <script src="<?= asset_url('assets/js/turni.js') ?>"></script>
+
+<script>
+var TP_DATA = <?= json_encode([
+    'cal'      => $calendario,
+    'turns'    => $turns,
+    'uid'      => $uid,
+    'mobEdit'  => $mobTurniEdit,
+    'isResp'   => is_responsabile(),
+    'opPuoMod' => $opPuoModificare,
+    'opList'   => $operatori,
+    'today'    => $oggi,
+], JSON_HEX_TAG | JSON_HEX_APOS) ?>;
+var TP_CSRF = '<?= csrf_token() ?>';
+</script>
+
+<dialog class="tp-day-sheet" id="dlg-day-sheet" aria-modal="true">
+  <div class="tds-handle" aria-hidden="true"></div>
+  <div class="tds-header">
+    <span class="tds-date-lbl" id="tds-date"></span>
+    <button class="tds-close" id="tds-close" aria-label="Chiudi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="16" height="16" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="tds-body" id="tds-body"></div>
+</dialog>
+
+<script>
+(function () {
+  var sheet = document.getElementById('dlg-day-sheet');
+  if (!sheet || typeof TP_DATA === 'undefined') return;
+
+  var GG = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  var MM = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtDate(d) {
+    var dt = new Date(d + 'T00:00:00');
+    return GG[dt.getDay()] + ', ' + dt.getDate() + ' ' + MM[dt.getMonth() + 1];
+  }
+
+  function buildBody(date) {
+    var day  = TP_DATA.cal[date] || {};
+    var keys = Object.keys(TP_DATA.turns).sort();
+    var html = '';
+
+    for (var i = 0; i < keys.length; i++) {
+      var n     = keys[i];
+      var turn  = TP_DATA.turns[n];
+      var slot  = day[n];
+      var nome  = turn.nome || ('Turno ' + n);
+      var letter = nome.charAt(0).toUpperCase();
+      var isMine = slot && String(slot.operatore_id) === String(TP_DATA.uid);
+      var sc = slot ? (isMine ? 'tds-mine' : 'tds-other') : 'tds-empty';
+
+      html += '<div class="tds-slot ' + sc + '">';
+      html += '<div class="tds-slot-info">';
+      html += '<span class="tds-chip">' + esc(letter) + '</span>';
+      html += '<div class="tds-slot-text">';
+      html += '<span class="tds-turn-lbl">' + esc(nome) + '</span>';
+      if (slot) {
+        html += '<span class="tds-op-nome">' + esc(slot.nome) + (isMine ? ' <span class="tds-tu">(tu)</span>' : '') + '</span>';
+      } else {
+        html += '<span class="tds-vuoto">Non assegnato</span>';
+      }
+      html += '</div></div>';
+
+      if (TP_DATA.mobEdit) {
+        html += '<div class="tds-actions">';
+        if (slot) {
+          if (TP_DATA.isResp) {
+            html += '<form method="post" class="tds-form">'
+              + '<input type="hidden" name="csrf"   value="' + esc(TP_CSRF) + '">'
+              + '<input type="hidden" name="azione" value="rimuovi">'
+              + '<input type="hidden" name="data"   value="' + esc(date) + '">'
+              + '<input type="hidden" name="numero" value="' + esc(n) + '">'
+              + '<button type="submit" class="tds-btn tds-rm">Rimuovi</button>'
+              + '</form>';
+          }
+        } else {
+          if (TP_DATA.isResp) {
+            html += '<form method="post" class="tds-form tds-form-assign">'
+              + '<input type="hidden" name="csrf"   value="' + esc(TP_CSRF) + '">'
+              + '<input type="hidden" name="azione" value="programma">'
+              + '<input type="hidden" name="data"   value="' + esc(date) + '">'
+              + '<input type="hidden" name="numero" value="' + esc(n) + '">'
+              + '<select name="operatore_id" class="tds-select">'
+              + '<option value="">— operatore —</option>';
+            for (var j = 0; j < TP_DATA.opList.length; j++) {
+              var op = TP_DATA.opList[j];
+              html += '<option value="' + esc(op.id) + '">' + esc(op.nome) + '</option>';
+            }
+            html += '</select>'
+              + '<button type="submit" class="tds-btn tds-ok">Assegna</button>'
+              + '</form>';
+          } else if (TP_DATA.opPuoMod) {
+            html += '<form method="post" class="tds-form">'
+              + '<input type="hidden" name="csrf"   value="' + esc(TP_CSRF) + '">'
+              + '<input type="hidden" name="azione" value="programma">'
+              + '<input type="hidden" name="data"   value="' + esc(date) + '">'
+              + '<input type="hidden" name="numero" value="' + esc(n) + '">'
+              + '<button type="submit" class="tds-btn tds-ok">Aggiungiti</button>'
+              + '</form>';
+          }
+        }
+        html += '</div>';
+      }
+
+      html += '</div>';
+    }
+    return html;
+  }
+
+  function openSheet(date) {
+    if (window.innerWidth > 760) return;
+    document.getElementById('tds-date').textContent = fmtDate(date);
+    document.getElementById('tds-body').innerHTML = buildBody(date);
+    sheet.showModal();
+  }
+
+  document.querySelectorAll('.tp-cal-cell[data-date]').forEach(function (cell) {
+    cell.addEventListener('click', function (e) {
+      if (window.innerWidth > 760) return;
+      openSheet(cell.dataset.date);
+    });
+  });
+
+  document.getElementById('tds-close').addEventListener('click', function () { sheet.close(); });
+  sheet.addEventListener('click', function (e) { if (e.target === sheet) sheet.close(); });
+}());
+</script>
 
 <?php endif; /* migrationOk */ ?>
 </body></html>
