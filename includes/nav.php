@@ -168,6 +168,35 @@ function top_menu(array $user): void {
 </button>
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
+<?php if (!$isRevisore):
+    $dashUrl  = base_url($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php');
+    $dashActive   = in_array($cur, ['dashboard.php', 'responsabile.php']);
+    $cassaActive  = $cur === 'giornaliero.php';
+    $turniActive  = $cur === 'turni.php';
+    $docActive    = $cur === 'documenti.php';
+?>
+<nav class="mob-tab-bar" aria-label="Navigazione rapida">
+  <a class="mob-tab<?= $dashActive  ? ' mob-tab-on' : '' ?>" href="<?= $dashUrl ?>">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Home</span>
+  </a>
+  <a class="mob-tab<?= $cassaActive ? ' mob-tab-on' : '' ?>" href="<?= base_url('cassa/giornaliero.php') ?>">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <span>Cassa</span>
+  </a>
+  <a class="mob-tab<?= $turniActive ? ' mob-tab-on' : '' ?>" href="<?= base_url('sala/turni.php') ?>">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+    <span>Turni</span>
+  </a>
+  <?php if ($modDocumenti): ?>
+  <a class="mob-tab<?= $docActive   ? ' mob-tab-on' : '' ?>" href="<?= base_url('sala/documenti.php') ?>">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <span>Documenti</span>
+  </a>
+  <?php endif; ?>
+</nav>
+<?php endif; ?>
+
 <script src="<?= asset_url('assets/js/sidebar.js') ?>"></script>
 <script>window.GP_BASE='<?= addslashes(base_url()) ?>';window.GP_ROLE='<?= addslashes($role) ?>';window.GP_SALA='<?= addslashes($navNomeSala) ?>';</script>
 <script src="<?= asset_url('assets/js/ob-banners.js') ?>" defer></script>

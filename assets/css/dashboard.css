@@ -151,6 +151,23 @@
   text-decoration: none
 }
 
+.dash-earn-storico {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--faint);
+  line-height: 1.4
+}
+
+.dash-earn-storico strong {
+  color: var(--muted)
+}
+
+/* Tfoot salary total row */
+.op-sal-total td {
+  border-top: 2px solid var(--border);
+  background: var(--surface2)
+}
+
 .dash-card-link:hover {
   text-decoration: underline
 }
@@ -255,26 +272,62 @@
 }
 
 @media (max-width: 760px) {
+  .dash-page {
+    padding: 10px 14px 32px
+  }
+
   .dash-grid {
-    grid-template-columns: 1fr
+    grid-template-columns: 1fr;
+    margin: 0
   }
 
   .dash-hero {
     flex-wrap: wrap;
-    gap: 12px
+    gap: 12px;
+    padding: 14px 16px
+  }
+
+  .dash-hero-turno {
+    font-size: 16px
+  }
+
+  .btn-dash-inizia,
+  .btn-dash-cassa {
+    width: 100%;
+    text-align: center;
+    justify-content: center
   }
 
   .dash-earn-row {
-    flex-direction: column
+    flex-direction: row;
+    flex-wrap: wrap
   }
 
   .dash-earn-item {
+    flex: 1 1 100px;
     border-right: none;
     border-bottom: 1px solid var(--border)
   }
 
   .dash-earn-item:last-child {
     border-bottom: none
+  }
+
+  .dash-earn-val {
+    font-size: 17px
+  }
+
+  .dash-op-stats {
+    margin: 0
+  }
+
+  .op-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch
+  }
+
+  .dash-quicklinks {
+    display: none
   }
 }
 
