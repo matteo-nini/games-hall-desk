@@ -347,6 +347,11 @@ tr:nth-child(even) td{background:#fafbff}
 <title>Turni — <?= $h($nomiMesi[$mese]) ?> <?= $anno ?></title>
 <link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('assets/css/turni.css') ?>">
+<?php if (!$mobTurniEdit): ?>
+<style>@media(max-width:760px){
+.tp-slot-add,.tp-slot-del,.tp-del-form{display:none!important}
+}</style>
+<?php endif; ?>
 </head><body<?= !$mobTurniEdit ? ' class="gp-mob-ro-turni"' : '' ?>>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 

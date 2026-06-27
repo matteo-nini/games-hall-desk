@@ -580,78 +580,128 @@ body:has(.tp-layout)>.warn {
 
 /* ---- Mobile ---- */
 @media (max-width: 760px) {
-  /* With tab bar, body must scroll normally */
+  /* body scrolla normalmente con la tab bar */
   body:has(.tp-layout) {
     height: auto !important;
     overflow: visible !important
   }
 
+  /* Single-column, pannello destra prima */
   .tp-layout {
     grid-template-columns: 1fr;
     height: auto !important;
     overflow: visible
   }
 
-  /* Pannello destra (turno corrente, €, prossimi) appare PRIMA del calendario */
+  /* Pannello destra PRIMA: turno corrente, riepilogo €, prossimi turni */
   .tp-right {
     order: -1;
     border-left: none;
     border-bottom: 1px solid var(--border);
     margin: 0;
-    border-radius: 0
+    border-radius: 0;
+    overflow-y: visible;
+    max-height: none
   }
 
   .tp-cal-col {
     order: 0;
     overflow-y: visible;
-    padding: 8px 12px 16px
+    padding: 10px 10px 16px
   }
 
-  .tp-cal-cell {
-    min-height: 52px;
-    padding: 4px 3px
+  /* Riepilogo € più leggibile sul piccolo schermo */
+  .tp-stot-val {
+    font-size: 22px
   }
 
-  .tp-cal-day {
-    font-size: 10px
+  .tp-stot-sub {
+    font-size: 11px
   }
 
-  .tp-slot {
-    font-size: 9px;
-    gap: 2px
+  .tp-summary-totals {
+    margin-bottom: 8px;
+    padding-bottom: 10px
   }
 
-  .tp-slot-tag {
-    width: 18px;
-    height: 18px;
-    font-size: 8px
-  }
-
-  .tp-slot-name {
-    font-size: 8.5px
-  }
-
-  .tp-month-nav .tp-cal-title {
-    min-width: auto
-  }
-
-  /* Legenda compatta su mobile */
-  .tp-legenda-price {
+  /* Bottone inizia turno: grande e comodo (44px+ touch target) */
+  .btn-inizia-turno {
     width: 100%;
-    margin-left: 0;
-    margin-top: 4px
+    min-height: 48px;
+    font-size: 15px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center
   }
 
-  /* Sola lettura su mobile: nascondi pulsanti add/del quando setting disabilitato */
-  body.gp-mob-ro-turni .tp-slot-add,
-  body.gp-mob-ro-turni .tp-slot-del,
-  body.gp-mob-ro-turni .tp-del-form {
+  /* ---- Calendario: chip colorati invece del testo nome ---- */
+  /* Il testo del nome non si legge su celle piccole: si nasconde, */
+  /* il chip (tag lettera) diventa l'unico indicatore visivo */
+  .tp-slot-name {
     display: none
   }
 
-  /* Mostra dash vuoto al posto del + quando slot è libero */
-  body.gp-mob-ro-turni .tp-slot-empty .tp-slot-vuoto {
-    display: inline
+  /* Vuoto: il trattino — non serve, la cella grigia comunica già */
+  .tp-slot-vuoto {
+    display: none
+  }
+
+  /* Slot centrato sul suo unico elemento (il chip) */
+  .tp-slot {
+    font-size: 9px;
+    gap: 2px;
+    padding: 2px 3px;
+    justify-content: center
+  }
+
+  /* Chip più leggibile */
+  .tp-slot-tag {
+    width: 22px;
+    height: 22px;
+    font-size: 9.5px;
+    border-radius: 4px
+  }
+
+  /* Cella: altezza calibrata per 2 chip + numero giorno */
+  .tp-cal-cell {
+    min-height: 58px;
+    padding: 4px 2px;
+    gap: 2px
+  }
+
+  .tp-cal-day {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 1px
+  }
+
+  .tp-oggi-badge {
+    font-size: 7px;
+    padding: 1px 3px
+  }
+
+  .tp-month-nav .tp-cal-title {
+    min-width: auto;
+    font-size: 13px
+  }
+
+  .tp-legenda {
+    gap: 8px
+  }
+
+  /* Prezzi su riga separata nella legenda */
+  .tp-legenda-price {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 2px
+  }
+
+  /* Sola lettura: ridondanza difensiva (inline style già garantisce) */
+  body.gp-mob-ro-turni .tp-slot-add,
+  body.gp-mob-ro-turni .tp-slot-del,
+  body.gp-mob-ro-turni .tp-del-form {
+    display: none !important
   }
 }
 

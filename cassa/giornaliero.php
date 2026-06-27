@@ -203,7 +203,14 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cassa <?= $h($data) ?></title><link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
-<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>"></head><body<?= !$mobGiornaliero ? ' class="gp-mob-ro"' : '' ?>>
+<link rel="stylesheet" href="<?= asset_url('assets/css/giornaliero.css') ?>">
+<?php if (!$mobGiornaliero): ?>
+<style>@media(max-width:760px){
+.sh-hero,.sh-stats-wrap,.gp-swipe-hint,.sh-actions .save-btn,.sh-actions form.actions,#frm{display:none!important}
+.gp-mob-notice{display:flex!important}
+}</style>
+<?php endif; ?>
+</head><body<?= !$mobGiornaliero ? ' class="gp-mob-ro"' : '' ?>>
 <?php require __DIR__ . '/../includes/nav.php'; top_menu($user); ?>
 <h1 class="sr-only">Cassa del <?= $h(date('d/m/Y', strtotime($data))) ?></h1>
 
