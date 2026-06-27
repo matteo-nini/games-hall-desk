@@ -278,33 +278,61 @@
 
   .dash-grid {
     grid-template-columns: 1fr;
-    margin: 0
+    margin: 0;
+    gap: 10px
   }
 
+  /* Hero verticale su mobile: info sopra, CTA sotto */
   .dash-hero {
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 14px 16px
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px
   }
 
   .dash-hero-info {
-    flex: 1 1 auto
+    flex: 1 1 auto;
+    gap: 5px
   }
 
+  .dash-hero-label {
+    font-size: 11px
+  }
+
+  /* Turno corrente più prominente */
   .dash-hero-turno {
-    font-size: 16px
+    font-size: 20px;
+    line-height: 1.15
+  }
+
+  .dash-hero-stato {
+    font-size: 13px
   }
 
   .dash-hero-actions {
-    width: 100%
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px
   }
 
-  .btn-dash-inizia,
+  /* Bottoni CTA: altezza minima 52px per tap comodo */
+  .btn-dash-inizia {
+    width: 100%;
+    min-height: 52px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center
+  }
+
   .btn-dash-cassa {
     width: 100%;
-    text-align: center;
-    justify-content: center;
-    display: block
+    min-height: 48px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center
   }
 
   .dash-earn-row {
@@ -322,8 +350,17 @@
     border-bottom: none
   }
 
+  /* Stipendio: valori più leggibili */
   .dash-earn-val {
-    font-size: 17px
+    font-size: 20px
+  }
+
+  .dash-earn-lbl {
+    font-size: 10px
+  }
+
+  .dash-earn-sub {
+    font-size: 10px
   }
 
   /* Nasconde performance bar su mobile (troppo densa) */
