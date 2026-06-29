@@ -16,14 +16,19 @@ $anno = max(2020, min(2040, $anno));
 
 $tsM1        = mktime(0, 0, 0, $mese, 1, $anno);
 $giorniMese  = (int)date('t', $tsM1);
-$numSettimane = (int)ceil($giorniMese / 7);
+$numSettimane = 4; /* sempre 4: 1-7 | 8-15 | 16-23 | 24-fine */
 
-$sett = (int)($_GET['sett'] ?? ceil((int)date('j') / 7));
-$sett = max(1, min($numSettimane, $sett));
+/* Confini fissi: [sett => giorno_inizio] */
+$weekStarts = [1 => 1, 2 => 8, 3 => 16, 4 => 24];
+
+$dayJ         = (int)date('j');
+$sett_default = $dayJ <= 7 ? 1 : ($dayJ <= 15 ? 2 : ($dayJ <= 23 ? 3 : 4));
+$sett = (int)($_GET['sett'] ?? $sett_default);
+$sett = max(1, min(4, $sett));
 
 /* Giorni della settimana selezionata */
-$dayStart = ($sett - 1) * 7 + 1;
-$dayEnd   = min($sett * 7, $giorniMese);
+$dayStart = $weekStarts[$sett];
+$dayEnd   = $sett < 4 ? $weekStarts[$sett + 1] - 1 : $giorniMese;
 $giorni   = [];
 for ($d = $dayStart; $d <= $dayEnd; $d++) {
     $giorni[] = date('Y-m-d', mktime(0, 0, 0, $mese, $d, $anno));
@@ -33,10 +38,10 @@ for ($d = $dayStart; $d <= $dayEnd; $d++) {
 $prevSett = $sett > 1
     ? ['anno' => $anno, 'mese' => $mese, 'sett' => $sett - 1]
     : ($mese > 1
-        ? ['anno' => $anno,   'mese' => $mese - 1, 'sett' => (int)ceil(date('t', mktime(0,0,0,$mese-1,1,$anno)) / 7)]
-        : ['anno' => $anno-1, 'mese' => 12,        'sett' => (int)ceil(date('t', mktime(0,0,0,12,1,$anno-1)) / 7)]);
+        ? ['anno' => $anno,   'mese' => $mese - 1, 'sett' => 4]
+        : ['anno' => $anno-1, 'mese' => 12,        'sett' => 4]);
 
-$nextSett = $sett < $numSettimane
+$nextSett = $sett < 4
     ? ['anno' => $anno, 'mese' => $mese, 'sett' => $sett + 1]
     : ($mese < 12
         ? ['anno' => $anno,   'mese' => $mese + 1, 'sett' => 1]
@@ -121,9 +126,9 @@ $tg = array_sum(array_column($tot, 'g'));
 $tp = array_sum(array_column($tot, 'p'));
 
 /* Settimana precedente per confronto */
-$prevDs   = ($prevSett['sett'] - 1) * 7 + 1;
 $prevDays = (int)date('t', mktime(0, 0, 0, $prevSett['mese'], 1, $prevSett['anno']));
-$prevDe   = min($prevSett['sett'] * 7, $prevDays);
+$prevDs   = $weekStarts[$prevSett['sett']];
+$prevDe   = $prevSett['sett'] < 4 ? $weekStarts[$prevSett['sett'] + 1] - 1 : $prevDays;
 $prevGiorni = [];
 for ($d = $prevDs; $d <= $prevDe; $d++) {
     $prevGiorni[] = date('Y-m-d', mktime(0, 0, 0, $prevSett['mese'], $d, $prevSett['anno']));
@@ -258,8 +263,8 @@ if (($_GET['export'] ?? '') === 'csv') {
       <a class="settimana-nav-btn" href="?anno=<?= $nextSett['anno'] ?>&mese=<?= $nextSett['mese'] ?>&sett=<?= $nextSett['sett'] ?>" title="Settimana successiva">&#8594;</a>
     </div>
     <div class="sett-topbar-actions">
-      <?php for ($s = 1; $s <= $numSettimane; $s++):
-          $ds = ($s-1)*7+1; $de = min($s*7,$giorniMese); ?>
+      <?php for ($s = 1; $s <= 4; $s++):
+          $ds = $weekStarts[$s]; $de = $s < 4 ? $weekStarts[$s + 1] - 1 : $giorniMese; ?>
       <a class="settimana-tab <?= $s===$sett?'active':'' ?>"
          href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $s ?>"><?= $ds ?>&ndash;<?= $de ?></a>
       <?php endfor; ?>

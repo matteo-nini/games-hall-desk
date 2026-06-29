@@ -12,7 +12,11 @@ $nv   = fn($v) => number_format((float)$v, 2, ',', '.');
    ========================================================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
-    $az = $_POST['azione'] ?? '';
+    $az  = $_POST['azione'] ?? '';
+    /* Preserva mese/anno nei redirect in modo che l'utente resti nel mese che stava compilando */
+    $_ra = (int)($_GET['anno'] ?? date('Y'));
+    $_rm = (int)($_GET['mese'] ?? date('n'));
+    $_qs = "anno=$_ra&mese=$_rm";
 
     if ($az === 'prezzi' && is_responsabile()) {
         $pm = is_numeric($_POST['prezzo_mattino'] ?? '') ? abs((float)$_POST['prezzo_mattino']) : null;
@@ -20,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($pm !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="mattino"')->execute([$pm]);
         if ($ps !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="sera"')->execute([$ps]);
         audit('prezzi_turni_aggiornati', null, null, "mattino=$pm sera=$ps");
-        header('Location: turni.php?ok=1'); exit;
+        header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
     /* Operatore: aggiunge se stesso a uno slot libero (se permesso abilitato) */
@@ -41,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        header('Location: turni.php?ok=1'); exit;
+        header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
     if ($az === 'programma' && is_responsabile()) {
@@ -49,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $n    = (int)($_POST['numero'] ?? 0);
         $oid  = (int)($_POST['operatore_id'] ?? 0);
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) || !in_array($n, [1,2]) || $oid <= 0) {
-            header('Location: turni.php?err=1'); exit;
+            header("Location: turni.php?err=1&$_qs"); exit;
         }
         $pdo->prepare(
             'INSERT INTO turni_programmati (data, numero, operatore_id, creato_da)
@@ -57,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              ON DUPLICATE KEY UPDATE operatore_id=VALUES(operatore_id), creato_da=VALUES(creato_da), creato_il=NOW()'
         )->execute([$data, $n, $oid, $user['id']]);
         audit('turno_programmato', 'turni_programmati', null, "data=$data n=$n op=$oid");
-        header('Location: turni.php?ok=1'); exit;
+        header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
     if ($az === 'rimuovi' && is_responsabile()) {
@@ -67,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM turni_programmati WHERE data=? AND numero=?')->execute([$data, $n]);
             audit('turno_rimosso', 'turni_programmati', null, "data=$data n=$n");
         }
-        header('Location: turni.php?ok=1'); exit;
+        header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
     if ($az === 'inizia' && !is_responsabile()) {
@@ -81,10 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare('UPDATE turni SET operatore_id=?, iniziato_il=NOW() WHERE id=?')
             ->execute([(int)$user['id'], (int)$t['id']]);
         audit('inizio_turno', 'turni', (int)$t['id'], "turno=$n data=$data");
-        header('Location: turni.php?ok=1'); exit;
+        header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
-    header('Location: turni.php'); exit;
+    header("Location: turni.php?$_qs"); exit;
 }
 
 /* =========================================================
@@ -356,6 +360,9 @@ tr:nth-child(even) td{background:#fafbff}
     <a href="?anno=<?= $prevMese['anno'] ?>&mese=<?= $prevMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese precedente">&#9664;</a>
     <span class="tp-cal-title"><?= $h($nomiMesi[$mese]) ?> <?= $anno ?></span>
     <a href="?anno=<?= $nextMese['anno'] ?>&mese=<?= $nextMese['mese'] ?>" class="tp-cal-arrow" aria-label="Mese successivo">&#9654;</a>
+    <?php if ($anno !== (int)date('Y') || $mese !== (int)date('n')): ?>
+    <a href="turni.php" class="tp-oggi-btn">Oggi</a>
+    <?php endif; ?>
   </div>
   <?php if ($migrationOk): ?>
   <div class="topbar-actions">
