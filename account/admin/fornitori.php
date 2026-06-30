@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare('DELETE FROM fornitori WHERE id=? AND attiva=0')->execute([$id]);
                 audit('fornitore_elimina', 'fornitori', $id, null);
             } catch (Throwable) {
-                // vincolo FK: impossibile eliminare, i dati storici referenziano questo fornitore
+                // FK violation: impossibile eliminare, ci sono dati storici collegati
             }
         }
         header('Location: fornitori.php'); exit;
@@ -143,10 +143,11 @@ try {
       <div class="imp-card-ico" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
-      <div>
+      <div style="flex:1">
         <h2 class="imp-card-title">Lista fornitori</h2>
-        <p class="imp-card-desc">I fornitori configurati qui compaiono in Scassettamenti, Ticket vincite e Bet/Win SNAI. Disabilitando un fornitore lo si nasconde dai nuovi inserimenti — i dati storici rimangono intatti. Trascina per riordinare. Un fornitore disabilitato può essere eliminato solo se non ha dati storici collegati.</p>
+        <p class="imp-card-desc">I fornitori qui compaiono in Scassettamenti, Ticket vincite e Bet/Win. Disabilitando un fornitore lo si nasconde dai nuovi inserimenti — i dati storici rimangono intatti. Un fornitore disabilitato può essere eliminato solo se non ha dati storici collegati.</p>
       </div>
+      <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-forn').showModal()">+ Aggiungi</button>
     </div>
 
     <?php if ($lista): ?>
@@ -157,25 +158,25 @@ try {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
         </span>
         <form method="post" class="forn-rinomina-form">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="rinomina">
-          <input type="hidden" name="id" value="<?= $f['id'] ?>">
+          <input type="hidden" name="id"     value="<?= $f['id'] ?>">
           <input class="forn-name-input" type="text" name="nome" value="<?= $h($f['nome']) ?>" maxlength="50" aria-label="Nome fornitore">
           <button type="submit" class="ghost forn-btn-sm">Salva</button>
         </form>
         <form method="post" class="forn-toggle-form">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="toggle">
-          <input type="hidden" name="id" value="<?= $f['id'] ?>">
+          <input type="hidden" name="id"     value="<?= $f['id'] ?>">
           <button type="submit" class="ghost forn-btn-sm <?= $f['attiva'] ? '' : 'forn-toggle-on' ?>">
             <?= $f['attiva'] ? 'Disabilita' : 'Abilita' ?>
           </button>
         </form>
         <?php if (!$f['attiva']): ?>
         <form method="post" onsubmit="return confirm('Eliminare definitivamente <?= $h($f['nome']) ?>?\nQuesta azione è irreversibile. Se ci sono dati storici collegati l\'eliminazione verrà bloccata automaticamente.')">
-          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="elimina_fornitore">
-          <input type="hidden" name="id" value="<?= $f['id'] ?>">
+          <input type="hidden" name="id"     value="<?= $f['id'] ?>">
           <button type="submit" class="ghost forn-btn-sm forn-btn-danger">Elimina</button>
         </form>
         <?php endif; ?>
@@ -183,32 +184,12 @@ try {
       <?php endforeach; ?>
     </ul>
     <?php else: ?>
-    <p class="ticket-empty">Nessun fornitore ancora. Aggiungine uno qui sotto.</p>
+    <p class="ticket-empty">Nessun fornitore ancora.</p>
     <?php endif; ?>
 
     <form method="post" id="forn-ordine-form" style="display:none">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
       <input type="hidden" name="azione" value="ordine">
-    </form>
-  </section>
-
-  <section class="imp-card">
-    <div class="imp-card-head">
-      <div class="imp-card-ico" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </div>
-      <div>
-        <h2 class="imp-card-title">Aggiungi fornitore</h2>
-        <p class="imp-card-desc">Il nome viene convertito automaticamente in maiuscolo.</p>
-      </div>
-    </div>
-    <form method="post">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="aggiungi">
-      <div class="forn-add-row">
-        <input type="text" name="nome" placeholder="Es. GAMENET" maxlength="50" required style="text-transform:uppercase">
-        <button type="submit">Aggiungi</button>
-      </div>
     </form>
   </section>
 
@@ -220,10 +201,11 @@ try {
       <div class="imp-card-ico" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.96-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       </div>
-      <div>
+      <div style="flex:1">
         <h2 class="imp-card-title">Rubrica contatti</h2>
-        <p class="imp-card-desc">Contatti dei fornitori, tecnici e referenti della sala. Trascina per riordinare. Telefono ed email diventano link cliccabili.</p>
+        <p class="imp-card-desc">Contatti dei fornitori, tecnici e referenti della sala. Telefono ed email diventano link cliccabili. Trascina per riordinare.</p>
       </div>
+      <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-cont').showModal()">+ Aggiungi</button>
     </div>
 
     <?php if ($contatti): ?>
@@ -237,20 +219,24 @@ try {
           <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="modifica_contatto">
           <input type="hidden" name="id"     value="<?= $c['id'] ?>">
-          <input class="cont-input cont-input-nome"  type="text"  name="nome"     value="<?= $h($c['nome']) ?>"     maxlength="100" placeholder="Nome"       aria-label="Nome"     required>
-          <input class="cont-input cont-input-ruolo" type="text"  name="ruolo"    value="<?= $h($c['ruolo'] ?? '') ?>"  maxlength="100" placeholder="Ruolo"      aria-label="Ruolo">
-          <input class="cont-input cont-input-tel"   type="tel"   name="telefono" value="<?= $h($c['telefono'] ?? '') ?>" maxlength="30"  placeholder="Telefono"   aria-label="Telefono">
-          <input class="cont-input cont-input-email" type="email" name="email"    value="<?= $h($c['email'] ?? '') ?>"    maxlength="255" placeholder="Email"      aria-label="Email">
-          <input class="cont-input cont-input-note"  type="text"  name="note"     value="<?= $h($c['note'] ?? '') ?>"     maxlength="500" placeholder="Note"       aria-label="Note">
+          <input class="cont-input cont-input-nome"  type="text"  name="nome"     value="<?= $h($c['nome']) ?>"           maxlength="100" placeholder="Nome"     aria-label="Nome"     required>
+          <input class="cont-input cont-input-ruolo" type="text"  name="ruolo"    value="<?= $h($c['ruolo'] ?? '') ?>"    maxlength="100" placeholder="Ruolo"    aria-label="Ruolo">
+          <input class="cont-input cont-input-tel"   type="tel"   name="telefono" value="<?= $h($c['telefono'] ?? '') ?>" maxlength="30"  placeholder="Telefono" aria-label="Telefono">
+          <input class="cont-input cont-input-email" type="email" name="email"    value="<?= $h($c['email'] ?? '') ?>"    maxlength="255" placeholder="Email"    aria-label="Email">
+          <input class="cont-input cont-input-note"  type="text"  name="note"     value="<?= $h($c['note'] ?? '') ?>"     maxlength="500" placeholder="Note"     aria-label="Note">
           <button type="submit" class="ghost forn-btn-sm">Salva</button>
         </form>
         <div class="cont-actions">
-          <?php if ($c['telefono']): ?><a href="tel:<?= $h($c['telefono']) ?>" class="ghost forn-btn-sm" title="Chiama <?= $h($c['telefono']) ?>">
+          <?php if ($c['telefono']): ?>
+          <a href="tel:<?= $h($c['telefono']) ?>" class="ghost forn-btn-sm" title="Chiama <?= $h($c['telefono']) ?>">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.96-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          </a><?php endif; ?>
-          <?php if ($c['email']): ?><a href="mailto:<?= $h($c['email']) ?>" class="ghost forn-btn-sm" title="Scrivi a <?= $h($c['email']) ?>">
+          </a>
+          <?php endif; ?>
+          <?php if ($c['email']): ?>
+          <a href="mailto:<?= $h($c['email']) ?>" class="ghost forn-btn-sm" title="Scrivi a <?= $h($c['email']) ?>">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </a><?php endif; ?>
+          </a>
+          <?php endif; ?>
           <form method="post" onsubmit="return confirm('Eliminare il contatto <?= $h(addslashes($c['nome'])) ?>?')">
             <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
             <input type="hidden" name="azione" value="elimina_contatto">
@@ -264,40 +250,82 @@ try {
       <?php endforeach; ?>
     </ul>
     <?php else: ?>
-    <p class="ticket-empty">Nessun contatto ancora. Aggiungine uno qui sotto.</p>
+    <p class="ticket-empty">Nessun contatto ancora.</p>
     <?php endif; ?>
 
     <form method="post" id="cont-ordine-form" style="display:none">
-      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
       <input type="hidden" name="azione" value="ordine_contatti">
     </form>
   </section>
 
-  <section class="imp-card">
-    <div class="imp-card-head">
-      <div class="imp-card-ico" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </div>
-      <div>
-        <h2 class="imp-card-title">Aggiungi contatto</h2>
-        <p class="imp-card-desc">Aggiungi un contatto alla rubrica. Solo il nome è obbligatorio.</p>
-      </div>
-    </div>
-    <form method="post">
-      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
-      <input type="hidden" name="azione" value="aggiungi_contatto">
-      <div class="cont-add-grid">
-        <label>Nome *<input type="text"  name="nome"     maxlength="100" placeholder="Mario Rossi"        required></label>
-        <label>Ruolo<input  type="text"  name="ruolo"    maxlength="100" placeholder="Tecnico referente"></label>
-        <label>Telefono<input type="tel" name="telefono" maxlength="30"  placeholder="+39 333 1234567"></label>
-        <label>Email<input  type="email" name="email"    maxlength="255" placeholder="mario@esempio.it"></label>
-        <label>Note<input   type="text"  name="note"     maxlength="500" placeholder="Es. NOVO Lombardia"></label>
-        <div class="cont-add-actions"><button type="submit">Aggiungi</button></div>
-      </div>
-    </form>
-  </section>
-
 </div>
+
+<!-- ================================================================
+     DIALOG: Aggiungi fornitore
+     ================================================================ -->
+<dialog id="dlg-forn" class="form-dialog">
+  <div class="dlg-head">
+    <div>
+      <strong>Aggiungi fornitore</strong>
+      <span class="dlg-head-sub">Il nome viene convertito automaticamente in maiuscolo.</span>
+    </div>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <form method="post">
+    <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="aggiungi">
+    <div class="field">
+      <label for="forn-nome-dlg">Nome fornitore</label>
+      <input id="forn-nome-dlg" type="text" name="nome" maxlength="50" placeholder="Es. GAMENET" required autofocus style="text-transform:uppercase;width:220px">
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Aggiungi</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ================================================================
+     DIALOG: Aggiungi contatto
+     ================================================================ -->
+<dialog id="dlg-cont" class="form-dialog">
+  <div class="dlg-head">
+    <div>
+      <strong>Aggiungi contatto</strong>
+      <span class="dlg-head-sub">Solo il nome è obbligatorio.</span>
+    </div>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <form method="post">
+    <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="aggiungi_contatto">
+    <div class="field">
+      <label for="cont-nome-dlg">Nome *</label>
+      <input id="cont-nome-dlg" type="text"  name="nome"     maxlength="100" placeholder="Mario Rossi"      required autofocus style="width:220px">
+    </div>
+    <div class="field">
+      <label>Ruolo</label>
+      <input type="text"  name="ruolo"    maxlength="100" placeholder="Tecnico referente" style="width:220px">
+    </div>
+    <div class="field">
+      <label>Telefono</label>
+      <input type="tel"   name="telefono" maxlength="30"  placeholder="+39 333 1234567"  style="width:220px">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" name="email"    maxlength="255" placeholder="mario@esempio.it" style="width:220px">
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <input type="text"  name="note"     maxlength="500" placeholder="Es. NOVO Lombardia" style="width:220px">
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Aggiungi</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (function () {
@@ -342,8 +370,15 @@ try {
     form.submit();
   }
 
-  makeDraggable('forn-list',  'forn-ordine-form');
+  makeDraggable('forn-list', 'forn-ordine-form');
   makeDraggable('cont-list', 'cont-ordine-form');
+
+  /* Chiudi dialog con click fuori */
+  document.querySelectorAll('.form-dialog').forEach(function (dlg) {
+    dlg.addEventListener('click', function (e) {
+      if (e.target === dlg) dlg.close();
+    });
+  });
 })();
 </script>
 </body></html>
