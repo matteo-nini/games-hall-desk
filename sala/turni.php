@@ -2,8 +2,12 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
-require_not_revisore();
 $pdo  = db();
+if (is_revisore()) {
+    $rvt = get_settings($pdo)['revisori_vedi_turni'] ?? '0';
+    if ($rvt !== '1')
+        render_403('I revisori non hanno accesso al calendario turni. Il responsabile può abilitarlo in Impostazioni → Permessi.');
+}
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv   = fn($v) => number_format((float)$v, 2, ',', '.');
 
@@ -28,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     /* Operatore: aggiunge se stesso a uno slot libero (se permesso abilitato) */
-    if ($az === 'programma' && !is_responsabile()) {
+    if ($az === 'programma' && !is_responsabile() && !is_revisore()) {
         $perm = setting($pdo, 'operatori_modifica_turni', '1');
         if ($perm === '1') {
             $data = $_POST['data'] ?? '';
@@ -74,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: turni.php?ok=1&$_qs"); exit;
     }
 
-    if ($az === 'inizia' && !is_responsabile()) {
+    if ($az === 'inizia' && !is_responsabile() && !is_revisore()) {
         $n    = (int)($_POST['numero'] ?? 0);
         $data = $_POST['data'] ?? date('Y-m-d');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) || !in_array($n, [1,2])) {
@@ -411,7 +415,7 @@ tr:nth-child(even) td{background:#fafbff}
       </div>
 
       <!-- Slot mattino -->
-      <?php $canAddM = is_responsabile() || (!$slotM && $opPuoModificare);
+      <?php $canAddM = is_responsabile() || (!$slotM && $opPuoModificare && !is_revisore());
             $tagM = mb_strtoupper(mb_substr($turns[1]['nome'] ?? 'M', 0, 1, 'UTF-8'), 'UTF-8'); ?>
       <div class="tp-slot <?= $slotM ? ($slotM['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
         <span class="tp-slot-tag"><?= $tagM ?></span>
@@ -446,7 +450,7 @@ tr:nth-child(even) td{background:#fafbff}
       </div>
 
       <!-- Slot sera -->
-      <?php $canAddS = is_responsabile() || (!$slotS && $opPuoModificare);
+      <?php $canAddS = is_responsabile() || (!$slotS && $opPuoModificare && !is_revisore());
             $tagS = mb_strtoupper(mb_substr($turns[2]['nome'] ?? 'S', 0, 1, 'UTF-8'), 'UTF-8'); ?>
       <div class="tp-slot <?= $slotS ? ($slotS['operatore_id'] == $uid ? 'tp-slot-mine' : 'tp-slot-other') : 'tp-slot-empty' ?>">
         <span class="tp-slot-tag"><?= $tagS ?></span>
@@ -503,7 +507,7 @@ $futuri  = array_values(array_filter($miei_turni, fn($t) => $t['data'] >  $oggi)
 ?>
 
 <!-- Turno corrente (operatori) -->
-<?php if (!is_responsabile()):
+<?php if (!is_responsabile() && !is_revisore()):
     $assegnatoA = null;
     if ($nCorrente !== null && isset($turniOggi[$nCorrente])) {
         $assegnatoA = (int)$turniOggi[$nCorrente]['operatore_id'] === $uid

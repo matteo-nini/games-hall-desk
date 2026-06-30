@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS utenti (
   username      VARCHAR(50)  NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   nome          VARCHAR(100) DEFAULT NULL,
-  ruolo         ENUM('operatore','responsabile') NOT NULL DEFAULT 'operatore',
+  ruolo         ENUM('operatore','responsabile','revisore') NOT NULL DEFAULT 'operatore',
   attivo        TINYINT(1)   NOT NULL DEFAULT 1,
   creato_il     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   foto          VARCHAR(255) DEFAULT NULL
@@ -256,6 +256,9 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('turno_sera_fine',            '01:00'),
   ('operatori_modifica_turni',   '1'),
   ('turno_edit_libero',          '1'),
+  ('mobile_giornaliero',         '0'),
+  ('mobile_turni_edit',          '0'),
+  ('revisori_vedi_turni',        '0'),
   ('modulo_assistenze',          '1'),
   ('modulo_prestiti',            '1'),
   ('modulo_documenti',           '1');
