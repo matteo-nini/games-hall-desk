@@ -304,4 +304,18 @@ CREATE TABLE IF NOT EXISTS versamenti_confermati (
   CONSTRAINT fk_vc_revisore FOREIGN KEY (confermato_da) REFERENCES utenti(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ---------- Contatti (fornitori / tecnici sala) ----------
+CREATE TABLE IF NOT EXISTS contatti (
+  id         INT           AUTO_INCREMENT PRIMARY KEY,
+  nome       VARCHAR(100)  NOT NULL,
+  ruolo      VARCHAR(100)  DEFAULT NULL,
+  telefono   VARCHAR(30)   DEFAULT NULL,
+  email      VARCHAR(255)  DEFAULT NULL,
+  note       VARCHAR(500)  DEFAULT NULL,
+  ordine     INT           NOT NULL DEFAULT 0,
+  creato_da  INT           DEFAULT NULL,
+  creato_il  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;
