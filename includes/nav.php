@@ -170,7 +170,7 @@ function top_menu(array $user): void {
 
 <?php if (!$isRevisore):
     $dashUrl    = base_url('account/dashboard.php');
-    $dashActive = in_array($cur, ['dashboard.php', 'responsabile.php', 'revisore.php']);
+    $dashActive = $cur === 'dashboard.php';
     $cassaActive  = $cur === 'giornaliero.php';
     $turniActive  = $cur === 'turni.php';
     $docActive    = $cur === 'documenti.php';
