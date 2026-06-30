@@ -66,10 +66,15 @@
   white-space: nowrap
 }
 
-.ul-th-ava  { width: 52px }
-.ul-th-menu { width: 44px }
+.ul-th-ava {
+  width: 52px
+}
 
-.ul-table tbody tr + tr {
+.ul-th-menu {
+  width: 44px
+}
+
+.ul-table tbody tr+tr {
   border-top: 1px solid var(--border)
 }
 
@@ -111,7 +116,9 @@
 }
 
 /* Avatar: gradient set inline via avatar_style(); text always white */
-.ul-ava { color: #fff }
+.ul-ava {
+  color: #fff
+}
 
 .ul-row-off .ul-ava {
   background: var(--surface3) !important;
@@ -137,6 +144,22 @@
   font-size: 11px;
   color: var(--faint);
   margin-top: 2px
+}
+
+.ul-email-link {
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none
+}
+
+.ul-email-link:hover {
+  color: var(--accent);
+  text-decoration: underline
+}
+
+.ul-muted {
+  color: var(--faint);
+  font-size: 12px
 }
 
 .ul-you {
@@ -378,7 +401,8 @@
   .ul-table thead th:nth-child(3),
   .ul-table tbody td:nth-child(3),
   .ul-table thead th:nth-child(4),
-  .ul-table tbody td:nth-child(4) {
+  .ul-table tbody td:nth-child(4),
+  .ul-td-email {
     display: none
   }
 }

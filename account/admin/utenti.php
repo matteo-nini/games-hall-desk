@@ -311,6 +311,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
         <tr>
           <th class="ul-th-ava" aria-hidden="true"></th>
           <th data-sort="text">Utente</th>
+          <th class="ul-td-email" data-sort="text">Email</th>
           <th data-sort="text">Ruolo</th>
           <th data-sort="text">Stato</th>
           <th class="ul-th-menu" aria-hidden="true"></th>
@@ -345,8 +346,13 @@ $okMsg = match ($_GET['ok'] ?? '') {
             <?php if ($u['nome']): ?>
               <span class="ul-username">@<?= $h($u['username']) ?></span>
             <?php endif; ?>
+          </td>
+
+          <td class="ul-td-email" data-val="<?= $h(mb_strtolower($u['email'] ?? '', 'UTF-8')) ?>">
             <?php if (!empty($u['email'])): ?>
-              <span class="ul-username"><?= $h($u['email']) ?></span>
+              <a href="mailto:<?= $h($u['email']) ?>" class="ul-email-link"><?= $h($u['email']) ?></a>
+            <?php else: ?>
+              <span class="ul-muted">—</span>
             <?php endif; ?>
           </td>
 
