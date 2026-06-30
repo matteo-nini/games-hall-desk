@@ -72,7 +72,8 @@ scassettamenti    (id, turno_id, macchina_id, importo)
 ticket            (id, turno_id, fornitore, importo)
 refill_awp        (id, turno_id, n_macchina, euro, ora)
 macchine          (id, codice, tipo[VLT|AWP], fornitore, ordine, attiva)
-utenti            (id, username, password_hash, nome, ruolo[operatore|responsabile], attivo)
+utenti            (id, username, password_hash, nome, email, ruolo[operatore|responsabile|revisore], attivo)
+password_reset    (id, utente_id, token[64-char hex], scade_il, usato)
 snai_betwin       (id, data, fornitore, giocato, pagato)
 audit_log         (id, utente_id, azione, entita, entita_id, dettaglio, ip, creato_il)
 ticket_assistenza (id, data_apertura, macchina, problema, id_ticket, risoluzione,
@@ -85,6 +86,22 @@ documenti         (id, nome, descrizione, filename, mime, ordine, visibile,
                    cartella_id, caricato_da, caricato_il)
 ```
 
+## Permessi (tabella `impostazioni` — sezione Permessi in impostazioni.php)
+
+Tutte le chiavi seguenti si trovano nella sezione **Permessi** unificata (rimpiazza le vecchie sezioni Operatori e Mobile).
+
+| chiave                    | default | descrizione |
+|---------------------------|---------|-------------|
+| `operatori_modifica_turni`| `'1'`   | Operatori possono aggiungere se stessi al calendario turni |
+| `turno_edit_libero`       | `'1'`   | Operatori possono modificare qualsiasi turno giornaliero |
+| `mobile_giornaliero`      | `'0'`   | Abilita compilazione cassa da mobile (≤ 760 px) |
+| `mobile_turni_edit`       | `'0'`   | Abilita modifica turni da mobile |
+| `revisori_vedi_turni`     | `'0'`   | Revisori possono vedere il calendario turni in sola lettura |
+
+Il POST handler `az === 'permessi'` in `impostazioni.php` salva tutte e 5 le chiavi in un unico submit.
+
+In `sala/turni.php` il vecchio `require_not_revisore()` è stato sostituito con un controllo condizionale su `revisori_vedi_turni`. Quando il revisore ha accesso, vede il calendario in sola lettura: nessun bottone +/−, nessun form di auto-assegnazione.
+
 ## Moduli opzionali (tabella `impostazioni`)
 
 I moduli si attivano/disattivano da Impostazioni → Moduli. La chiave in `impostazioni` è `'1'` se abilitato, `'0'` se no. Default `'1'` per tutti.
@@ -96,6 +113,17 @@ I moduli si attivano/disattivano da Impostazioni → Moduli. La chiave in `impos
 | `modulo_documenti`   | Documenti                  | sala/documenti.php |
 
 In `nav.php` i moduli vengono letti via `$navSett = get_settings($pdo)` e il nav item compare solo se la chiave è `'1'`.
+
+## Reset password (`account/reset_password.php` + `account/reset_confirm.php`)
+
+Flusso in due pagine. L'utente inserisce il proprio username → il sistema cerca l'email nella tabella `utenti` → genera `bin2hex(random_bytes(32))` (token 64 char) → salva in `password_reset` con `scade_il = NOW() + 1 ora` → invia email via `mail()`.
+
+Il link porta a `reset_confirm.php?token=XXX` che:
+1. Valida il token (esiste, non scaduto, non usato)
+2. Mostra form nuova password
+3. Al POST: aggiorna `password_hash`, marca il token `usato=1`
+
+Per le installazioni esistenti, configura `mail_from` in Impostazioni → Sistema → Email. Se `mail_from` è vuoto, usa `noreply@cassasala.it` come fallback (la mail potrebbe finire nello spam se il dominio non è configurato).
 
 ## White label / Brand colori
 

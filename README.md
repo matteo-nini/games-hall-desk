@@ -53,7 +53,9 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 |---|---|
 | **Operatore** | Cassa giornaliera, AWP, turni, ticket, prestiti, documenti |
 | **Responsabile** | Tutto + admin (macchine, fornitori, utenti, impostazioni, audit) + caricamento documenti |
-| **Revisore** | Solo report in sola lettura (settimanale, mensile, annuale) |
+| **Revisore** | Report in sola lettura (settimanale, mensile, annuale); calendario turni opzionale (vedi Permessi) |
+
+Ogni utente può avere un **indirizzo email** configurato (gestito da Impostazioni → Utenti). L'email abilita il **reset password self-service** dalla pagina di login: l'utente inserisce il proprio username, riceve un link valido 1 ora e imposta la nuova password senza l'intervento del responsabile.
 
 ### Impostazioni configurabili
 - **Logo sala**: caricabile da Impostazioni, mostrato nella sidebar e nella pagina di login
@@ -61,9 +63,10 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - Numero di turni (1–3) con nome e orari personalizzabili per turno e costo orario
 - **Fornitori configurabili**: lista riordinabile, rinominabile, con toggle attivazione
 - **Fuso orario**: selezionabile tra tutti i timezone IANA
-- Permessi operatori: modifica turni nel calendario; modifica turni giornalieri (solo propri o qualsiasi)
+- **Permessi unificati**: sezione unica per operatori (modifica calendario e turni), mobile (compilazione cassa e modifica turni da smartphone) e revisori (accesso opzionale al calendario turni in sola lettura)
 - **Moduli opzionali**: Ticket assistenza · Prestiti e rientri · Documenti
 - Dati assistenza tecnica (numero, lock, password)
+- Email di sistema (`mail_from`): indirizzo mittente per le email di reset password
 - Retention log audit (min 7 giorni)
 
 ### Sicurezza
@@ -75,6 +78,7 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 - Documenti serviti via `doc_view.php` con verifica sessione (nessun accesso diretto alla cartella upload)
 - Audit log completo: utente, IP, entità, dettaglio per ogni operazione significativa
 - Sessioni con `cookie_httponly` e `cookie_samesite=Lax` (attivare `cookie_secure` in produzione HTTPS)
+- **Reset password via email**: token `bin2hex(random_bytes(32))` con scadenza 1 ora, uso singolo; nessuna enumerazione utente nell'UI
 
 ### PWA e offline
 - Progressive Web App installabile su desktop e mobile
@@ -196,8 +200,10 @@ games-palace-desk/
 ├── index.php                    Redirect → dashboard o login
 │
 ├── account/
-│   ├── login.php                Accesso con logo e brand colore sala
+│   ├── login.php                Accesso con logo e brand colore sala + link reset password
 │   ├── logout.php               Logout + distruzione sessione
+│   ├── reset_password.php       Richiesta reset password (username → email link)
+│   ├── reset_confirm.php        Conferma reset password (token → nuova password)
 │   ├── dashboard.php            Dashboard operatore (avvio turni, performance 30gg)
 │   ├── responsabile.php         Dashboard responsabile (KPI live, grafici, stats operatori)
 │   ├── responsabile_live.php    Endpoint JSON per polling KPI ogni 30s
