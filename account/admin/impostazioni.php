@@ -172,6 +172,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'email') {
+        $mf = mb_substr(trim($_POST['mail_from'] ?? ''), 0, 200);
+        if ($mf !== '' && !filter_var($mf, FILTER_VALIDATE_EMAIL)) {
+            /* Ignora silenziosamente email malformata, non blocchiamo il redirect */
+        } else {
+            $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
+                ->execute(['mail_from', $mf]);
+            audit('impostazioni_email', null, null, "mail_from=$mf");
+        }
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     header('Location: impostazioni.php'); exit;
 }
 
@@ -749,6 +761,27 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
               </div>
               <div class="imp-form-footer">
                 <button type="submit">Salva politica</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Email di sistema</h3>
+            <p class="imp-srow-desc">Indirizzo mittente per le email di reset password. Richiede che il server abbia PHP mail() configurato o un SMTP relay.</p>
+          </div>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="email">
+              <div class="imp-field">
+                <label for="imp-mailfrom">Indirizzo mittente</label>
+                <input id="imp-mailfrom" type="email" name="mail_from" maxlength="200"
+                       value="<?= $h($sett['mail_from'] ?? '') ?>" placeholder="es. noreply@miasala.it">
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva email</button>
               </div>
             </form>
           </div>
