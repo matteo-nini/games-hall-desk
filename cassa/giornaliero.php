@@ -26,7 +26,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['azione'] ?? '') === 'chiudi') {
         $pdo->prepare('UPDATE giornate SET stato="chiusa", chiusa_da=?, chiusa_il=NOW() WHERE id=?')->execute([$user['id'], $g['id']]);
         audit('chiusura_giornata','giornate',(int)$g['id'],$data);
+        /* Notifica email ai revisori attivi con email configurata */
+        $gid = (int)$g['id'];
+        $stTot = $pdo->prepare('
+            SELECT
+              COALESCE((SELECT SUM(s.importo) FROM scassettamenti s JOIN turni t ON t.id=s.turno_id WHERE t.giornata_id=?),0) AS scass,
+              COALESCE((SELECT SUM(t2.bancomat)                     FROM turni t2            WHERE t2.giornata_id=?),0) AS bancomat,
+              COALESCE((SELECT SUM(tk.importo) FROM ticket tk JOIN turni t3 ON t3.id=tk.turno_id WHERE t3.giornata_id=?),0) AS ticket
+        ');
+        $stTot->execute([$gid,$gid,$gid]);
+        $tot = $stTot->fetch();
+        $mailVers   = (float)$tot['scass'] - (float)$tot['bancomat'] - (float)$tot['ticket'];
+        $mailFrom   = $sett['mail_from'] ?: 'noreply@cassasala.it';
+        $nomeSala   = $cfg['nome_sala'] ?? 'Cassa Sala';
+        $dataFmt    = date('d/m/Y', strtotime($data));
+        $chiusaOra  = date('H:i');
+        $nomeOp     = $user['nome'] ?: $user['username'];
+        $appUrl     = base_url('account/revisore.php');
+        $fmtEur     = fn(float $v) => '&euro;&nbsp;' . number_format($v, 2, ',', '.');
+        $revs = $pdo->query("SELECT nome, email FROM utenti WHERE ruolo='revisore' AND attivo=1 AND email IS NOT NULL AND email != ''")->fetchAll();
+        foreach ($revs as $rev) {
+            $subject = "Versamento del $dataFmt \xe2\x80\x94 $nomeSala";
+            $body = '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f3f4f6;font-family:sans-serif">'
+                . '<div style="max-width:520px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb">'
+                . '<div style="background:#111827;padding:20px 24px">'
+                . '<p style="margin:0;color:#9ca3af;font-size:12px;letter-spacing:.06em;text-transform:uppercase">' . htmlspecialchars($nomeSala) . '</p>'
+                . '<h1 style="margin:4px 0 0;color:#fff;font-size:20px;font-weight:700">Riepilogo versamento</h1>'
+                . '</div>'
+                . '<div style="padding:24px">'
+                . '<table style="width:100%;border-collapse:collapse;font-size:14px">'
+                . '<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#6b7280">Data</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:600">' . $dataFmt . '</td></tr>'
+                . '<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#6b7280">Scassettamenti</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;text-align:right">' . number_format((float)$tot['scass'],2,',','.') . ' &euro;</td></tr>'
+                . '<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#6b7280">Bancomat</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;text-align:right;color:#dc2626">&minus; ' . number_format((float)$tot['bancomat'],2,',','.') . ' &euro;</td></tr>'
+                . '<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#6b7280">Ticket pagati</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;text-align:right;color:#dc2626">&minus; ' . number_format((float)$tot['ticket'],2,',','.') . ' &euro;</td></tr>'
+                . '<tr><td style="padding:14px 0 0;font-weight:700;font-size:16px">Versamento netto</td><td style="padding:14px 0 0;text-align:right;font-weight:700;font-size:20px;color:#059669">' . number_format($mailVers,2,',','.') . ' &euro;</td></tr>'
+                . '</table>'
+                . '<p style="margin:20px 0 4px;font-size:12px;color:#6b7280">Chiusa da <strong>' . htmlspecialchars($nomeOp) . '</strong> oggi alle ' . $chiusaOra . '.</p>'
+                . '<p style="margin:0;font-size:12px;color:#6b7280">Accedi all&rsquo;app per confermare il ritiro del versamento.</p>'
+                . '<a href="' . $appUrl . '" style="display:inline-block;margin-top:18px;background:#111827;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600">Vai alla dashboard &rarr;</a>'
+                . '</div>'
+                . '<div style="padding:12px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af">' . htmlspecialchars($nomeSala) . ' &middot; sistema gestione cassa</div>'
+                . '</div></body></html>';
+            $headers = 'From: ' . $mailFrom . "\r\nContent-Type: text/html; charset=UTF-8\r\nMIME-Version: 1.0\r\n";
+            @mail($rev['email'], $subject, $body, $headers);
+        }
         header("Location: giornaliero.php?data=$data&ok=1"); exit;
+    }
+    if (($_POST['azione'] ?? '') === 'conferma_ritiro' && is_responsabile()) {
+        $gid = (int)$g['id'];
+        $stV = $pdo->prepare('
+            SELECT
+              COALESCE((SELECT SUM(s.importo) FROM scassettamenti s JOIN turni t ON t.id=s.turno_id WHERE t.giornata_id=?),0)
+              - COALESCE((SELECT SUM(t2.bancomat) FROM turni t2 WHERE t2.giornata_id=?),0)
+              - COALESCE((SELECT SUM(tk.importo) FROM ticket tk JOIN turni t3 ON t3.id=tk.turno_id WHERE t3.giornata_id=?),0)
+              AS versamento
+        ');
+        $stV->execute([$gid,$gid,$gid]);
+        $importo = (float)$stV->fetchColumn();
+        try {
+            $pdo->prepare('INSERT INTO versamenti_confermati (giornata_id,confermato_da,importo_dichiarato,ip,user_agent) VALUES (?,?,?,?,?)')
+                ->execute([$gid,(int)$user['id'],$importo,$_SERVER['REMOTE_ADDR']??'',mb_substr($_SERVER['HTTP_USER_AGENT']??'',0,500)]);
+            audit('versamento_confermato','giornate',$gid,"importo=$importo");
+        } catch (Throwable) {}
+        header("Location: giornaliero.php?data=$data&ok=confermato"); exit;
     }
     if (($_POST['azione'] ?? '') === 'riapri' && is_responsabile()) {
         $pdo->prepare('UPDATE giornate SET stato="aperta", chiusa_da=NULL, chiusa_il=NULL WHERE id=?')->execute([$g['id']]);
@@ -71,6 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $g = ensure_giornata($pdo, $data);
 $chiusa = ($g['stato'] === 'chiusa');
 $readonly = $chiusa && !is_responsabile();
+/* Conferma versamento (solo per giornate chiuse) */
+$conferma = null;
+if ($chiusa) {
+    $stConf = $pdo->prepare('SELECT vc.importo_dichiarato, vc.confermato_il, vc.ip, COALESCE(NULLIF(u.nome,""),u.username) AS nome_conf FROM versamenti_confermati vc JOIN utenti u ON u.id=vc.confermato_da WHERE vc.giornata_id=?');
+    $stConf->execute([(int)$g['id']]);
+    $conferma = $stConf->fetch() ?: null;
+}
 $turni = [];
 foreach (array_keys($turns) as $n) {
     $t = ensure_turno($pdo, (int)$g['id'], $n); $tid = (int)$t['id'];
@@ -276,6 +345,18 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
           <button name="azione" value="riapri" class="btn-reopen">Riapri</button>
         </form>
       <?php endif; ?>
+      <?php if ($chiusa && $conferma): ?>
+        <span class="gd-conf-badge" title="IP: <?= $h($conferma['ip']) ?>">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Ritirato da <?= $h($conferma['nome_conf']) ?> &middot; <?= date('d/m H:i', strtotime($conferma['confermato_il'])) ?>
+        </span>
+      <?php elseif ($chiusa && !$conferma && is_responsabile()): ?>
+        <form method="post" class="actions">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+          <button name="azione" value="conferma_ritiro" class="btn-conferma"
+                  onclick="return confirm('Confermi il ritiro del versamento di questa giornata?')">Conferma ritiro</button>
+        </form>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -334,7 +415,7 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
 </form>
 
 <?php if (isset($_GET['ok'])): ?>
-<div class="ok">Salvato</div>
+<div class="ok"><?= $_GET['ok'] === 'confermato' ? 'Versamento confermato' : 'Salvato' ?></div>
 <?php endif; ?>
 
 <?php

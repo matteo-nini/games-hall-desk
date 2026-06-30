@@ -32,6 +32,7 @@ function top_menu(array $user): void {
         'impostazioni'=> '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>',
         'fornitori'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
         'profilo'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        'revisore'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
     ];
 
     $isRevisore = $role === 'revisore';
@@ -105,12 +106,14 @@ function top_menu(array $user): void {
 
   <nav class="sb-nav" aria-label="Menu principale">
 
-    <?php if (!$isRevisore): ?>
     <!-- Dashboard -->
     <div class="sn-group">
-      <?php $renderLink($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']); ?>
+      <?php if ($isRevisore):
+        $renderLink('account/revisore.php', ['label' => 'Dashboard', 'ico' => 'revisore']);
+      else:
+        $renderLink($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']);
+      endif; ?>
     </div>
-    <?php endif; ?>
 
     <div class="sn-group">
       <span class="sn-cat"><?= $isRevisore ? 'Report' : 'Cassa' ?></span>

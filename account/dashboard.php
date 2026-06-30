@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
 $user = require_login();
-if (is_revisore()) { header('Location: ' . base_url('cassa/settimanale.php')); exit; }
+if (is_revisore()) { header('Location: ' . base_url('account/revisore.php')); exit; }
 $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $nv   = fn($v) => number_format((float)$v, 2, ',', '.');
