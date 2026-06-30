@@ -211,8 +211,9 @@ $navRes = [
             <li><strong>Turni</strong>: numero (1–3), nomi e orari dei turni giornalieri.</li>
             <li><strong>Fuso orario</strong>: importante per sale fuori dall'Italia.</li>
             <li><strong>Costo turni</strong>: compenso per turno, visibile nel riepilogo guadagni.</li>
-            <li><strong>Permessi operatori</strong>: modifica calendario e dati di turno.</li>
+            <li><strong>Permessi</strong>: sezione unica per operatori (calendario, turni giornalieri), mobile (compilazione e modifica da smartphone) e revisori (accesso opzionale al calendario turni in sola lettura).</li>
             <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza, Prestiti e Documenti.</li>
+            <li><strong>Email di sistema</strong>: indirizzo mittente per le email di reset password (in Sistema → Email).</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('account/admin/impostazioni.php') ?>">Vai alle impostazioni →</a>
         </div>
@@ -236,8 +237,10 @@ $navRes = [
           <ul class="ob-ul">
             <li>Ruolo <strong>operatore</strong>: accesso a cassa, sala, assistenze e prestiti.</li>
             <li>Ruolo <strong>responsabile</strong>: accesso completo incluse le funzioni admin.</li>
+            <li>Ruolo <strong>revisore</strong>: sola lettura dei report. Il calendario turni è opzionale (da Impostazioni → Permessi).</li>
+            <li><strong>Email utente</strong>: aggiungila dal menu azione (⋮) della riga utente. Abilita il reset password self-service dalla pagina di login.</li>
           </ul>
-          <div class="ob-tip">Cambia le password periodicamente. Il reset va fatto dalla pagina Utenti (solo responsabile).</div>
+          <div class="ob-tip">Con un'email configurata, ogni operatore può reimpostare la propria password autonomamente dalla pagina di login, senza contattare il responsabile.</div>
           <a class="ob-panel-link" href="<?= base_url('account/admin/utenti.php') ?>">Vai agli utenti →</a>
         </div>
 
