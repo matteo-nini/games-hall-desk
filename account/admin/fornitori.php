@@ -1,6 +1,0 @@
-<?php
-require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../includes/lib.php';
-require_login();
-header('Location: ' . base_url('account/admin/macchine.php#fornitori'));
-exit;
