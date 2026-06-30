@@ -104,9 +104,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         $st = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
         $v1 = isset($_POST['operatori_modifica_turni']) ? '1' : '0';
         $v2 = isset($_POST['turno_edit_libero'])        ? '1' : '0';
+        $v3 = isset($_POST['mobile_giornaliero'])       ? '1' : '0';
+        $v4 = isset($_POST['mobile_turni_edit'])        ? '1' : '0';
+        $v5 = isset($_POST['revisori_vedi_turni'])      ? '1' : '0';
         $st->execute(['operatori_modifica_turni', $v1]);
         $st->execute(['turno_edit_libero',        $v2]);
-        audit('impostazioni_permessi', null, null, "omt=$v1 tel=$v2");
+        $st->execute(['mobile_giornaliero',       $v3]);
+        $st->execute(['mobile_turni_edit',        $v4]);
+        $st->execute(['revisori_vedi_turni',      $v5]);
+        audit('impostazioni_permessi', null, null, "omt=$v1 tel=$v2 mg=$v3 mt=$v4 rvt=$v5");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -166,16 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
-    if ($az === 'mobile') {
-        $mg = isset($_POST['mobile_giornaliero']) ? '1' : '0';
-        $mt = isset($_POST['mobile_turni_edit'])  ? '1' : '0';
-        $st = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
-        $st->execute(['mobile_giornaliero', $mg]);
-        $st->execute(['mobile_turni_edit',  $mt]);
-        audit('impostazioni_mobile', null, null, "giornaliero=$mg turni=$mt");
-        header('Location: impostazioni.php?ok=1'); exit;
-    }
-
     header('Location: impostazioni.php'); exit;
 }
 
@@ -227,17 +223,13 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
       Turni
     </a>
     <div class="imp-snav-divider"></div>
-    <a class="imp-snav-item" href="#operatori">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="9" rx="1.5"/><path d="M7 9V7.5a3 3 0 0 1 6 0V9"/></svg>
-      Operatori
+    <a class="imp-snav-item" href="#permessi">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L3 5.5v5c0 4.5 3 7.5 7 8 4-.5 7-3.5 7-8v-5L10 2z"/></svg>
+      Permessi
     </a>
     <a class="imp-snav-item" href="#moduli">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
       Moduli
-    </a>
-    <a class="imp-snav-item" href="#mobile">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="1.5" width="9" height="17" rx="1.5"/><circle cx="10" cy="15.5" r=".7" fill="currentColor" stroke="none"/></svg>
-      Mobile
     </a>
     <div class="imp-snav-divider"></div>
     <a class="imp-snav-item" href="#assistenza">
@@ -531,38 +523,70 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
       </div>
     </div>
 
-    <!-- OPERATORI -->
-    <div class="imp-section" id="operatori">
+    <!-- PERMESSI -->
+    <div class="imp-section" id="permessi">
       <div class="imp-section-head">
-        <h2>Permessi operatori</h2>
-        <p>Controllo delle azioni disponibili agli operatori sul calendario e sui turni giornalieri</p>
+        <h2>Permessi</h2>
+        <p>Controllo delle azioni disponibili a operatori, revisori e da dispositivi mobili</p>
       </div>
       <div class="imp-settings-card">
         <div class="imp-srow">
           <div class="imp-srow-meta">
-            <h3 class="imp-srow-title">Permessi</h3>
-            <p class="imp-srow-desc">Abilita o disabilita le azioni degli operatori sul calendario e sui dati di cassa.</p>
+            <h3 class="imp-srow-title">Impostazioni accesso</h3>
+            <p class="imp-srow-desc">Abilita o disabilita le azioni per ruolo. Le opzioni mobile valgono per schermi ≤ 760 px.</p>
           </div>
           <div class="imp-srow-ctrl">
             <form method="post">
               <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
               <input type="hidden" name="azione" value="permessi">
+
+              <p class="imp-sub-head">Operatori</p>
               <div class="imp-opt-stack">
                 <label class="imp-opt">
                   <input type="checkbox" name="operatori_modifica_turni" <?= ($sett['operatori_modifica_turni'] ?? '1') === '1' ? 'checked' : '' ?>>
                   <span class="imp-opt-text">
-                    <strong>Modifica calendario</strong>
-                    <span>Gli operatori possono aggiungere e modificare i turni programmati nel calendario</span>
+                    <strong>Modifica calendario turni</strong>
+                    <span>Gli operatori possono aggiungere se stessi ai turni programmati nel calendario</span>
                   </span>
                 </label>
                 <label class="imp-opt">
                   <input type="checkbox" name="turno_edit_libero" <?= ($sett['turno_edit_libero'] ?? '1') === '1' ? 'checked' : '' ?>>
                   <span class="imp-opt-text">
-                    <strong>Modifica libera turni</strong>
-                    <span>Gli operatori possono modificare i dati di qualsiasi turno giornaliero, non solo il proprio — utile per correzioni e inserimento storico</span>
+                    <strong>Modifica libera turni giornalieri</strong>
+                    <span>Gli operatori possono modificare i dati di qualsiasi turno, non solo il proprio</span>
                   </span>
                 </label>
               </div>
+
+              <p class="imp-sub-head" style="margin-top:20px">Mobile <span class="imp-unit">(≤ 760 px)</span></p>
+              <div class="imp-opt-stack">
+                <label class="imp-opt">
+                  <input type="checkbox" name="mobile_giornaliero" <?= ($sett['mobile_giornaliero'] ?? '0') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Compilazione cassa da mobile</strong>
+                    <span>Permette di inserire e salvare i dati del giornaliero da smartphone</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="mobile_turni_edit" <?= ($sett['mobile_turni_edit'] ?? '0') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Modifica turni da mobile</strong>
+                    <span>Permette di assegnare e rimuovere turni dal calendario su smartphone</span>
+                  </span>
+                </label>
+              </div>
+
+              <p class="imp-sub-head" style="margin-top:20px">Revisori</p>
+              <div class="imp-opt-stack">
+                <label class="imp-opt">
+                  <input type="checkbox" name="revisori_vedi_turni" <?= ($sett['revisori_vedi_turni'] ?? '0') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Accesso al calendario turni</strong>
+                    <span>I revisori possono visualizzare il calendario turni in sola lettura</span>
+                  </span>
+                </label>
+              </div>
+
               <div class="imp-form-footer">
                 <button type="submit">Salva permessi</button>
               </div>
@@ -620,46 +644,6 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
       </div>
     </div>
 
-    <!-- MOBILE -->
-    <div class="imp-section" id="mobile">
-      <div class="imp-section-head">
-        <h2>Mobile</h2>
-        <p>Funzioni abilitate quando si accede da smartphone (schermo ≤ 760 px) — di default le pagine complesse sono in sola lettura</p>
-      </div>
-      <div class="imp-settings-card">
-        <div class="imp-srow">
-          <div class="imp-srow-meta">
-            <h3 class="imp-srow-title">Permessi da mobile</h3>
-            <p class="imp-srow-desc">Abilita per consentire la compilazione e la modifica anche dagli smartphone. Lascia disabilitato per ridurre il rischio di inserimenti accidentali.</p>
-          </div>
-          <div class="imp-srow-ctrl">
-            <form method="post">
-              <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-              <input type="hidden" name="azione" value="mobile">
-              <div class="imp-opt-stack">
-                <label class="imp-opt">
-                  <input type="checkbox" name="mobile_giornaliero" <?= ($sett['mobile_giornaliero'] ?? '0') === '1' ? 'checked' : '' ?>>
-                  <span class="imp-opt-text">
-                    <strong>Compilazione cassa da mobile</strong>
-                    <span>Permette di inserire e salvare i dati del giornaliero da smartphone</span>
-                  </span>
-                </label>
-                <label class="imp-opt">
-                  <input type="checkbox" name="mobile_turni_edit" <?= ($sett['mobile_turni_edit'] ?? '0') === '1' ? 'checked' : '' ?>>
-                  <span class="imp-opt-text">
-                    <strong>Modifica turni da mobile</strong>
-                    <span>Permette di assegnare e rimuovere turni dal calendario su smartphone</span>
-                  </span>
-                </label>
-              </div>
-              <div class="imp-form-footer">
-                <button type="submit">Salva opzioni mobile</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ASSISTENZA -->
     <div class="imp-section" id="assistenza">
