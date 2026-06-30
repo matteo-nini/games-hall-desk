@@ -31,6 +31,7 @@ function top_menu(array $user): void {
         'documenti'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
         'impostazioni'=> '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>',
         'fornitori'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+        'contatti'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
         'profilo'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
         'revisore'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
     ];
@@ -59,11 +60,11 @@ function top_menu(array $user): void {
         if ($modAssistenze) $salaItems['sala/ticket.php']    = ['label' => 'Assistenze', 'ico' => 'ticket'];
         if ($modPrestiti)   $salaItems['sala/prestiti.php']  = ['label' => 'Prestiti',   'ico' => 'prestiti'];
         if ($modDocumenti)  $salaItems['sala/documenti.php'] = ['label' => 'Documenti',  'ico' => 'documenti'];
+        $salaItems['sala/contatti.php'] = ['label' => 'Contatti', 'ico' => 'contatti'];
     }
 
     $adminItems = ($role === 'responsabile') ? [
         'account/admin/macchine.php'     => ['label' => 'Macchine',     'ico' => 'macchine'],
-        'account/admin/fornitori.php'    => ['label' => 'Fornitori',    'ico' => 'fornitori'],
         'account/admin/utenti.php'       => ['label' => 'Utenti',       'ico' => 'utenti'],
         'account/admin/impostazioni.php' => ['label' => 'Impostazioni', 'ico' => 'impostazioni'],
         'account/admin/audit.php'        => ['label' => 'Audit',        'ico' => 'audit'],

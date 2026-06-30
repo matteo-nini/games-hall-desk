@@ -2,6 +2,21 @@
    Impostazioni
    ============================================================ */
 
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--rxs);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color .1s, background .1s
+}
+.icon-link:hover { color: var(--text); background: var(--surface2) }
+
 .imp-page {
   display: grid;
   grid-template-columns: .5fr .5fr;
