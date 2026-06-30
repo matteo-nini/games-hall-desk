@@ -150,7 +150,9 @@ SUM(scassettamenti) - SUM(bancomat) - SUM(ticket) -- su tutti i turni della gior
 - Tabella andamento mensile (ultimi 6 mesi): giorni chiusi, confermati, copertura %, totale €
 - Storico confermati (ultimi 100): importo, chi ha confermato, data/ora, IP
 
-**Login revisore** → redirect a `revisore.php` (era `cassa/settimanale.php`). La nav mostra "Dashboard" con icona shield.
+**Login** → tutti i ruoli vengono mandati a `account/dashboard.php` che si costruisce in base al ruolo. La nav mostra "Dashboard" con icona shield per i revisori e griglia per gli altri.
+
+I file `account/responsabile.php` e `account/revisore.php` esistono come redirect a `dashboard.php` per compatibilità bookmark.
 
 ## White label / Brand colori
 
