@@ -17,15 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($az === 'add') {
         $username = mb_substr(trim($_POST['username'] ?? ''), 0, 60);
         $nome     = mb_substr(trim($_POST['nome']     ?? ''), 0, 80) ?: null;
+        $email    = mb_substr(trim($_POST['email']    ?? ''), 0, 255) ?: null;
         $pw       = $_POST['password'] ?? '';
         $ruolo    = in_array($_POST['ruolo'] ?? '', ['responsabile','revisore'], true) ? $_POST['ruolo'] : 'operatore';
-        if ($username === '' || strlen($pw) < 8) {
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $err = 'Indirizzo email non valido.';
+        } elseif ($username === '' || strlen($pw) < 8) {
             $err = 'Username obbligatorio e password di almeno 8 caratteri.';
         } else {
             try {
                 $pdo->prepare(
-                    'INSERT INTO utenti (username, password_hash, nome, ruolo) VALUES (?,?,?,?)'
-                )->execute([$username, password_hash($pw, PASSWORD_DEFAULT), $nome, $ruolo]);
+                    'INSERT INTO utenti (username, password_hash, nome, email, ruolo) VALUES (?,?,?,?,?)'
+                )->execute([$username, password_hash($pw, PASSWORD_DEFAULT), $nome, $email, $ruolo]);
                 audit('utente_aggiunto', 'utenti', (int)$pdo->lastInsertId(), $username);
                 header('Location: utenti.php?ok=add'); exit;
             } catch (Throwable) {
@@ -68,6 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($az === 'edit_email') {
+        $id    = (int)($_POST['id'] ?? 0);
+        $email = mb_substr(trim($_POST['email'] ?? ''), 0, 255) ?: null;
+        if ($id > 0) {
+            if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $err = 'Indirizzo email non valido.';
+            } else {
+                $pdo->prepare('UPDATE utenti SET email=? WHERE id=?')->execute([$email, $id]);
+                audit('utente_edit_email', 'utenti', $id, $email ?? '(rimossa)');
+                header('Location: utenti.php?ok=email'); exit;
+            }
+        }
+    }
+
     if ($az === 'change_ruolo') {
         $id    = (int)($_POST['id'] ?? 0);
         $ruolo = in_array($_POST['ruolo'] ?? '', ['responsabile','revisore'], true) ? $_POST['ruolo'] : 'operatore';
@@ -92,6 +109,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
     'toggle' => 'Stato aggiornato.',
     'reset'  => 'Password aggiornata.',
     'nome'   => 'Nome aggiornato.',
+    'email'  => 'Email aggiornata.',
     'ruolo'  => 'Ruolo aggiornato.',
     default  => ''
 };
@@ -144,6 +162,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
         <label for="nu-user">Username <span class="ul-req">*</span></label>
         <input id="nu-user" type="text" name="username" required placeholder="es. mario.rossi" maxlength="60" autocomplete="off">
       </div>
+      <div class="ul-field">
+        <label for="nu-email">Email</label>
+        <input id="nu-email" type="email" name="email" placeholder="es. mario@sala.it" maxlength="255" autocomplete="off">
+      </div>
       <div class="ul-field ul-field-full">
         <label for="nu-ruolo">Ruolo</label>
         <select id="nu-ruolo" name="ruolo" onchange="document.getElementById('ruolo-desc').textContent=({operatore:'Accesso completo alla cassa giornaliera e alle sezioni operative.',responsabile:'Accesso completo incluse impostazioni, gestione utenti e macchine.',revisore:'Solo visualizzazione report settimanali, mensili e annuali. Nessun accesso alle operazioni di cassa.'})[this.value]||''">
@@ -193,6 +215,29 @@ $okMsg = match ($_GET['ok'] ?? '') {
     <div class="dlg-actions">
       <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
       <button type="submit">Aggiorna password</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ========== Dialog: modifica email ========== -->
+<dialog id="dlg-email" class="form-dialog">
+  <div class="dlg-head">
+    <strong>Modifica email</strong>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <form method="post" class="ticket-new-form">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+    <input type="hidden" name="azione" value="edit_email">
+    <input type="hidden" name="id" id="email-uid">
+    <p class="ul-reset-ctx" id="email-ctx"></p>
+    <div class="ul-field">
+      <label>Indirizzo email</label>
+      <input type="email" name="email" id="email-val" maxlength="255" placeholder="es. mario@sala.it">
+    </div>
+    <p class="ul-field-hint">Usata per il reset della password. Lascia vuoto per rimuoverla.</p>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost" onclick="this.closest('dialog').close()">Annulla</button>
+      <button type="submit">Salva</button>
     </div>
   </form>
 </dialog>
@@ -300,6 +345,9 @@ $okMsg = match ($_GET['ok'] ?? '') {
             <?php if ($u['nome']): ?>
               <span class="ul-username">@<?= $h($u['username']) ?></span>
             <?php endif; ?>
+            <?php if (!empty($u['email'])): ?>
+              <span class="ul-username"><?= $h($u['email']) ?></span>
+            <?php endif; ?>
           </td>
 
           <td>
@@ -328,6 +376,11 @@ $okMsg = match ($_GET['ok'] ?? '') {
                         data-action="nome" data-uid="<?= (int)$u['id'] ?>" data-name="<?= $h($displayN) ?>">
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2.5a2.1 2.1 0 0 1 2.5 2.5L5 14H2v-3L11 2.5z"/></svg>
                   Modifica nome
+                </button>
+                <button type="button" class="ul-menu-item" role="menuitem"
+                        data-action="email" data-uid="<?= (int)$u['id'] ?>" data-name="<?= $h($displayN) ?>" data-email="<?= $h($u['email'] ?? '') ?>">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 5l7 5 7-5"/></svg>
+                  Modifica email
                 </button>
                 <button type="button" class="ul-menu-item" role="menuitem"
                         data-action="reset" data-uid="<?= (int)$u['id'] ?>" data-name="<?= $h($displayN) ?>">
@@ -420,6 +473,12 @@ $okMsg = match ($_GET['ok'] ?? '') {
         document.getElementById('nome-uid').value = uid;
         document.getElementById('nome-val').value = name;
         document.getElementById('dlg-nome').showModal();
+      }
+      if (btn.dataset.action === 'email') {
+        document.getElementById('email-uid').value = uid;
+        document.getElementById('email-ctx').textContent = 'Email per: ' + name;
+        document.getElementById('email-val').value = btn.dataset.email || '';
+        document.getElementById('dlg-email').showModal();
       }
       if (btn.dataset.action === 'ruolo') {
         document.getElementById('ruolo-uid').value = uid;

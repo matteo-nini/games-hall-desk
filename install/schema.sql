@@ -12,10 +12,24 @@ CREATE TABLE IF NOT EXISTS utenti (
   username      VARCHAR(50)  NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   nome          VARCHAR(100) DEFAULT NULL,
+  email         VARCHAR(255) DEFAULT NULL,
   ruolo         ENUM('operatore','responsabile','revisore') NOT NULL DEFAULT 'operatore',
   attivo        TINYINT(1)   NOT NULL DEFAULT 1,
   creato_il     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   foto          VARCHAR(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------- Reset password ----------
+CREATE TABLE IF NOT EXISTS password_reset (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  utente_id  INT         NOT NULL,
+  token      CHAR(64)    NOT NULL,
+  scade_il   DATETIME    NOT NULL,
+  usato      TINYINT(1)  NOT NULL DEFAULT 0,
+  creato_il  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_token (token),
+  INDEX idx_user_usato (utente_id, usato),
+  CONSTRAINT fk_pwreset_utente FOREIGN KEY (utente_id) REFERENCES utenti(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Macchine ----------
@@ -261,7 +275,8 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('revisori_vedi_turni',        '0'),
   ('modulo_assistenze',          '1'),
   ('modulo_prestiti',            '1'),
-  ('modulo_documenti',           '1');
+  ('modulo_documenti',           '1'),
+  ('mail_from',                  '');
 
 -- ---------- Settimana Extra (verifica VLT) ----------
 CREATE TABLE IF NOT EXISTS settimana_extra (

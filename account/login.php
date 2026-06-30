@@ -75,6 +75,7 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
         <input id="lp" name="password" type="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
       </div>
       <button type="submit" class="login-btn">Entra &rarr;</button>
+      <p style="text-align:center;margin-top:12px"><a href="reset_password.php" style="color:var(--muted);font-size:12px">Password dimenticata?</a></p>
     </form>
     <?php endif; ?>
     <p class="login-foot">Cassa Sala &middot; gestione cassa VLT/AWP</p>
