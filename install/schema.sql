@@ -290,4 +290,18 @@ CREATE TABLE IF NOT EXISTS settimana_extra (
   UNIQUE KEY uq_sett_extra (anno, mese, settimana)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------- Versamenti confermati ----------
+CREATE TABLE IF NOT EXISTS versamenti_confermati (
+  id                  INT AUTO_INCREMENT PRIMARY KEY,
+  giornata_id         INT           NOT NULL,
+  confermato_da       INT           NOT NULL,
+  importo_dichiarato  DECIMAL(10,2) NOT NULL,
+  ip                  VARCHAR(45)   DEFAULT NULL,
+  user_agent          VARCHAR(500)  DEFAULT NULL,
+  confermato_il       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_giornata (giornata_id),
+  CONSTRAINT fk_vc_giornata FOREIGN KEY (giornata_id) REFERENCES giornate(id) ON DELETE CASCADE,
+  CONSTRAINT fk_vc_revisore FOREIGN KEY (confermato_da) REFERENCES utenti(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;

@@ -84,6 +84,8 @@ prestiti_movimenti(id, data, persona_id, tipo[prestito|rientro], quantita, note,
 documenti_cartelle(id, nome, ordine, creata_da, creata_il)
 documenti         (id, nome, descrizione, filename, mime, ordine, visibile,
                    cartella_id, caricato_da, caricato_il)
+versamenti_confermati (id, giornata_id UNIQUE, confermato_da, importo_dichiarato,
+                       ip, user_agent, confermato_il)
 ```
 
 ## Permessi (tabella `impostazioni` — sezione Permessi in impostazioni.php)
@@ -124,6 +126,31 @@ Il link porta a `reset_confirm.php?token=XXX` che:
 3. Al POST: aggiorna `password_hash`, marca il token `usato=1`
 
 Per le installazioni esistenti, configura `mail_from` in Impostazioni → Sistema → Email. Se `mail_from` è vuoto, usa `noreply@cassasala.it` come fallback (la mail potrebbe finire nello spam se il dominio non è configurato).
+
+## Conferma versamento (`account/revisore.php`)
+
+Sistema di tracciamento tracciato a tutela degli operatori: registra chi ha ritirato il versamento, quando, da dove.
+
+**Flusso:**
+1. Operatore chiude la giornata → email HTML automatica inviata a tutti i revisori attivi con email configurata (riepiloga scassettamenti, bancomat, ticket, versamento netto)
+2. Il revisore accede all'app → `account/revisore.php` (dashboard dedicata) → vede le giornate da confermare con l'importo calcolato live
+3. Clicca "Conferma ritiro" → JS confirm dialog → POST → inserisce riga in `versamenti_confermati` con importo, IP, user_agent, timestamp
+4. La conferma è visibile come badge verde `gd-conf-badge` in `cassa/giornaliero.php` per operatori e responsabili
+
+**Calcolo versamento** (usato sia nell'email che nella conferma, non usa `riepilogo_giornata()`):
+```sql
+SUM(scassettamenti) - SUM(bancomat) - SUM(ticket) -- su tutti i turni della giornata
+```
+
+**Responsabile** può anche confermare direttamente da `cassa/giornaliero.php` (bottone "Conferma ritiro", handler `az === 'conferma_ritiro'`).
+
+**Dashboard revisore** (`account/revisore.php`):
+- KPI mese: da confermare, totale confermato (€), giorni coperti, % copertura
+- Tabella "Da confermare" con bottone di conferma inline
+- Tabella andamento mensile (ultimi 6 mesi): giorni chiusi, confermati, copertura %, totale €
+- Storico confermati (ultimi 100): importo, chi ha confermato, data/ora, IP
+
+**Login revisore** → redirect a `revisore.php` (era `cassa/settimanale.php`). La nav mostra "Dashboard" con icona shield.
 
 ## White label / Brand colori
 

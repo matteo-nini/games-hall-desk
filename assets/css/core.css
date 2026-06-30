@@ -441,6 +441,28 @@ button.ghost,
   border-color: var(--muted)
 }
 
+.btn-conferma {
+  background: var(--green);
+  border-color: var(--green)
+}
+
+.gd-conf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+  color: var(--green-ink, #065f46);
+  border-radius: var(--rs);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600
+}
+
+.gd-conf-badge svg {
+  stroke: var(--green)
+}
+
 button:disabled {
   opacity: .5;
   cursor: not-allowed
