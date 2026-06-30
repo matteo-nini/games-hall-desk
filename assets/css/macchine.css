@@ -2,6 +2,40 @@
    Parco macchine — macchine.php
    ============================================================ */
 
+/* Tab bar */
+.mach-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface)
+}
+
+.mach-tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
+  white-space: nowrap
+}
+
+.mach-tab:hover { color: var(--text) }
+
+.mach-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent)
+}
+
+.mach-tab-pane { display: none }
+.mach-tab-pane.active { display: block }
+
 .mach-page {
   padding: 16px 24px 48px
 }
