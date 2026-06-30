@@ -108,11 +108,7 @@ function top_menu(array $user): void {
 
     <!-- Dashboard -->
     <div class="sn-group">
-      <?php if ($isRevisore):
-        $renderLink('account/revisore.php', ['label' => 'Dashboard', 'ico' => 'revisore']);
-      else:
-        $renderLink($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php', ['label' => 'Dashboard', 'ico' => 'dashboard']);
-      endif; ?>
+      <?php $renderLink('account/dashboard.php', ['label' => 'Dashboard', 'ico' => $isRevisore ? 'revisore' : 'dashboard']); ?>
     </div>
 
     <div class="sn-group">
@@ -173,8 +169,8 @@ function top_menu(array $user): void {
 <div class="sb-overlay" id="sb-overlay" aria-hidden="true" role="presentation"></div>
 
 <?php if (!$isRevisore):
-    $dashUrl  = base_url($role === 'responsabile' ? 'account/responsabile.php' : 'account/dashboard.php');
-    $dashActive   = in_array($cur, ['dashboard.php', 'responsabile.php']);
+    $dashUrl    = base_url('account/dashboard.php');
+    $dashActive = in_array($cur, ['dashboard.php', 'responsabile.php', 'revisore.php']);
     $cassaActive  = $cur === 'giornaliero.php';
     $turniActive  = $cur === 'turni.php';
     $docActive    = $cur === 'documenti.php';

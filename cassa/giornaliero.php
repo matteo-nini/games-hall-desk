@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dataFmt    = date('d/m/Y', strtotime($data));
         $chiusaOra  = date('H:i');
         $nomeOp     = $user['nome'] ?: $user['username'];
-        $appUrl     = base_url('account/revisore.php');
+        $appUrl     = base_url('account/dashboard.php');
         $fmtEur     = fn(float $v) => '&euro;&nbsp;' . number_format($v, 2, ',', '.');
         $revs = $pdo->query("SELECT nome, email FROM utenti WHERE ruolo='revisore' AND attivo=1 AND email IS NOT NULL AND email != ''")->fetchAll();
         foreach ($revs as $rev) {

@@ -32,7 +32,7 @@ $err    = '';
 if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     if (login(trim($_POST['username'] ?? ''), $_POST['password'] ?? '')) {
-        $dest = is_responsabile() ? 'responsabile.php' : (is_revisore() ? 'revisore.php' : 'dashboard.php');
+        $dest = 'dashboard.php';
         header('Location: ' . $dest); exit;
     }
     $locked = rate_limit_check($ip);
