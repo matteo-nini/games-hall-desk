@@ -362,32 +362,33 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
 
   <div class="sh-hero">
     <div id="hm-scost" class="hero-box hb-scost ok" role="status" aria-live="polite">
-      <div class="hb-main">
-        <div class="hb-ico" id="v-ico" aria-hidden="true"></div>
-        <div class="hb-msg" id="v-big">&mdash;</div>
-        <div class="hb-num-wrap">
-          <span class="hb-num" id="m-scost">&euro;&nbsp;0,00</span>
-          <span class="hb-lbl">Scostamento</span>
-        </div>
-      </div>
-      <div class="hb-formula">
-        <span class="hbf-val" id="v-tot">&euro;&nbsp;0,00</span>
-        <span class="hbf-eq" id="v-sign" aria-hidden="true">=</span>
-        <span class="hbf-val" id="v-fondo">&euro;&nbsp;0,00</span>
-        <span class="hbf-lbl">tot. cassa = fondo</span>
-      </div>
+      <div class="hb-ico" id="v-ico" aria-hidden="true"></div>
+      <div class="hb-msg" id="v-big">&mdash;</div>
     </div>
-    <div class="hero-box hb-versamento">
-      <div class="hb-main">
-        <div class="hb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
-        <div class="hb-num-wrap hb-num-wrap--left">
-          <span class="hb-num" id="m-versamento">&euro;&nbsp;0,00</span>
-          <span class="hb-lbl">Versamento</span>
+    <div class="hero-box hb-data">
+      <div class="hbd-col hbd-scost-col">
+        <div class="hbd-top">
+          <span class="hbd-num" id="m-scost">&euro;&nbsp;0,00</span>
+          <span class="hbd-cap">Scostamento</span>
+        </div>
+        <div class="hbd-sub">
+          <span id="v-tot">&euro;&nbsp;0,00</span>
+          <span id="v-sign" aria-hidden="true">=</span>
+          <span id="v-fondo">&euro;&nbsp;0,00</span>
+          <span class="hbd-meta">tot. cassa = fondo</span>
         </div>
       </div>
-      <div class="hb-formula">
-        <span class="hbf-val" id="m-vers-reale">&euro;&nbsp;0,00</span>
-        <span class="hbf-lbl">reale: contanti &minus; fondo</span>
+      <div class="hbd-sep" aria-hidden="true"></div>
+      <div class="hbd-col hbd-vers-col">
+        <div class="hbd-top">
+          <span class="hbd-ico-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
+          <span class="hbd-num" id="m-versamento">&euro;&nbsp;0,00</span>
+          <span class="hbd-cap">Versamento</span>
+        </div>
+        <div class="hbd-sub">
+          <span id="m-vers-reale">&euro;&nbsp;0,00</span>
+          <span class="hbd-meta">reale: contanti &minus; fondo</span>
+        </div>
       </div>
     </div>
   </div>

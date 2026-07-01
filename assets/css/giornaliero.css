@@ -1138,14 +1138,18 @@ textarea.note:focus {
     grid-template-columns: 1fr
   }
 
-  /* Hero boxes affiancati compatti */
+  /* Hero boxes compatti su mobile */
   .sh-hero {
-    grid-template-columns: 1fr 1fr
+    grid-template-columns: auto 1fr
   }
 
   .hero-box {
     margin: 4px 6px;
     padding: 6px 8px
+  }
+
+  .hb-scost {
+    padding: 8px 10px
   }
 
   .hb-num {
@@ -1156,8 +1160,16 @@ textarea.note:focus {
     font-size: 12px
   }
 
-  .hb-formula {
+  .hbd-num {
+    font-size: 16px
+  }
+
+  .hbd-sub {
     display: none
+  }
+
+  .hbd-col {
+    padding: 6px 10px
   }
 }
 
@@ -1165,7 +1177,7 @@ textarea.note:focus {
 
 .sh-hero {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: auto 1fr;
   border-bottom: 1px solid var(--border)
 }
 
@@ -1201,9 +1213,10 @@ textarea.note:focus {
 }
 
 .hb-scost {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap
 }
 
 .hb-main {
@@ -1373,6 +1386,104 @@ textarea.note:focus {
   white-space: nowrap;
   margin-top: 3px
 }
+
+/* ============ Data panel (destra): scostamento + versamento ============ */
+
+.hb-data {
+  padding: 0;
+  margin: 0 0 0 0;
+  border-radius: 0;
+  gap: 0;
+  align-items: stretch;
+  border-left: 1px solid var(--border);
+  min-width: 0
+}
+
+.hbd-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 18px;
+  gap: 4px;
+  min-width: 0;
+  flex: 1
+}
+
+.hbd-top {
+  display: flex;
+  align-items: baseline;
+  gap: 7px
+}
+
+.hbd-num {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--text);
+  white-space: nowrap
+}
+
+.hbd-cap {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  white-space: nowrap
+}
+
+.hbd-sub {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted)
+}
+
+.hbd-meta {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--muted);
+  white-space: nowrap
+}
+
+.hbd-sep {
+  width: 1px;
+  background: var(--border);
+  margin: 8px 0;
+  flex-shrink: 0
+}
+
+.hbd-ico-sm {
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted);
+  align-self: center
+}
+.hbd-ico-sm svg {
+  width: 100%;
+  height: 100%;
+  display: block
+}
+
+/* Scostamento: colore dinamico via :has() — stesso schema ok/warn/bad del box sinistro */
+.sh-hero:has(#hm-scost.ok)   .hbd-scost-col .hbd-num,
+.sh-hero:has(#hm-scost.ok)   .hbd-scost-col .hbd-sub { color: var(--green-ink) }
+.sh-hero:has(#hm-scost.warn) .hbd-scost-col .hbd-num,
+.sh-hero:has(#hm-scost.warn) .hbd-scost-col .hbd-sub { color: var(--amber-ink) }
+.sh-hero:has(#hm-scost.bad)  .hbd-scost-col .hbd-num,
+.sh-hero:has(#hm-scost.bad)  .hbd-scost-col .hbd-sub { color: var(--red-ink) }
+
+/* Versamento negativo in ambra */
+#m-versamento[data-sign="neg"] { color: var(--amber-ink) }
 
 /* ============ Daily summary — formula variant ============ */
 

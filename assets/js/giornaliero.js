@@ -45,7 +45,7 @@ function updateActive(){
   el=document.getElementById('m-cassetto'); if(el) el.textContent=eur(r.cassetto);
   el=document.getElementById('m-monete');   if(el) el.textContent=eur(r.monete);
   el=document.getElementById('m-vers-reale'); if(el) el.textContent='€ '+eur(r.cont-r.fondo);
-  el=document.getElementById('m-versamento'); if(el) el.textContent='€ '+eur(r.vers_cassa);
+  el=document.getElementById('m-versamento'); if(el){el.textContent='€ '+eur(r.vers_cassa);el.dataset.sign=r.vers_cassa<0?'neg':'pos';}
 }
 function recalcAll(){
   var g={bancomat:0,versamento:0,ticket:0,incasso:0};
