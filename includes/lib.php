@@ -268,15 +268,28 @@ function avatar_style(string $name): string {
 }
 
 /* Sincronizza un contatto legato a un utente (utente_id).
-   Aggiorna nome/telefono/email/ruolo; non tocca le note manuali. */
+   Cerca prima per utente_id, poi per telefono/email — evita duplicati se il contatto
+   era già stato inserito manualmente con gli stessi recapiti. */
 function sync_contact_utente(PDO $pdo, int $uid, string $nome, string $telefono, string $email, string $ruolo): void {
     try {
         $st = $pdo->prepare('SELECT id FROM contatti WHERE utente_id=? LIMIT 1');
         $st->execute([$uid]);
-        $existing = $st->fetchColumn();
-        if ($existing) {
-            $pdo->prepare('UPDATE contatti SET nome=?,telefono=?,email=?,ruolo=? WHERE id=?')
-                ->execute([$nome, $telefono ?: null, $email ?: null, $ruolo, $existing]);
+        $id = $st->fetchColumn();
+
+        if (!$id) {
+            $conds = []; $params = [];
+            if ($telefono) { $conds[] = 'telefono=?'; $params[] = $telefono; }
+            if ($email)    { $conds[] = 'email=?';    $params[] = $email; }
+            if ($conds) {
+                $st2 = $pdo->prepare('SELECT id FROM contatti WHERE (' . implode(' OR ', $conds) . ') ORDER BY id LIMIT 1');
+                $st2->execute($params);
+                $id = $st2->fetchColumn();
+            }
+        }
+
+        if ($id) {
+            $pdo->prepare('UPDATE contatti SET nome=?,telefono=?,email=?,ruolo=?,utente_id=? WHERE id=?')
+                ->execute([$nome, $telefono ?: null, $email ?: null, $ruolo, $uid, $id]);
         } else {
             $max = (int)$pdo->query('SELECT COALESCE(MAX(ordine),0) FROM contatti')->fetchColumn();
             $pdo->prepare('INSERT INTO contatti (nome,ruolo,telefono,email,ordine,utente_id) VALUES (?,?,?,?,?,?)')
@@ -286,19 +299,34 @@ function sync_contact_utente(PDO $pdo, int $uid, string $nome, string $telefono,
 }
 
 /* Sincronizza il contatto di sistema della sala (sistema=1).
-   Aggiorna nome/telefono; salva il sito web nel campo note. */
-function sync_contact_sala(PDO $pdo, string $nome, string $telefono, string $sito): void {
+   Cerca prima per sistema=1, poi per telefono/email — evita duplicati.
+   Sull'update preserva il nome (potrebbe essere stato impostato manualmente o
+   dal sync utente); il sito web va nel campo note. */
+function sync_contact_sala(PDO $pdo, string $nome, string $telefono, string $email, string $sito): void {
     try {
         $note = $sito ? 'Sito: ' . $sito : null;
-        $st   = $pdo->query('SELECT id FROM contatti WHERE sistema=1 LIMIT 1');
-        $existing = $st->fetchColumn();
-        if ($existing) {
-            $pdo->prepare('UPDATE contatti SET nome=?,telefono=?,note=? WHERE id=?')
-                ->execute([$nome, $telefono ?: null, $note, $existing]);
+
+        $st = $pdo->query('SELECT id FROM contatti WHERE sistema=1 LIMIT 1');
+        $id = $st->fetchColumn();
+
+        if (!$id) {
+            $conds = []; $params = [];
+            if ($telefono) { $conds[] = 'telefono=?'; $params[] = $telefono; }
+            if ($email)    { $conds[] = 'email=?';    $params[] = $email; }
+            if ($conds) {
+                $st2 = $pdo->prepare('SELECT id FROM contatti WHERE (' . implode(' OR ', $conds) . ') ORDER BY id LIMIT 1');
+                $st2->execute($params);
+                $id = $st2->fetchColumn();
+            }
+        }
+
+        if ($id) {
+            $pdo->prepare('UPDATE contatti SET telefono=?,email=?,note=?,sistema=1 WHERE id=?')
+                ->execute([$telefono ?: null, $email ?: null, $note, $id]);
         } else {
             $max = (int)$pdo->query('SELECT COALESCE(MAX(ordine),0) FROM contatti')->fetchColumn();
-            $pdo->prepare('INSERT INTO contatti (nome,ruolo,telefono,note,ordine,sistema) VALUES (?,?,?,?,?,1)')
-                ->execute([$nome, 'Sala', $telefono ?: null, $note, $max + 1]);
+            $pdo->prepare('INSERT INTO contatti (nome,ruolo,telefono,email,note,ordine,sistema) VALUES (?,?,?,?,?,?,1)')
+                ->execute([$nome, 'Sala', $telefono ?: null, $email ?: null, $note, $max + 1]);
         }
     } catch (Throwable) {}
 }

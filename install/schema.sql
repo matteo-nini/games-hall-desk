@@ -279,6 +279,7 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('modulo_documenti',           '1'),
   ('mail_from',                  ''),
   ('tel_sala',                   ''),
+  ('email_sala',                 ''),
   ('sito_web',                   '');
 
 -- ---------- Settimana Extra (verifica VLT) ----------

@@ -165,14 +165,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     }
 
     if ($az === 'sala_contatti') {
-        $tel  = mb_substr(trim($_POST['tel_sala']  ?? ''), 0, 30);
-        $sito = mb_substr(trim($_POST['sito_web']  ?? ''), 0, 255);
-        $save = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
-        $save->execute(['tel_sala',  $tel]);
-        $save->execute(['sito_web',  $sito]);
+        $tel   = mb_substr(trim($_POST['tel_sala']   ?? ''), 0, 30);
+        $email = mb_substr(trim($_POST['email_sala'] ?? ''), 0, 255);
+        $sito  = mb_substr(trim($_POST['sito_web']   ?? ''), 0, 255);
+        $save  = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $save->execute(['tel_sala',   $tel]);
+        $save->execute(['email_sala', $email]);
+        $save->execute(['sito_web',   $sito]);
         audit('impostazioni_sala_contatti', null, null, null);
         try { $pdo->exec('ALTER TABLE contatti ADD COLUMN sistema TINYINT(1) NOT NULL DEFAULT 0'); } catch (Throwable) {}
-        sync_contact_sala($pdo, $cfg['nome_sala'] ?? 'Sala', $tel, $sito);
+        try { $pdo->exec('ALTER TABLE contatti ADD COLUMN email VARCHAR(255) DEFAULT NULL'); } catch (Throwable) {}
+        sync_contact_sala($pdo, $cfg['nome_sala'] ?? 'Sala', $tel, $email, $sito);
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -345,7 +348,7 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
         <div class="imp-srow">
           <div class="imp-srow-meta">
             <h3 class="imp-srow-title">Contatti sala</h3>
-            <p class="imp-srow-desc">Telefono e sito web della sala — aggiunti automaticamente alla rubrica Contatti.</p>
+            <p class="imp-srow-desc">Recapiti della sala — sincronizzati automaticamente nella rubrica Contatti.</p>
           </div>
           <div class="imp-srow-ctrl">
             <form method="post">
@@ -355,6 +358,11 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
                 <label for="imp-tel">Telefono sala</label>
                 <input id="imp-tel" type="tel" name="tel_sala" maxlength="30"
                        value="<?= $h($sett['tel_sala'] ?? '') ?>" placeholder="Es. 06 1234 5678">
+              </div>
+              <div class="imp-field" style="margin-top:8px">
+                <label for="imp-email-sala">Email sala</label>
+                <input id="imp-email-sala" type="email" name="email_sala" maxlength="255"
+                       value="<?= $h($sett['email_sala'] ?? '') ?>" placeholder="info@...">
               </div>
               <div class="imp-field" style="margin-top:8px">
                 <label for="imp-sito">Sito web</label>
