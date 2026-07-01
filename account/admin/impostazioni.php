@@ -164,6 +164,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
+    if ($az === 'sala_contatti') {
+        $tel  = mb_substr(trim($_POST['tel_sala']  ?? ''), 0, 30);
+        $sito = mb_substr(trim($_POST['sito_web']  ?? ''), 0, 255);
+        $save = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
+        $save->execute(['tel_sala',  $tel]);
+        $save->execute(['sito_web',  $sito]);
+        audit('impostazioni_sala_contatti', null, null, null);
+        try { $pdo->exec('ALTER TABLE contatti ADD COLUMN sistema TINYINT(1) NOT NULL DEFAULT 0'); } catch (Throwable) {}
+        sync_contact_sala($pdo, $cfg['nome_sala'] ?? 'Sala', $tel, $sito);
+        header('Location: impostazioni.php?ok=1'); exit;
+    }
+
     if ($az === 'retention') {
         $rd = max(7, min(3650, (int)($_POST['retention_giorni'] ?? 90)));
         $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
@@ -325,6 +337,32 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
               </div>
               <div class="imp-form-footer">
                 <button type="submit">Carica</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="imp-srow">
+          <div class="imp-srow-meta">
+            <h3 class="imp-srow-title">Contatti sala</h3>
+            <p class="imp-srow-desc">Telefono e sito web della sala — aggiunti automaticamente alla rubrica Contatti.</p>
+          </div>
+          <div class="imp-srow-ctrl">
+            <form method="post">
+              <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+              <input type="hidden" name="azione" value="sala_contatti">
+              <div class="imp-field">
+                <label for="imp-tel">Telefono sala</label>
+                <input id="imp-tel" type="tel" name="tel_sala" maxlength="30"
+                       value="<?= $h($sett['tel_sala'] ?? '') ?>" placeholder="Es. 06 1234 5678">
+              </div>
+              <div class="imp-field" style="margin-top:8px">
+                <label for="imp-sito">Sito web</label>
+                <input id="imp-sito" type="url" name="sito_web" maxlength="255"
+                       value="<?= $h($sett['sito_web'] ?? '') ?>" placeholder="https://...">
+              </div>
+              <div class="imp-form-footer">
+                <button type="submit">Salva</button>
               </div>
             </form>
           </div>

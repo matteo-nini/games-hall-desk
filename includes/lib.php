@@ -266,3 +266,39 @@ function avatar_style(string $name): string {
     $h2 = ($h1 + 40) % 360;
     return "background:linear-gradient(135deg,hsl({$h1},62%,46%),hsl({$h2},56%,36%))";
 }
+
+/* Sincronizza un contatto legato a un utente (utente_id).
+   Aggiorna nome/telefono/email/ruolo; non tocca le note manuali. */
+function sync_contact_utente(PDO $pdo, int $uid, string $nome, string $telefono, string $email, string $ruolo): void {
+    try {
+        $st = $pdo->prepare('SELECT id FROM contatti WHERE utente_id=? LIMIT 1');
+        $st->execute([$uid]);
+        $existing = $st->fetchColumn();
+        if ($existing) {
+            $pdo->prepare('UPDATE contatti SET nome=?,telefono=?,email=?,ruolo=? WHERE id=?')
+                ->execute([$nome, $telefono ?: null, $email ?: null, $ruolo, $existing]);
+        } else {
+            $max = (int)$pdo->query('SELECT COALESCE(MAX(ordine),0) FROM contatti')->fetchColumn();
+            $pdo->prepare('INSERT INTO contatti (nome,ruolo,telefono,email,ordine,utente_id) VALUES (?,?,?,?,?,?)')
+                ->execute([$nome, $ruolo, $telefono ?: null, $email ?: null, $max + 1, $uid]);
+        }
+    } catch (Throwable) {}
+}
+
+/* Sincronizza il contatto di sistema della sala (sistema=1).
+   Aggiorna nome/telefono; salva il sito web nel campo note. */
+function sync_contact_sala(PDO $pdo, string $nome, string $telefono, string $sito): void {
+    try {
+        $note = $sito ? 'Sito: ' . $sito : null;
+        $st   = $pdo->query('SELECT id FROM contatti WHERE sistema=1 LIMIT 1');
+        $existing = $st->fetchColumn();
+        if ($existing) {
+            $pdo->prepare('UPDATE contatti SET nome=?,telefono=?,note=? WHERE id=?')
+                ->execute([$nome, $telefono ?: null, $note, $existing]);
+        } else {
+            $max = (int)$pdo->query('SELECT COALESCE(MAX(ordine),0) FROM contatti')->fetchColumn();
+            $pdo->prepare('INSERT INTO contatti (nome,ruolo,telefono,note,ordine,sistema) VALUES (?,?,?,?,?,1)')
+                ->execute([$nome, 'Sala', $telefono ?: null, $note, $max + 1]);
+        }
+    } catch (Throwable) {}
+}

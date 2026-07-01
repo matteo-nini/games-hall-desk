@@ -6,6 +6,11 @@ $pdo  = db();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $uid  = (int)$user['id'];
 
+/* Auto-migrazione colonne */
+try { $pdo->exec('ALTER TABLE utenti ADD COLUMN telefono VARCHAR(30) DEFAULT NULL'); } catch (Throwable) {}
+try { $pdo->exec('ALTER TABLE contatti ADD COLUMN utente_id INT DEFAULT NULL'); } catch (Throwable) {}
+try { $pdo->exec('ALTER TABLE contatti ADD COLUMN sistema TINYINT(1) NOT NULL DEFAULT 0'); } catch (Throwable) {}
+
 $ok  = '';
 $err = '';
 
@@ -23,8 +28,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         else {
             $pdo->prepare('UPDATE utenti SET nome=? WHERE id=?')->execute([$nome, $uid]);
             audit('profilo_nome', 'utenti', $uid, "nuovo=$nome");
+            $me2 = $pdo->prepare('SELECT * FROM utenti WHERE id=?'); $me2->execute([$uid]); $me2 = $me2->fetch();
+            sync_contact_utente($pdo, $uid, $nome, $me2['telefono'] ?? '', $me2['email'] ?? '', $me2['ruolo'] ?? '');
             header('Location: profilo.php?ok=nome'); exit;
         }
+    }
+
+    /* Salva numero di telefono */
+    if ($az === 'telefono') {
+        $tel = mb_substr(trim($_POST['telefono'] ?? ''), 0, 30);
+        $pdo->prepare('UPDATE utenti SET telefono=? WHERE id=?')->execute([$tel ?: null, $uid]);
+        audit('profilo_telefono', 'utenti', $uid, $tel ?: '(rimosso)');
+        $me2 = $pdo->prepare('SELECT * FROM utenti WHERE id=?'); $me2->execute([$uid]); $me2 = $me2->fetch();
+        sync_contact_utente($pdo, $uid, $me2['nome'] ?: $me2['username'], $tel, $me2['email'] ?? '', $me2['ruolo'] ?? '');
+        header('Location: profilo.php?ok=tel'); exit;
     }
 
     /* Cambio password */
@@ -106,6 +123,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
     'nome' => 'Nome aggiornato.',
     'pwd'  => 'Password cambiata.',
     'foto' => 'Foto profilo aggiornata.',
+    'tel'  => 'Telefono aggiornato.',
     default => ''
 };
 
@@ -181,6 +199,22 @@ $avatarStyle = avatar_style($rawName);
           <input type="text" value="<?= $h($me['username']) ?>" disabled style="width:220px;opacity:.5">
         </div>
         <button type="submit" style="margin-top:10px">Salva nome</button>
+      </form>
+    </section>
+
+    <!-- ===== Recapiti ===== -->
+    <section class="profilo-card">
+      <h2 class="profilo-card-title">Recapiti</h2>
+      <form method="post">
+        <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="telefono">
+        <div class="field">
+          <label for="ptel">Numero di telefono</label>
+          <input id="ptel" type="tel" name="telefono" value="<?= $h($me['telefono'] ?? '') ?>"
+                 placeholder="+39 333 000 0000" maxlength="30" style="width:220px">
+        </div>
+        <p class="profilo-hint">Viene salvato automaticamente nella rubrica Contatti della sala.</p>
+        <button type="submit" style="margin-top:10px">Salva telefono</button>
       </form>
     </section>
 
