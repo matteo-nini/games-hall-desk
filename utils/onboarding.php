@@ -27,6 +27,15 @@ $navRes = [
   'Documenti',
   'Audit log',
 ];
+
+$navChiusura = [
+  'Contanti & ticket',
+  'Scassettamenti',
+  'SPIELO — POS',
+  'NOVO — POS',
+  'INSPIRED — POS',
+  'Raccolta rapporti',
+];
 ?>
 <!doctype html><html lang="it"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -61,6 +70,7 @@ $navRes = [
       <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="rev">Revisore</button>
       <?php else: ?>
       <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="op">Operatori</button>
+      <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="chiusura">Chiusura sala</button>
       <?php if ($role === 'responsabile'): ?>
       <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="res">Responsabile</button>
       <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="rev">Revisore</button>
@@ -185,6 +195,107 @@ $navRes = [
             <li>Inserisci i valori quando ricevi il bollettino settimanale dal concessionario.</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('cassa/settimanale.php') ?>">Vai al settimanale →</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab chiusura sala -->
+  <div class="ob-panel" id="ob-panel-chiusura">
+    <div class="ob-panes">
+
+      <nav class="ob-step-nav" aria-label="Passi chiusura">
+        <?php foreach ($navChiusura as $i => $lbl): ?>
+        <button type="button" class="ob-snav-item<?= $i === 0 ? ' active' : '' ?>" data-step="<?= $i ?>">
+          <span class="ob-snav-num"><?= $i + 1 ?></span>
+          <span class="ob-snav-lbl"><?= $h($lbl) ?></span>
+        </button>
+        <?php endforeach; ?>
+      </nav>
+
+      <div class="ob-pane-area">
+
+        <div class="ob-pane active" data-pane="0">
+          <h3 class="ob-pane-head">Contanti e ticket pagati</h3>
+          <p>Prima di scassettare, conta il cassetto e inserisci i dati nel giornaliero.</p>
+          <ul class="ob-ul">
+            <li><strong>Conta le banconote</strong> per taglio (200€, 100€, 50€, 20€, 10€, 5€) e inseriscile nella griglia contanti del turno sera.</li>
+            <li><strong>Conta le monete</strong> e inserisci il totale nel campo Monete.</li>
+            <li><strong>Ticket di vincita pagati</strong>: per ogni fornitore (NOVO, INSPIRED, SPIELO) inserisci il totale dei ticket pagati durante il turno.</li>
+            <li>Salva il turno e controlla il banner in alto: deve essere <strong>verde</strong> (scostamento &lt; 4 €). Se è rosso, riverifica contanti e ticket prima di procedere.</li>
+          </ul>
+          <div class="ob-tip">Conta sempre le banconote due volte prima di inserirle. Un errore qui si propagherà ai controlli successivi.</div>
+        </div>
+
+        <div class="ob-pane" data-pane="1">
+          <h3 class="ob-pane-head">Scassettamenti</h3>
+          <p>Svuota le cassette di tutte le macchine <strong>VLT</strong> e registra ogni importo nel giornaliero.</p>
+          <ul class="ob-ul">
+            <li>Apri la cassetta di ogni macchina VLT e preleva le banconote.</li>
+            <li>Conta le banconote di ogni macchina <strong>separatamente</strong> e annota l'importo.</li>
+            <li>Nel giornaliero, sezione <em>Scassettamenti VLT</em>, inserisci l'importo per ogni macchina. Lascia a zero le macchine non scassettate.</li>
+            <li>Il versamento VLT viene aggiornato automaticamente.</li>
+          </ul>
+          <div class="ob-tip">Tieni le banconote di ogni macchina separate finché non hai inserito tutti i dati. In caso di dubbio puoi ricountare senza mescolare.</div>
+          <a class="ob-panel-link" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero →</a>
+        </div>
+
+        <div class="ob-pane" data-pane="2">
+          <h3 class="ob-pane-head">SPIELO — Rapporto raccolta</h3>
+          <p>Dopo aver inserito gli scassettamenti nel giornaliero, genera il rapporto dal POS SPIELO.</p>
+          <ol class="ob-ul">
+            <li>Sul POS SPIELO: clicca su <strong>«Rapporti»</strong>.</li>
+            <li>Clicca su <strong>«Raccolta»</strong>.</li>
+            <li>Clicca sull'<strong>icona stampa</strong> per stampare il rapporto.</li>
+            <li>Controlla che i valori stampati corrispondano a quanto inserito nel giornaliero. Se ci sono differenze, segnalale con una foto prima di procedere.</li>
+          </ol>
+          <div class="ob-tip">Conserva il rapporto stampato: va allegato insieme agli altri ticket a fine turno.</div>
+        </div>
+
+        <div class="ob-pane" data-pane="3">
+          <h3 class="ob-pane-head">NOVO — POS e riconciliazione</h3>
+          <p>La procedura NOVO si divide in tre fasi: raccolta, dump e riconciliazione.</p>
+          <ol class="ob-ul">
+            <li><strong>Login POS</strong>: accedi come utente <em>Vault</em>.</li>
+            <li>Tab <strong>«Scassettamento»</strong>: clicca su <strong>«Banconote»</strong>, poi su <strong>«Monete»</strong>.</li>
+            <li><strong>Controlla le macchine</strong>: se su una macchina compare la schermata <em>«DUMP REQUIRED»</em>, esegui il dump:
+              <ul class="ob-ul" style="margin-top:6px">
+                <li>Sulla macchina: <strong>Giocatore → Cash dump → Stampa</strong>.</li>
+                <li>La macchina stampa il <strong>ticket di chiusura</strong> — conservalo.</li>
+              </ul>
+            </li>
+            <li>Torna al POS, sottotab <strong>«Scassettamento»</strong>: verifica che i valori di ogni ticket corrispondano a quelli della macchina e del giornaliero. Se tutto torna, clicca <strong>«Conferma»</strong> per ogni macchina. Se non tornano, scatta una foto e segnala.</li>
+            <li>Tab <strong>«Turno»</strong> → sottotab <strong>«Riconciliazione»</strong>: clicca <strong>«Riconcilia tutto»</strong> e attendi la generazione del report.</li>
+            <li>Clicca sull'icona <strong>«Salva» → PDF</strong> e salva il file con il nome <strong>DDMM</strong> nella cartella del mese corrispondente (es. <code>3006</code> per il 30 giugno, <code>0107</code> per il 1° luglio).</li>
+          </ol>
+          <div class="ob-tip">Il file PDF va salvato subito: il POS NOVO non conserva i report precedenti.</div>
+        </div>
+
+        <div class="ob-pane" data-pane="4">
+          <h3 class="ob-pane-head">INSPIRED — Raccolta incassi</h3>
+          <p>Per INSPIRED la raccolta avviene sia sulle singole macchine che sul POS.</p>
+          <ol class="ob-ul">
+            <li><strong>Su ogni macchina INSPIRED</strong>: accedi con le credenziali → <strong>Raccolta incassi → Stampa rapporto</strong>.</li>
+            <li>Controlla che i valori stampati da ogni macchina corrispondano a quanto inserito nel giornaliero. Se non tornano, segnala con una foto.</li>
+            <li><strong>Sul POS INSPIRED</strong>: clicca su <strong>«Manutenzione»</strong> → <strong>Login</strong> → <strong>Raccolta incassi</strong>.</li>
+            <li>Stampa il rapporto riepilogativo dal POS.</li>
+          </ol>
+          <div class="ob-tip">Esegui prima tutte le macchine e poi il POS: il POS aggrega i dati già caricati dalle singole macchine.</div>
+        </div>
+
+        <div class="ob-pane" data-pane="5">
+          <h3 class="ob-pane-head">Raccolta rapporti</h3>
+          <p>A fine turno raccogli tutta la documentazione cartacea e mettila al suo posto.</p>
+          <ul class="ob-ul">
+            <li>Rapporto raccolta <strong>SPIELO</strong> (stampato dal POS).</li>
+            <li>Ticket di chiusura <strong>NOVO</strong> (uno per ogni macchina dove era richiesto il dump).</li>
+            <li>Rapporti <strong>INSPIRED</strong> (uno per macchina + il riepilogo dal POS).</li>
+            <li><strong>Ticket di vincita</strong> pagati durante il turno.</li>
+          </ul>
+          <p style="margin-top:10px">Metti tutti i documenti insieme e riponili nella <strong>cartella del giorno</strong> nella posizione stabilita dalla sala.</p>
+          <div class="ob-tip">Prima di lasciare, chiudi la giornata nel sistema se sei l'ultimo turno: Giornaliero → «Chiudi giornata».</div>
+          <a class="ob-panel-link" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero →</a>
         </div>
 
       </div>
