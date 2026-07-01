@@ -194,7 +194,7 @@ $okMsg = '';
           <th data-sort="text">Ruolo</th>
           <th data-sort="text">Telefono</th>
           <th class="ul-td-email" data-sort="text">Email</th>
-          <th>Note</th>
+          <th class="ul-col-hide-mob">Note</th>
           <?php if (!$isRo): ?>
           <th class="ul-th-menu" aria-hidden="true"></th>
           <?php endif; ?>
@@ -235,7 +235,7 @@ $okMsg = '';
             <?php endif; ?>
           </td>
 
-          <td>
+          <td class="ul-col-hide-mob">
             <?= $c['note'] ? $h(mb_substr($c['note'], 0, 60)) . (mb_strlen($c['note']) > 60 ? '…' : '') : '<span class="ul-muted">—</span>' ?>
           </td>
 

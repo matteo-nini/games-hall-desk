@@ -1228,56 +1228,6 @@ textarea.note:focus {
   box-shadow: var(--sh)
 }
 
-.hb-main {
-  display: flex;
-  align-items: center;
-  gap: 10px
-}
-
-.hb-formula {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  margin-top: 5px;
-  padding-top: 5px;
-  border-top: 1px solid rgba(0, 0, 0, .08)
-}
-
-.hb-scost.ok .hb-formula {
-  color: var(--green-ink)
-}
-
-.hb-scost.warn .hb-formula {
-  color: var(--amber-ink)
-}
-
-.hb-scost.bad .hb-formula {
-  color: var(--red-ink)
-}
-
-.hbf-val {
-  font-size: 13px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap
-}
-
-.hbf-eq {
-  font-size: 13px;
-  font-weight: 700;
-  padding: 0 1px
-}
-
-.hbf-lbl {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-left: auto;
-  white-space: nowrap;
-  padding-left: 6px
-}
-
 .hb-ico {
   width: 26px;
   height: 26px;
@@ -1324,76 +1274,6 @@ textarea.note:focus {
 
 .hb-scost.bad .hb-msg {
   color: var(--red-ink)
-}
-
-.hb-num-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  flex-shrink: 0
-}
-
-.hb-num {
-  font-size: 20px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  color: var(--text)
-}
-
-.hb-scost.ok .hb-num {
-  color: var(--green-ink)
-}
-
-.hb-scost.warn .hb-num {
-  color: var(--amber-ink)
-}
-
-.hb-scost.bad .hb-num {
-  color: var(--red-ink)
-}
-
-.hb-lbl {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  font-weight: 700;
-  color: var(--text);
-  margin-top: 3px;
-  white-space: nowrap
-}
-
-/* Versamento box */
-.hb-versamento {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  margin: 6px 14px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0
-}
-
-.hb-versamento .hb-ico {
-  color: var(--accent)
-}
-
-.hb-versamento .hb-num {
-  color: var(--text)
-}
-
-.hb-num-wrap--left {
-  align-items: flex-start;
-  text-align: left
-}
-
-.hb-sub {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-  margin-top: 3px
 }
 
 /* ============ Data panel (destra): scostamento + versamento ============ */

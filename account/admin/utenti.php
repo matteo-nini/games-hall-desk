@@ -316,7 +316,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
           <th class="ul-th-ava" aria-hidden="true"></th>
           <th data-sort="text">Utente</th>
           <th class="ul-td-email" data-sort="text">Email</th>
-          <th data-sort="text">Ruolo</th>
+          <th class="ul-col-hide-mob" data-sort="text">Ruolo</th>
           <th data-sort="text">Stato</th>
           <th class="ul-th-menu" aria-hidden="true"></th>
         </tr>
@@ -360,7 +360,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
             <?php endif; ?>
           </td>
 
-          <td>
+          <td class="ul-col-hide-mob">
             <span class="ul-badge ul-role-<?= $isResp ? 'resp' : ($isRev ? 'rev' : 'op') ?>">
               <?= $isResp ? 'Responsabile' : ($isRev ? 'Revisore' : 'Operatore') ?>
             </span>

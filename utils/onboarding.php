@@ -60,6 +60,7 @@ $navRes = [
     <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="op">Operatori</button>
     <?php if ($role === 'responsabile'): ?>
     <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="res">Responsabile</button>
+    <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="rev">Revisore</button>
     <?php endif; ?>
     <?php endif; ?>
   </div>

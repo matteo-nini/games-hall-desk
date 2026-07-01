@@ -45,7 +45,8 @@
   border: 1px solid var(--border);
   border-radius: var(--r);
   box-shadow: var(--sh);
-  overflow: hidden
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch
 }
 
 .ul-table {
@@ -398,11 +399,15 @@
     grid-template-columns: 1fr
   }
 
-  .ul-table thead th:nth-child(3),
-  .ul-table tbody td:nth-child(3),
-  .ul-table thead th:nth-child(4),
-  .ul-table tbody td:nth-child(4),
+  /* ul-td-email: compatibilità backward + ul-col-hide-mob: classe generica */
+  .ul-col-hide-mob,
   .ul-td-email {
+    display: none
+  }
+}
+
+@media (max-width: 560px) {
+  .ul-col-hide-sm {
     display: none
   }
 }
