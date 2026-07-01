@@ -77,6 +77,10 @@ $okMsg = '';
       <span class="ul-chip"><?= $total ?> <?= $total === 1 ? 'contatto' : 'contatti' ?></span>
     </div>
   </div>
+  <label class="topbar-search-wrap">
+    <svg class="topbar-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" class="topbar-search" id="tbl-search" placeholder="Cerca…" aria-label="Cerca contatti">
+  </label>
   <?php if (!$isRo): ?>
   <button type="button" class="topbar-action-btn" onclick="document.getElementById('dlg-cont-add').showModal()">
     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>
@@ -332,6 +336,17 @@ $okMsg = '';
   document.querySelectorAll('.form-dialog').forEach(function (dlg) {
     dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   });
+
+  /* ---- Ricerca live ---- */
+  var srch = document.getElementById('tbl-search');
+  if (srch) {
+    srch.addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      document.querySelectorAll('.ul-table tbody .ul-row').forEach(function (row) {
+        row.style.display = !q || row.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  }
 
   /* ---- Sort colonne ---- */
   var tbl = document.querySelector('.ul-table');

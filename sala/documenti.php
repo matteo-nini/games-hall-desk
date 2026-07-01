@@ -187,6 +187,12 @@ $totalDocs = count($docs);
     <span class="topbar-sub"><?= $totalDocs ?> <?= $totalDocs === 1 ? 'documento' : 'documenti' ?></span>
     <?php endif; ?>
   </div>
+  <?php if ($tableOk && $totalDocs): ?>
+  <label class="topbar-search-wrap">
+    <svg class="topbar-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" class="topbar-search" id="doc-search" placeholder="Cerca…" aria-label="Cerca documenti">
+  </label>
+  <?php endif; ?>
   <?php if ($canEdit && $tableOk): ?>
   <div class="topbar-actions">
     <?php if ($foldersOk): ?>
@@ -488,6 +494,42 @@ endif;
 <script>var GP_CSRF='<?= addslashes(csrf_token()) ?>';</script>
 <script>
 (function () {
+  // ---- Ricerca live ----
+  var docSrch = document.getElementById('doc-search');
+  if (docSrch) {
+    docSrch.addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      document.querySelectorAll('.doc-folder-section').forEach(function (section) {
+        var items = section.querySelectorAll('.doc-item');
+        var visible = 0;
+        items.forEach(function (item) {
+          var text = item.querySelector('.doc-name, .doc-desc, .doc-meta') ?
+            ['.doc-name', '.doc-desc', '.doc-meta'].map(function (s) {
+              var el = item.querySelector(s); return el ? el.textContent : '';
+            }).join(' ').toLowerCase() : item.textContent.toLowerCase();
+          var show = !q || text.includes(q);
+          item.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        var emptyEl = section.querySelector('.doc-folder-empty');
+        if (emptyEl) emptyEl.style.display = (q && visible === 0 && items.length > 0) ? '' : (items.length === 0 ? '' : 'none');
+        var body = section.querySelector('.doc-folder-body');
+        if (body && q && visible === 0 && !emptyEl) {
+          if (!body.querySelector('.doc-search-empty')) {
+            var msg = document.createElement('div');
+            msg.className = 'doc-folder-empty doc-search-empty';
+            msg.textContent = 'Nessun risultato';
+            body.appendChild(msg);
+          }
+          body.querySelector('.doc-search-empty').style.display = '';
+        } else if (body) {
+          var se = body.querySelector('.doc-search-empty');
+          if (se) se.style.display = 'none';
+        }
+      });
+    });
+  }
+
   // ---- Print ----
   document.querySelectorAll('.doc-btn-stampa').forEach(function (btn) {
     btn.addEventListener('click', function () {

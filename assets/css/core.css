@@ -1398,6 +1398,52 @@ body {
    Topbar action button
    ============================================================ */
 
+.topbar-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 1
+}
+
+.topbar-search-ico {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted);
+  width: 14px;
+  height: 14px
+}
+
+.topbar-search {
+  width: 200px;
+  padding: 6px 10px 6px 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--rpill);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .12s, width .2s
+}
+
+.topbar-search:focus {
+  border-color: var(--accent);
+  width: 240px
+}
+
+.topbar-search::placeholder { color: var(--muted) }
+
+.topbar-search::-webkit-search-cancel-button { cursor: pointer }
+
+@media (max-width: 640px) {
+  .topbar-search { width: 130px }
+  .topbar-search:focus { width: 160px }
+}
+
 .topbar-actions {
   display: flex;
   gap: 8px;

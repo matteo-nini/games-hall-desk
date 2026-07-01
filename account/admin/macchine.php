@@ -137,7 +137,7 @@ $okMsg = match ($_GET['ok'] ?? '') {
   <div class="mach-header-left">
     <strong>Macchine</strong>
     <?php if (count($vlt) || count($awp)): ?>
-    <div class="mach-chips" id="mach-kpi-chips">
+    <div class="mach-chips" id="mach-kpi-chips" style="margin-right:auto">
       <?php if (count($vlt)): ?>
       <span class="mach-chip"><span class="mach-type-sm mach-type-vlt">VLT</span><?= $nVlt ?> attive</span>
       <?php endif; ?>
@@ -147,6 +147,10 @@ $okMsg = match ($_GET['ok'] ?? '') {
     </div>
     <?php endif; ?>
   </div>
+  <label class="topbar-search-wrap" id="mach-search-wrap">
+    <svg class="topbar-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" class="topbar-search" id="mach-search" placeholder="Cerca…" aria-label="Cerca">
+  </label>
 </header>
 
 <nav class="mach-tab-bar" role="tablist" aria-label="Sezioni">
@@ -419,11 +423,53 @@ $okMsg = match ($_GET['ok'] ?? '') {
   }
 
   tabs.forEach(function (t) {
-    t.addEventListener('click', function () { activateTab(t.dataset.tab); });
+    t.addEventListener('click', function () {
+      activateTab(t.dataset.tab);
+      var inp = document.getElementById('mach-search');
+      if (inp) { inp.value = ''; runSearch(''); }
+    });
   });
 
   var hash = (location.hash || '').replace('#', '');
   activateTab(['macchine', 'fornitori'].includes(hash) ? hash : 'macchine');
+
+  /* ---- Ricerca live (per tab) ---- */
+  function runSearch(q) {
+    var activeTab = (document.querySelector('.mach-tab.active') || {}).dataset;
+    var tab = activeTab ? activeTab.tab : 'macchine';
+
+    if (tab === 'macchine') {
+      var groups = document.querySelectorAll('#tab-macchine .mach-group-row');
+      document.querySelectorAll('#tab-macchine .mach-row').forEach(function (row) {
+        var text = Array.from(row.querySelectorAll('input[name], select')).map(function (el) {
+          return el.value;
+        }).join(' ').toLowerCase();
+        var show = !q || text.includes(q);
+        row.style.display = show ? '' : 'none';
+        var next = row.nextElementSibling;
+        if (next && next.classList.contains('mach-history')) next.style.display = show ? '' : 'none';
+      });
+      groups.forEach(function (g) {
+        var sib = g.nextElementSibling;
+        var anyVis = false;
+        while (sib && !sib.classList.contains('mach-group-row')) {
+          if (sib.classList.contains('mach-row') && sib.style.display !== 'none') { anyVis = true; break; }
+          sib = sib.nextElementSibling;
+        }
+        g.style.display = anyVis ? '' : 'none';
+      });
+    } else {
+      document.querySelectorAll('#forn-list .forn-row').forEach(function (row) {
+        var text = (row.querySelector('input[name="nome"]') || {}).value || '';
+        row.style.display = !q || text.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+  }
+
+  var machSrch = document.getElementById('mach-search');
+  if (machSrch) {
+    machSrch.addEventListener('input', function () { runSearch(this.value.trim().toLowerCase()); });
+  }
 
   /* ---- Drag-to-reorder fornitori ---- */
   var list = document.getElementById('forn-list');
