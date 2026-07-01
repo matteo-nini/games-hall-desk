@@ -35,12 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('INSERT INTO password_reset (utente_id, token, scade_il) VALUES (?,?,?)')
                 ->execute([$u['id'], $token, $scade]);
 
-            $resetUrl  = base_url('account/reset_confirm.php') . '?token=' . urlencode($token);
+            $scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $resetUrl  = $scheme . '://' . $host . base_url('account/reset_confirm.php') . '?token=' . urlencode($token);
             $nomeSala  = $cfg['nome_sala'] ?? 'Cassa Sala';
             $from      = $sett['mail_from'] ?? '';
             $accent    = ($sett['brand_accent'] ?? '') ?: '#111827';
             $logoPath  = $sett['logo_path'] ?? null;
-            $logoUrl   = $logoPath ? base_url('account/uploads/sala/' . rawurlencode($logoPath)) : null;
+            $logoUrl   = $logoPath ? ($scheme . '://' . $host . base_url('account/uploads/sala/' . rawurlencode($logoPath))) : null;
             $hE        = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
             $subject = "Reset password \xe2\x80\x94 $nomeSala";
