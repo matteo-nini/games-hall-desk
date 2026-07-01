@@ -96,6 +96,24 @@ if (is_responsabile()):
         GROUP BY g.id, g.data, g.stato ORDER BY g.data DESC LIMIT 10
     ')->fetchAll();
 
+    $versAmmda = $pdo->query('
+        SELECT g.id, g.data,
+               COALESCE((SELECT SUM(s.importo) FROM scassettamenti s JOIN turni t ON t.id=s.turno_id WHERE t.giornata_id=g.id),0)
+               - COALESCE((SELECT SUM(t2.bancomat) FROM turni t2 WHERE t2.giornata_id=g.id),0)
+               - COALESCE((SELECT SUM(tk.importo) FROM ticket tk JOIN turni t3 ON t3.id=tk.turno_id WHERE t3.giornata_id=g.id),0)
+               AS versamento
+        FROM giornate g LEFT JOIN versamenti_confermati vc ON vc.giornata_id=g.id
+        WHERE g.stato="chiusa" AND vc.id IS NULL ORDER BY g.data DESC LIMIT 30
+    ')->fetchAll();
+
+    $versConf = $pdo->query('
+        SELECT g.data, vc.importo_dichiarato, vc.confermato_il,
+               COALESCE(NULLIF(u.nome,""),u.username) AS nome_conf
+        FROM versamenti_confermati vc
+        JOIN giornate g ON g.id=vc.giornata_id JOIN utenti u ON u.id=vc.confermato_da
+        ORDER BY g.data DESC LIMIT 30
+    ')->fetchAll();
+
     $st = $pdo->prepare('
         SELECT g.data, COALESCE(SUM(s.importo),0) AS inc
         FROM giornate g LEFT JOIN turni t ON t.giornata_id=g.id LEFT JOIN scassettamenti s ON s.turno_id=t.id
@@ -311,6 +329,41 @@ if (is_responsabile()):
     </div>
   </section>
   <?php endif; ?>
+
+  <section class="dash-card" style="margin-top:14px">
+    <h2 class="dash-card-title">
+      Versamenti
+      <?php if ($versAmmda): ?><span class="badge open" style="font-size:11px;margin-left:6px;vertical-align:middle"><?= count($versAmmda) ?> da ritirare</span><?php endif; ?>
+    </h2>
+    <?php if ($versAmmda): ?>
+    <p class="dash-card-sub" style="margin:0 0 8px;font-size:12px;color:var(--red)">Giornate chiuse in attesa di conferma ritiro</p>
+    <div class="recent-list" style="margin-bottom:16px">
+      <?php foreach ($versAmmda as $vr): ?>
+      <a class="recent-row" href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($vr['data']) ?>">
+        <span class="recent-date"><?= $h(date('d/m/Y', strtotime($vr['data']))) ?></span>
+        <span class="badge open">Da ritirare</span>
+        <span class="tp-earn tp-earn-preview" style="color:var(--red)"><?= eur(arrotonda_versamento((float)$vr['versamento'])) ?></span>
+        <span class="recent-caret">›</span>
+      </a>
+      <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <p class="ticket-empty" style="color:var(--green)">Nessun versamento in sospeso.</p>
+    <?php endif; ?>
+    <?php if ($versConf): ?>
+    <p class="dash-card-sub" style="margin:0 0 8px;font-size:12px;color:var(--muted)">Versamenti recenti confermati</p>
+    <div class="recent-list">
+      <?php foreach ($versConf as $vc): ?>
+      <a class="recent-row" href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($vc['data']) ?>">
+        <span class="recent-date"><?= $h(date('d/m/Y', strtotime($vc['data']))) ?></span>
+        <span class="badge closed">Ritirato</span>
+        <span class="tp-earn tp-earn-preview"><?= eur((float)$vc['importo_dichiarato']) ?></span>
+        <span class="recent-caret">›</span>
+      </a>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+  </section>
 </div>
 
 <script>
@@ -636,6 +689,24 @@ else:
             $clsPerf  = $scostMed < 4 ? 'ok' : ($scostMed <= 5 ? 'warn' : 'bad');
         }
     } catch (PDOException) {}
+
+    $versAmmdaOp = $pdo->query('
+        SELECT g.id, g.data,
+               COALESCE((SELECT SUM(s.importo) FROM scassettamenti s JOIN turni t ON t.id=s.turno_id WHERE t.giornata_id=g.id),0)
+               - COALESCE((SELECT SUM(t2.bancomat) FROM turni t2 WHERE t2.giornata_id=g.id),0)
+               - COALESCE((SELECT SUM(tk.importo) FROM ticket tk JOIN turni t3 ON t3.id=tk.turno_id WHERE t3.giornata_id=g.id),0)
+               AS versamento
+        FROM giornate g LEFT JOIN versamenti_confermati vc ON vc.giornata_id=g.id
+        WHERE g.stato="chiusa" AND vc.id IS NULL ORDER BY g.data DESC LIMIT 20
+    ')->fetchAll();
+
+    $versConfOp = $pdo->query('
+        SELECT g.data, vc.importo_dichiarato, vc.confermato_il,
+               COALESCE(NULLIF(u.nome,""),u.username) AS nome_conf
+        FROM versamenti_confermati vc
+        JOIN giornate g ON g.id=vc.giornata_id JOIN utenti u ON u.id=vc.confermato_da
+        ORDER BY g.data DESC LIMIT 20
+    ')->fetchAll();
 ?>
 
 <header class="topbar">
@@ -779,6 +850,43 @@ else:
       ?>
       <span class="dp-bar dp-bar-<?= $bc ?>" style="height:<?= $bh ?>px"
             title="<?= date('d/m', strtotime($p['data'])) ?> · €<?= number_format($p['errore'], 2, ',', '.') ?>"></span>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+  </section>
+  <?php endif; ?>
+
+  <?php if ($versAmmdaOp || $versConfOp): ?>
+  <section class="dash-card" style="margin-top:14px">
+    <h2 class="dash-card-title">
+      Versamenti
+      <?php if ($versAmmdaOp): ?><span class="badge open" style="font-size:11px;margin-left:6px;vertical-align:middle"><?= count($versAmmdaOp) ?> da ritirare</span><?php endif; ?>
+    </h2>
+    <?php if ($versAmmdaOp): ?>
+    <p class="dash-card-sub" style="margin:0 0 8px;font-size:12px;color:var(--red)">Giornate chiuse in attesa di conferma ritiro</p>
+    <div class="recent-list" style="margin-bottom:16px">
+      <?php foreach ($versAmmdaOp as $vr): ?>
+      <a class="recent-row" href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($vr['data']) ?>">
+        <span class="recent-date"><?= $h(date('d/m/Y', strtotime($vr['data']))) ?></span>
+        <span class="badge open">Da ritirare</span>
+        <span class="tp-earn tp-earn-preview" style="color:var(--red)"><?= eur(arrotonda_versamento((float)$vr['versamento'])) ?></span>
+        <span class="recent-caret">›</span>
+      </a>
+      <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <p class="ticket-empty" style="color:var(--green)">Nessun versamento in sospeso.</p>
+    <?php endif; ?>
+    <?php if ($versConfOp): ?>
+    <p class="dash-card-sub" style="margin:0 0 8px;font-size:12px;color:var(--muted)">Versamenti recenti confermati</p>
+    <div class="recent-list">
+      <?php foreach ($versConfOp as $vc): ?>
+      <a class="recent-row" href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($vc['data']) ?>">
+        <span class="recent-date"><?= $h(date('d/m/Y', strtotime($vc['data']))) ?></span>
+        <span class="badge closed">Ritirato</span>
+        <span class="tp-earn tp-earn-preview"><?= eur((float)$vc['importo_dichiarato']) ?></span>
+        <span class="recent-caret">›</span>
+      </a>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>

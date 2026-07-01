@@ -36,13 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ');
         $stTot->execute([$gid,$gid,$gid]);
         $tot = $stTot->fetch();
-        $mailVers   = (float)$tot['scass'] - (float)$tot['bancomat'] - (float)$tot['ticket'];
+        $mailVers   = arrotonda_versamento((float)$tot['scass'] - (float)$tot['bancomat'] - (float)$tot['ticket']);
         $mailFrom   = $sett['mail_from'] ?: 'noreply@cassasala.it';
         $nomeSala   = $cfg['nome_sala'] ?? 'Cassa Sala';
         $dataFmt    = date('d/m/Y', strtotime($data));
         $chiusaOra  = date('H:i');
         $nomeOp     = $user['nome'] ?: $user['username'];
-        $appUrl     = base_url('account/dashboard.php');
+        $scheme     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $httpHost   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $appUrl     = $scheme . '://' . $httpHost . base_url('account/dashboard.php');
         $fmtEur     = fn(float $v) => '&euro;&nbsp;' . number_format($v, 2, ',', '.');
         $revs = $pdo->query("SELECT nome, email FROM utenti WHERE ruolo='revisore' AND attivo=1 AND email IS NOT NULL AND email != ''")->fetchAll();
         foreach ($revs as $rev) {
