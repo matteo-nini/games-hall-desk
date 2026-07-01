@@ -378,7 +378,6 @@ $render = function($n) use ($h,$nv,$byforn,$fornitori,$turni,$turns,$TOL,$data,$
           <span class="hbd-meta">tot. cassa = fondo</span>
         </div>
       </div>
-      <div class="hbd-sep" aria-hidden="true"></div>
       <div class="hbd-col hbd-vers-col">
         <div class="hbd-top">
           <span class="hbd-ico-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
