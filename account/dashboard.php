@@ -616,22 +616,35 @@ else:
     [$mhI, $mmI] = array_map('intval', explode(':', $mInizio));
     [$mhF, $mmF] = array_map('intval', explode(':', $mFine));
     [$shI, $smI] = array_map('intval', explode(':', $sInizio));
+    [$shF, $smF] = array_map('intval', explode(':', $sFine));
     $mStart = $mhI + $mmI / 60;
     $mEnd   = $mhF + $mmF / 60;
     $sStart = $shI + $smI / 60;
+    $sEnd   = $shF + $smF / 60;
+    $seraOltreMezzanotte = $sEnd < $sStart; // es. 19:00-01:00
 
     $nCorrente = null;
-    if ($oraFloat >= $mStart && $oraFloat < $mEnd)    $nCorrente = 1;
-    elseif ($oraFloat >= $sStart || $oraFloat < 2)    $nCorrente = 2;
+    if ($oraFloat >= $mStart && $oraFloat < $mEnd) {
+        $nCorrente = 1;
+    } elseif ($seraOltreMezzanotte) {
+        if ($oraFloat >= $sStart || $oraFloat < $sEnd) $nCorrente = 2;
+    } else {
+        if ($oraFloat >= $sStart && $oraFloat < $sEnd) $nCorrente = 2;
+    }
+
+    // Se siamo dopo mezzanotte ancora nel turno di sera, la data effettiva del turno è ieri
+    $dataCorrente = ($nCorrente === 2 && $seraOltreMezzanotte && $oraFloat < $sEnd)
+        ? date('Y-m-d', strtotime('-1 day'))
+        : $oggi;
 
     $assegnazioneOggi = null; $turnoGiornaliero = false; $giaIniziato = false;
     try {
         if ($nCorrente !== null) {
             $st = $pdo->prepare('SELECT tp.operatore_id, COALESCE(NULLIF(u.nome,""),u.username) AS nome FROM turni_programmati tp JOIN utenti u ON u.id=tp.operatore_id WHERE tp.data=? AND tp.numero=?');
-            $st->execute([$oggi, $nCorrente]);
+            $st->execute([$dataCorrente, $nCorrente]);
             $assegnazioneOggi = $st->fetch() ?: null;
             $st2 = $pdo->prepare('SELECT t.operatore_id, t.iniziato_il FROM turni t JOIN giornate g ON g.id=t.giornata_id WHERE g.data=? AND t.numero=?');
-            $st2->execute([$oggi, $nCorrente]);
+            $st2->execute([$dataCorrente, $nCorrente]);
             $turnoGiornaliero = $st2->fetch() ?: false;
             $giaIniziato = $turnoGiornaliero && !empty($turnoGiornaliero['iniziato_il']) && (int)$turnoGiornaliero['operatore_id'] === $uid;
         }
@@ -736,12 +749,12 @@ else:
     </div>
     <div class="dash-hero-actions">
       <?php if ($giaIniziato): ?>
-        <a href="<?= base_url('cassa/giornaliero.php') ?>" class="btn-dash-cassa">Vai alla cassa &rarr;</a>
+        <a href="<?= base_url('cassa/giornaliero.php') ?>?data=<?= $h($dataCorrente) ?>" class="btn-dash-cassa">Vai alla cassa &rarr;</a>
       <?php else: ?>
         <form method="post">
           <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
           <input type="hidden" name="azione" value="inizia">
-          <input type="hidden" name="data"   value="<?= $h($oggi) ?>">
+          <input type="hidden" name="data"   value="<?= $h($dataCorrente) ?>">
           <input type="hidden" name="numero" value="<?= (int)$nCorrente ?>">
           <button type="submit" class="btn-dash-inizia">Inizia turno &amp; vai alla cassa</button>
         </form>
@@ -763,6 +776,7 @@ else:
         <button type="submit" class="btn-dash-cassa"><?= $lbl ?></button>
       </form>
       <?php endforeach; ?>
+      <?php /* Il blocco avvio manuale usa sempre $oggi: è fuori orario turno, l'operatore sceglie esplicitamente */ ?>
     </div>
     <?php endif; ?>
   </div>

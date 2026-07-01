@@ -44,6 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: profilo.php?ok=tel'); exit;
     }
 
+    /* Salva indirizzo email */
+    if ($az === 'email') {
+        $email = mb_substr(trim($_POST['email'] ?? ''), 0, 150);
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $err = 'Indirizzo email non valido.';
+        } else {
+            $pdo->prepare('UPDATE utenti SET email=? WHERE id=?')->execute([$email ?: null, $uid]);
+            audit('profilo_email', 'utenti', $uid, $email ?: '(rimossa)');
+            $me2 = $pdo->prepare('SELECT * FROM utenti WHERE id=?'); $me2->execute([$uid]); $me2 = $me2->fetch();
+            sync_contact_utente($pdo, $uid, $me2['nome'] ?: $me2['username'], $me2['telefono'] ?? '', $email, $me2['ruolo'] ?? '');
+            header('Location: profilo.php?ok=email'); exit;
+        }
+    }
+
     /* Cambio password */
     if ($az === 'password') {
         $vecchia = $_POST['password_vecchia'] ?? '';
@@ -120,10 +134,11 @@ $st->execute([$uid]);
 $me = $st->fetch();
 
 $okMsg = match ($_GET['ok'] ?? '') {
-    'nome' => 'Nome aggiornato.',
-    'pwd'  => 'Password cambiata.',
-    'foto' => 'Foto profilo aggiornata.',
-    'tel'  => 'Telefono aggiornato.',
+    'nome'  => 'Nome aggiornato.',
+    'pwd'   => 'Password cambiata.',
+    'foto'  => 'Foto profilo aggiornata.',
+    'tel'   => 'Telefono aggiornato.',
+    'email' => 'Email aggiornata.',
     default => ''
 };
 
@@ -205,7 +220,7 @@ $avatarStyle = avatar_style($rawName);
     <!-- ===== Recapiti ===== -->
     <section class="profilo-card">
       <h2 class="profilo-card-title">Recapiti</h2>
-      <form method="post">
+      <form method="post" style="margin-bottom:16px">
         <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
         <input type="hidden" name="azione" value="telefono">
         <div class="field">
@@ -215,6 +230,17 @@ $avatarStyle = avatar_style($rawName);
         </div>
         <p class="profilo-hint">Viene salvato automaticamente nella rubrica Contatti della sala.</p>
         <button type="submit" style="margin-top:10px">Salva telefono</button>
+      </form>
+      <form method="post">
+        <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+        <input type="hidden" name="azione" value="email">
+        <div class="field">
+          <label for="pemail">Indirizzo email</label>
+          <input id="pemail" type="email" name="email" value="<?= $h($me['email'] ?? '') ?>"
+                 placeholder="nome@esempio.it" maxlength="150" style="width:220px">
+        </div>
+        <p class="profilo-hint">Usata per il reset password e le notifiche revisore.</p>
+        <button type="submit" style="margin-top:10px">Salva email</button>
       </form>
     </section>
 
