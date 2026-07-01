@@ -288,3 +288,64 @@
     grid-column: auto
   }
 }
+/* ── XLS import modal ──────────────────────────────────────────────────── */
+.xls-modal-body {
+  padding: 4px 0 8px
+}
+
+.xls-date-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px
+}
+
+.xls-warn {
+  background: var(--amber-bg);
+  color: var(--amber-ink);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--rxs);
+  padding: 8px 12px;
+  font-size: 12px;
+  margin-bottom: 12px
+}
+
+.xls-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px
+}
+
+.xls-table th {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: var(--faint);
+  border-bottom: 1px solid var(--border);
+  text-align: left
+}
+
+.xls-table th.rt,
+.xls-table td.rt {
+  text-align: right
+}
+
+.xls-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border)
+}
+
+.xls-table tbody tr:last-child td {
+  border-bottom: none
+}
+
+/* Flash animation on applied section */
+@keyframes xls-flash-anim {
+  0%   { outline: 2px solid var(--accent); outline-offset: 4px; }
+  100% { outline: 2px solid transparent;   outline-offset: 4px; }
+}
+
+.xls-flash {
+  animation: xls-flash-anim 1.8s ease-out forwards
+}

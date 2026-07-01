@@ -273,6 +273,7 @@ if (($_GET['export'] ?? '') === 'csv') {
   <div class="topbar-actions">
     <?php if (!is_revisore()): ?>
     <button type="submit" form="frm-sett" class="sett-save-btn">Salva</button>
+    <button type="button" id="xls-import-btn" class="topbar-action-btn" title="Importa dati da file XLS/XLSX giornaliero">&#8679; XLS</button>
     <?php endif; ?>
     <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=csv">&#8595; CSV</a>
     <a class="topbar-action-btn" href="?anno=<?= $anno ?>&mese=<?= $mese ?>&sett=<?= $sett ?>&export=print" target="_blank">&#128438; Stampa</a>
@@ -295,7 +296,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $vers    = $ri['versamento'];
     $cassa   = $ri['bancomat'] + $vers;
     $margine = $cassa - $ricavo; ?>
-  <section class="turno t1">
+  <section class="turno t1" data-date="<?= $d ?>">
     <h2><?= $h($nomiGiorniBr[(int)date('w', strtotime($d))] . ' ' . date('d/m', strtotime($d))) ?></h2>
     <table class="grid">
       <tr><th>Fornitore</th><th>Giocato</th><th>Pagato</th><th>Inserito</th><th>Payout</th></tr>
@@ -444,6 +445,140 @@ if (($_GET['export'] ?? '') === 'csv') {
 </div>
 </aside>
 </div>
+<?php if (!is_revisore()): ?>
+<!-- ================================================================
+     XLS import — file input (hidden) + dialog
+     ================================================================ -->
+<input type="file" id="xls-file-input" accept=".xls,.xlsx" style="display:none" aria-hidden="true">
+
+<dialog id="xls-import-modal" class="form-dialog">
+  <div class="dlg-head">
+    <div>
+      <strong>Verifica dati importati</strong>
+      <span class="dlg-head-sub">Controlla e conferma prima di applicare</span>
+    </div>
+    <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
+  </div>
+  <div id="xls-modal-body" class="xls-modal-body"></div>
+  <div class="dlg-actions">
+    <button type="button" id="xls-cancel-btn" class="btn ghost">Annulla</button>
+    <button type="button" id="xls-confirm-btn" class="btn">Applica al giornaliero</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var fileInput  = document.getElementById('xls-file-input');
+  var importBtn  = document.getElementById('xls-import-btn');
+  var modal      = document.getElementById('xls-import-modal');
+  var modalBody  = document.getElementById('xls-modal-body');
+  var confirmBtn = document.getElementById('xls-confirm-btn');
+  var cancelBtn  = document.getElementById('xls-cancel-btn');
+  var weekDays   = <?= json_encode(array_values($giorni)) ?>;
+  var pending    = null;
+
+  function eur(v) {
+    return v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  importBtn.addEventListener('click', function () { fileInput.click(); });
+
+  fileInput.addEventListener('change', async function () {
+    if (!this.files[0]) return;
+    var orig = importBtn.textContent;
+    importBtn.textContent = 'Lettura…';
+    importBtn.disabled = true;
+    try {
+      var fd = new FormData();
+      fd.append('xls', this.files[0]);
+      fd.append('csrf', (document.querySelector('#frm-sett [name=csrf]') || {}).value || '');
+      var res  = await fetch('<?= base_url('cassa/parse_xls_betwin.php') ?>', { method: 'POST', body: fd });
+      var json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'Errore sconosciuto');
+      pending = json;
+      showModal(json);
+    } catch (e) {
+      alert('Errore importazione: ' + e.message);
+    } finally {
+      importBtn.textContent = orig;
+      importBtn.disabled = false;
+      fileInput.value = '';
+    }
+  });
+
+  function showModal(json) {
+    var date    = json.date;
+    var data    = json.data;
+    var inWeek  = weekDays.includes(date);
+    var parts   = date.split('-');
+    var dateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+    var html = '<p class="xls-date-label">Data estratta: <strong>' + dateStr + '</strong></p>';
+
+    if (!inWeek) {
+      html += '<div class="xls-warn">Questa data non è nella settimana visualizzata.'
+             + ' Confermando potrai navigare alla settimana giusta.</div>';
+    }
+
+    html += '<table class="xls-table"><thead><tr>'
+          + '<th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th>'
+          + '</tr></thead><tbody>';
+    Object.entries(data).forEach(function (e) {
+      html += '<tr><td><strong>' + e[0] + '</strong></td>'
+            + '<td class="rt">&euro;&nbsp;' + eur(e[1].giocato) + '</td>'
+            + '<td class="rt">&euro;&nbsp;' + eur(e[1].pagato)  + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    modalBody.innerHTML = html;
+    confirmBtn.dataset.inWeek  = inWeek ? '1' : '0';
+    confirmBtn.dataset.navUrl  = json.nav_url || '';
+    modal.showModal();
+  }
+
+  confirmBtn.addEventListener('click', function () {
+    if (!pending) return;
+    var date    = pending.date;
+    var data    = pending.data;
+    var inWeek  = this.dataset.inWeek === '1';
+    var navUrl  = this.dataset.navUrl;
+    modal.close();
+
+    if (!inWeek) {
+      if (confirm('Il giorno non è visibile qui. Navigare alla settimana corretta?')) {
+        window.location.href = navUrl;
+      }
+      pending = null;
+      return;
+    }
+
+    var applied = false;
+    Object.entries(data).forEach(function (e) {
+      var forn = e[0];
+      var vals = e[1];
+      var g = document.querySelector('[name="bw[' + date + '][' + forn + '][giocato]"]');
+      var p = document.querySelector('[name="bw[' + date + '][' + forn + '][pagato]"]');
+      if (g) { g.value = vals.giocato; applied = true; }
+      if (p)   p.value = vals.pagato;
+    });
+
+    if (applied) {
+      var sec = document.querySelector('section[data-date="' + date + '"]');
+      if (sec) {
+        sec.classList.add('xls-flash');
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(function () { sec.classList.remove('xls-flash'); }, 1800);
+      }
+    }
+    pending = null;
+  });
+
+  cancelBtn.addEventListener('click', function () { modal.close(); pending = null; });
+  modal.addEventListener('click', function (e) { if (e.target === modal) { modal.close(); pending = null; } });
+})();
+</script>
+<?php endif; ?>
+
 <script>
 (function(){
   var V=<?= json_encode(round($versato_tot, 2)) ?>;
