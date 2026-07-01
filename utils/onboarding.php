@@ -35,6 +35,7 @@ $navChiusura = [
   'NOVO — POS',
   'INSPIRED — POS',
   'Raccolta rapporti',
+  'Chiudi nel sistema',
 ];
 ?>
 <!doctype html><html lang="it"><head>
@@ -294,7 +295,24 @@ $navChiusura = [
             <li><strong>Ticket di vincita</strong> pagati durante il turno.</li>
           </ul>
           <p style="margin-top:10px">Metti tutti i documenti insieme e riponili nella <strong>cartella del giorno</strong> nella posizione stabilita dalla sala.</p>
-          <div class="ob-tip">Prima di lasciare, chiudi la giornata nel sistema se sei l'ultimo turno: Giornaliero → «Chiudi giornata».</div>
+        </div>
+
+        <div class="ob-pane" data-pane="6">
+          <h3 class="ob-pane-head">Chiudi la giornata nel sistema</h3>
+          <p>Questo è l'<strong>ultimo passaggio</strong> — va fatto solo dall'operatore dell'ultimo turno (di solito sera).</p>
+          <ul class="ob-ul">
+            <li>Apri il <strong>Giornaliero</strong> della data corrente.</li>
+            <li>Verifica che entrambi i turni siano salvati e che lo scostamento sia accettabile (verde o giallo).</li>
+            <li>Premi <strong>«Chiudi giornata»</strong> in fondo alla pagina e conferma.</li>
+          </ul>
+          <div class="ob-tip">Dopo la chiusura la giornata è bloccata in sola lettura. Solo il responsabile può riaprirla.</div>
+          <h4 style="margin:16px 0 6px;font-size:13px;font-weight:600">Cosa succede dopo</h4>
+          <ul class="ob-ul">
+            <li>Il sistema calcola il <strong>versamento netto</strong> (scassettamenti − bancomat − ticket pagati).</li>
+            <li>Viene inviata una <strong>email automatica</strong> a tutti i revisori attivi con il riepilogo della giornata.</li>
+            <li>Il revisore dovrà confermare il ritiro dalla propria dashboard — questo genera una traccia firmata con data, ora e IP.</li>
+          </ul>
+          <div class="ob-tip" style="margin-top:12px">Se l'email non arriva, verifica che il campo <em>Email mittente</em> sia configurato in <strong>Impostazioni → Sistema</strong> e che il dominio del server sia abilitato all'invio.</div>
           <a class="ob-panel-link" href="<?= base_url('cassa/giornaliero.php') ?>">Vai al giornaliero →</a>
         </div>
 

@@ -1,8 +1,17 @@
 <?php
 /**
- * Endpoint: legge un file XLS/XLSX giornaliero SISAL e restituisce
- * i totali Giocato/Pagato per fornitore come JSON.
+ * Endpoint: legge un file XLS/XLSX SISAL (anche multi-giorno) e restituisce
+ * i totali Giocato/Pagato per fornitore per ogni data trovata.
  * POST — richiede autenticazione operatore.
+ *
+ * Response (successo):
+ * {
+ *   ok: true,
+ *   dates: {
+ *     "YYYY-MM-DD": { "FORN": { giocato: n, pagato: n }, ... },
+ *     ...
+ *   }
+ * }
  */
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
@@ -53,8 +62,8 @@ try {
         }
     }
 
-    $result   = [];
-    $dateISO  = null;
+    // Raggruppa per data
+    $byDate = [];
 
     foreach ($rows as $ri => $row) {
         if ($ri === 0) continue; // intestazione
@@ -64,10 +73,9 @@ try {
         $win     = (float)($row[9] ?? 0);
         if (!$sistema || ($bet == 0 && $win == 0)) continue;
 
-        // Estrai data (prima occorrenza valida)
-        if (!$dateISO && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataStr, $m)) {
-            $dateISO = "{$m[3]}-{$m[2]}-{$m[1]}";
-        }
+        // Normalizza data DD/MM/YYYY → YYYY-MM-DD
+        if (!preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataStr, $m)) continue;
+        $dateISO = "{$m[3]}-{$m[2]}-{$m[1]}";
 
         // Risolvi fornitore
         $forn = null;
@@ -79,21 +87,15 @@ try {
         }
         if ($forn === null) continue;
 
-        $result[$forn]['giocato'] = round(($result[$forn]['giocato'] ?? 0) + $bet, 2);
-        $result[$forn]['pagato']  = round(($result[$forn]['pagato']  ?? 0) + $win, 2);
+        $byDate[$dateISO][$forn]['giocato'] = round(($byDate[$dateISO][$forn]['giocato'] ?? 0) + $bet, 2);
+        $byDate[$dateISO][$forn]['pagato']  = round(($byDate[$dateISO][$forn]['pagato']  ?? 0) + $win, 2);
     }
 
-    if (!$dateISO)    throw new RuntimeException('Data non trovata nel file');
-    if (!$result)     throw new RuntimeException('Nessun dato fornitore trovato nel file');
+    if (!$byDate) throw new RuntimeException('Nessun dato fornitore trovato nel file');
 
-    // Calcola URL di navigazione alla settimana giusta
-    $day   = (int)date('j', strtotime($dateISO));
-    $sett  = $day <= 7 ? 1 : ($day <= 15 ? 2 : ($day <= 23 ? 3 : 4));
-    $yISO  = (int)date('Y', strtotime($dateISO));
-    $mISO  = (int)date('n', strtotime($dateISO));
-    $navUrl = "settimanale.php?anno=$yISO&mese=$mISO&sett=$sett";
+    ksort($byDate); // ordina per data
 
-    echo json_encode(['ok' => true, 'date' => $dateISO, 'data' => $result, 'nav_url' => $navUrl]);
+    echo json_encode(['ok' => true, 'dates' => $byDate]);
 
 } catch (Throwable $e) {
     http_response_code(400);

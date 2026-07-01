@@ -455,14 +455,14 @@ if (($_GET['export'] ?? '') === 'csv') {
   <div class="dlg-head">
     <div>
       <strong>Verifica dati importati</strong>
-      <span class="dlg-head-sub">Controlla e conferma prima di applicare</span>
+      <span class="dlg-head-sub">Controlla e conferma — verranno salvati tutti i giorni trovati</span>
     </div>
     <button type="button" class="dlg-close" onclick="this.closest('dialog').close()" aria-label="Chiudi">&times;</button>
   </div>
   <div id="xls-modal-body" class="xls-modal-body"></div>
   <div class="dlg-actions">
     <button type="button" id="xls-cancel-btn" class="btn ghost">Annulla</button>
-    <button type="button" id="xls-confirm-btn" class="btn">Applica al giornaliero</button>
+    <button type="button" id="xls-confirm-btn" class="btn">Salva tutti i giorni</button>
   </div>
 </dialog>
 
@@ -475,10 +475,14 @@ if (($_GET['export'] ?? '') === 'csv') {
   var confirmBtn = document.getElementById('xls-confirm-btn');
   var cancelBtn  = document.getElementById('xls-cancel-btn');
   var weekDays   = <?= json_encode(array_values($giorni)) ?>;
+  var csrf       = (document.querySelector('#frm-sett [name=csrf]') || {}).value || '';
   var pending    = null;
 
   function eur(v) {
     return v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtDate(iso) {
+    var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0];
   }
 
   importBtn.addEventListener('click', function () { fileInput.click(); });
@@ -491,7 +495,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     try {
       var fd = new FormData();
       fd.append('xls', this.files[0]);
-      fd.append('csrf', (document.querySelector('#frm-sett [name=csrf]') || {}).value || '');
+      fd.append('csrf', csrf);
       var res  = await fetch('<?= base_url('cassa/parse_xls_betwin.php') ?>', { method: 'POST', body: fd });
       var json = await res.json();
       if (!json.ok) throw new Error(json.error || 'Errore sconosciuto');
@@ -507,70 +511,85 @@ if (($_GET['export'] ?? '') === 'csv') {
   });
 
   function showModal(json) {
-    var date    = json.date;
-    var data    = json.data;
-    var inWeek  = weekDays.includes(date);
-    var parts   = date.split('-');
-    var dateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+    var dates = json.dates; // {"YYYY-MM-DD": {"FORN": {giocato, pagato}}}
+    var nDates = Object.keys(dates).length;
+    var nWeek  = Object.keys(dates).filter(function (d) { return weekDays.includes(d); }).length;
 
-    var html = '<p class="xls-date-label">Data estratta: <strong>' + dateStr + '</strong></p>';
+    var html = '<p class="xls-date-label"><strong>' + nDates + ' giorn' + (nDates === 1 ? 'o' : 'i')
+             + '</strong> trovati nel file';
+    if (nWeek < nDates) {
+      html += ' &mdash; <span style="color:var(--amber)">'
+            + (nDates - nWeek) + ' non visibili in questa settimana</span>';
+    }
+    html += '</p>';
 
-    if (!inWeek) {
-      html += '<div class="xls-warn">Questa data non è nella settimana visualizzata.'
-             + ' Confermando potrai navigare alla settimana giusta.</div>';
+    if (nWeek < nDates) {
+      html += '<div class="xls-warn">I giorni fuori settimana vengono comunque salvati direttamente nel database.</div>';
     }
 
     html += '<table class="xls-table"><thead><tr>'
-          + '<th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th>'
+          + '<th>Data</th><th>Fornitore</th><th class="rt">Giocato</th><th class="rt">Pagato</th>'
           + '</tr></thead><tbody>';
-    Object.entries(data).forEach(function (e) {
-      html += '<tr><td><strong>' + e[0] + '</strong></td>'
-            + '<td class="rt">&euro;&nbsp;' + eur(e[1].giocato) + '</td>'
-            + '<td class="rt">&euro;&nbsp;' + eur(e[1].pagato)  + '</td></tr>';
+    Object.entries(dates).forEach(function (entry) {
+      var date = entry[0], fornData = entry[1];
+      var inW  = weekDays.includes(date);
+      var rowStyle = inW ? '' : ' style="opacity:.7"';
+      var first = true;
+      Object.entries(fornData).forEach(function (fe) {
+        html += '<tr' + rowStyle + '>'
+              + '<td>' + (first ? '<strong>' + fmtDate(date) + '</strong>' + (inW ? '' : ' <small>(altra sett.)</small>') : '') + '</td>'
+              + '<td>' + fe[0] + '</td>'
+              + '<td class="rt">&euro;&nbsp;' + eur(fe[1].giocato) + '</td>'
+              + '<td class="rt">&euro;&nbsp;' + eur(fe[1].pagato)  + '</td></tr>';
+        first = false;
+      });
     });
     html += '</tbody></table>';
 
     modalBody.innerHTML = html;
-    confirmBtn.dataset.inWeek  = inWeek ? '1' : '0';
-    confirmBtn.dataset.navUrl  = json.nav_url || '';
     modal.showModal();
   }
 
-  confirmBtn.addEventListener('click', function () {
+  confirmBtn.addEventListener('click', async function () {
     if (!pending) return;
-    var date    = pending.date;
-    var data    = pending.data;
-    var inWeek  = this.dataset.inWeek === '1';
-    var navUrl  = this.dataset.navUrl;
+    var dates = pending.dates;
     modal.close();
+    confirmBtn.disabled = true;
 
-    if (!inWeek) {
-      if (confirm('Il giorno non è visibile qui. Navigare alla settimana corretta?')) {
-        window.location.href = navUrl;
-      }
+    try {
+      // 1. Salva TUTTO via endpoint diretto (incluse date fuori settimana)
+      var fd2 = new FormData();
+      fd2.append('csrf', csrf);
+      fd2.append('dates', JSON.stringify(dates));
+      var res2 = await fetch('<?= base_url('cassa/save_betwin_multi.php') ?>', { method: 'POST', body: fd2 });
+      var r2   = await res2.json();
+      if (!r2.ok) throw new Error(r2.error || 'Errore salvataggio');
+
+      // 2. Aggiorna i campi visibili nella settimana corrente
+      Object.entries(dates).forEach(function (entry) {
+        var date = entry[0], fornData = entry[1];
+        if (!weekDays.includes(date)) return;
+        Object.entries(fornData).forEach(function (fe) {
+          var forn = fe[0], vals = fe[1];
+          var g = document.querySelector('[name="bw[' + date + '][' + forn + '][giocato]"]');
+          var p = document.querySelector('[name="bw[' + date + '][' + forn + '][pagato]"]');
+          if (g) g.value = vals.giocato;
+          if (p) p.value = vals.pagato;
+        });
+        var sec = document.querySelector('section[data-date="' + date + '"]');
+        if (sec) {
+          sec.classList.add('xls-flash');
+          sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          setTimeout(function () { sec.classList.remove('xls-flash'); }, 1800);
+        }
+      });
+
+    } catch (e) {
+      alert('Errore salvataggio: ' + e.message);
+    } finally {
+      confirmBtn.disabled = false;
       pending = null;
-      return;
     }
-
-    var applied = false;
-    Object.entries(data).forEach(function (e) {
-      var forn = e[0];
-      var vals = e[1];
-      var g = document.querySelector('[name="bw[' + date + '][' + forn + '][giocato]"]');
-      var p = document.querySelector('[name="bw[' + date + '][' + forn + '][pagato]"]');
-      if (g) { g.value = vals.giocato; applied = true; }
-      if (p)   p.value = vals.pagato;
-    });
-
-    if (applied) {
-      var sec = document.querySelector('section[data-date="' + date + '"]');
-      if (sec) {
-        sec.classList.add('xls-flash');
-        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(function () { sec.classList.remove('xls-flash'); }, 1800);
-      }
-    }
-    pending = null;
   });
 
   cancelBtn.addEventListener('click', function () { modal.close(); pending = null; });
