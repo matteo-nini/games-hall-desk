@@ -34,9 +34,11 @@ $navRes = [
 <link rel="stylesheet" href="<?= asset_url('assets/css/core.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('assets/css/onboarding.css') ?>">
 <style>
-.ob-tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:12px; }
-.ob-tab-btn { padding:8px 18px; font-size:14px; font-weight:600; color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; margin-bottom:-1px; transition:color .1s; }
-.ob-tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.ob-tabs { display:flex; padding:0 0 20px; }
+.ob-tabs-card { display:inline-flex; gap:2px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--rs); padding:3px; }
+.ob-tab-btn { padding:7px 18px; font-size:13px; font-weight:500; color:var(--muted); background:transparent; border:none; border-radius:var(--rxs); cursor:pointer; transition:color .12s,background .12s,box-shadow .12s; white-space:nowrap; }
+.ob-tab-btn:hover { color:var(--text); }
+.ob-tab-btn.active { color:var(--text); font-weight:600; background:var(--surface); box-shadow:var(--sh); }
 .ob-panel { display:none; }
 .ob-panel.active { display:block; }
 </style>
@@ -53,16 +55,18 @@ $navRes = [
     <p>Come usare il sistema di cassa giornaliera</p>
   </div>
 
-  <div class="ob-tabs" role="tablist">
-    <?php if ($role === 'revisore'): ?>
-    <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="rev">Revisore</button>
-    <?php else: ?>
-    <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="op">Operatori</button>
-    <?php if ($role === 'responsabile'): ?>
-    <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="res">Responsabile</button>
-    <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="rev">Revisore</button>
-    <?php endif; ?>
-    <?php endif; ?>
+  <div class="ob-tabs">
+    <div class="ob-tabs-card" role="tablist">
+      <?php if ($role === 'revisore'): ?>
+      <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="rev">Revisore</button>
+      <?php else: ?>
+      <button class="ob-tab-btn active" role="tab" aria-selected="true" data-tab="op">Operatori</button>
+      <?php if ($role === 'responsabile'): ?>
+      <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="res">Responsabile</button>
+      <button class="ob-tab-btn" role="tab" aria-selected="false" data-tab="rev">Revisore</button>
+      <?php endif; ?>
+      <?php endif; ?>
+    </div>
   </div>
 
   <!-- Tab operatori -->

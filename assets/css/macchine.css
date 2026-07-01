@@ -6,31 +6,38 @@
 .mach-tab-bar {
   display: flex;
   align-items: center;
+  padding: 16px 24px
+}
+
+.mach-tab-card {
+  display: inline-flex;
   gap: 2px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface)
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 3px
 }
 
 .mach-tab {
-  padding: 10px 16px;
+  padding: 7px 18px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  border-radius: var(--rxs);
   cursor: pointer;
-  transition: color .12s, border-color .12s;
+  transition: color .12s, background .12s, box-shadow .12s;
   white-space: nowrap
 }
 
 .mach-tab:hover { color: var(--text) }
 
 .mach-tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent)
+  color: var(--text);
+  font-weight: 600;
+  background: var(--surface);
+  box-shadow: var(--sh)
 }
 
 .mach-tab-pane { display: none }

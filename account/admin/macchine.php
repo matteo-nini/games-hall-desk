@@ -153,9 +153,11 @@ $okMsg = match ($_GET['ok'] ?? '') {
   </label>
 </header>
 
-<nav class="mach-tab-bar" role="tablist" aria-label="Sezioni">
-  <button class="mach-tab" data-tab="macchine"  role="tab">Macchine</button>
-  <button class="mach-tab" data-tab="fornitori" role="tab">Fornitori</button>
+<nav class="mach-tab-bar" aria-label="Sezioni">
+  <div class="mach-tab-card" role="tablist">
+    <button class="mach-tab" data-tab="macchine"  role="tab">Macchine</button>
+    <button class="mach-tab" data-tab="fornitori" role="tab">Fornitori</button>
+  </div>
 </nav>
 
 <?php if ($okMsg || $msg): ?>
