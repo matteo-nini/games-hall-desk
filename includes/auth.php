@@ -94,15 +94,24 @@ function rate_limit_record(string $ip): void {
 }
 
 function login(string $username, string $password): bool {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $ip  = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $pdo = db();
     start_session();
-    $st = db()->prepare('SELECT * FROM utenti WHERE username = ? AND attivo = 1');
+    $st = $pdo->prepare('SELECT * FROM utenti WHERE username = ? AND attivo = 1');
     $st->execute([$username]);
     $u = $st->fetch();
+    if (!$u && str_contains($username, '@')) {
+        try {
+            $st2 = $pdo->prepare('SELECT * FROM utenti WHERE email = ? AND attivo = 1');
+            $st2->execute([$username]);
+            $rows = $st2->fetchAll();
+            if (count($rows) === 1) $u = $rows[0];
+        } catch (Throwable) {}
+    }
     if ($u && password_verify($password, $u['password_hash'])) {
         session_regenerate_id(true);
         $_SESSION['uid'] = (int)$u['id'];
-        try { db()->prepare('DELETE FROM login_attempts WHERE ip=?')->execute([$ip]); } catch (Throwable) {}
+        try { $pdo->prepare('DELETE FROM login_attempts WHERE ip=?')->execute([$ip]); } catch (Throwable) {}
         return true;
     }
     rate_limit_record($ip);

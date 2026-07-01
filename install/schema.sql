@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS utenti (
   ruolo         ENUM('operatore','responsabile','revisore') NOT NULL DEFAULT 'operatore',
   attivo        TINYINT(1)   NOT NULL DEFAULT 1,
   creato_il     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  foto          VARCHAR(255) DEFAULT NULL
+  foto          VARCHAR(255) DEFAULT NULL,
+  telefono      VARCHAR(30)  DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Reset password ----------
@@ -276,7 +277,9 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('modulo_assistenze',          '1'),
   ('modulo_prestiti',            '1'),
   ('modulo_documenti',           '1'),
-  ('mail_from',                  '');
+  ('mail_from',                  ''),
+  ('tel_sala',                   ''),
+  ('sito_web',                   '');
 
 -- ---------- Settimana Extra (verifica VLT) ----------
 CREATE TABLE IF NOT EXISTS settimana_extra (
@@ -313,6 +316,8 @@ CREATE TABLE IF NOT EXISTS contatti (
   email      VARCHAR(255)  DEFAULT NULL,
   note       VARCHAR(500)  DEFAULT NULL,
   ordine     INT           NOT NULL DEFAULT 0,
+  utente_id  INT           DEFAULT NULL,
+  sistema    TINYINT(1)    NOT NULL DEFAULT 0,
   creato_da  INT           DEFAULT NULL,
   creato_il  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE SET NULL

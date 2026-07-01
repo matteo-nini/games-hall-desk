@@ -67,8 +67,8 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="post">
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <div class="login-field">
-        <label for="lu">Utente</label>
-        <input id="lu" name="username" type="text" autofocus required autocomplete="username" placeholder="nome utente">
+        <label for="lu">Utente o email</label>
+        <input id="lu" name="username" type="text" autofocus required autocomplete="username" placeholder="nome utente o email">
       </div>
       <div class="login-field">
         <label for="lp">Password</label>

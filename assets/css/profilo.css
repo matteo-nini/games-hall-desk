@@ -227,3 +227,4 @@
   justify-content: flex-end;
   gap: 8px
 }
+.profilo-hint { font-size:12px; color:var(--muted); margin:4px 0 0 }
