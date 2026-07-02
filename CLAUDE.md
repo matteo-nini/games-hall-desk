@@ -10,7 +10,7 @@ Dopo ogni modifica significativa (nuova feature, cambio schema DB, nuovo modulo)
 | `CLAUDE.md` | Nuovi helper, nuove tabelle, nuovi moduli, nuove convenzioni |
 | `install/schema.sql` | Ogni nuova tabella o chiave `impostazioni` — **unica fonte di verità** per il DB |
 | `install/setup.php` | Se si aggiunge un modulo opzionale (step 4: checkbox + POST handler) |
-| `utils/onboarding.php` | Se si aggiunge una sezione/funzione che gli utenti devono conoscere |
+| `docs/onboarding.php` | Se si aggiunge una sezione/funzione che gli utenti devono conoscere |
 
 **Regola SQL**: nessun file di migration nel progetto. Aggiornare solo `install/schema.sql`. Per le istallazioni esistenti, dettare la query all'utente.
 
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 - `selector` — qualsiasi CSS selector o `null` (tooltip centrato, no spotlight)
 - Il tour non si mostra se `gp_wizard_done` è già in localStorage
-- Reset: `localStorage.removeItem('gp_wizard_done')` o bottone in `utils/onboarding.php`
+- Reset: `localStorage.removeItem('gp_wizard_done')` o bottone in `docs/onboarding.php`
 
 ## Export Excel (`includes/XlsxWriter.php`, `utils/export_xlsx.php`)
 

@@ -140,7 +140,7 @@ function top_menu(array $user): void {
   </nav>
 
   <div class="sb-util">
-    <?php $renderLink('utils/onboarding.php', ['label' => 'Guida', 'ico' => 'onboarding']); ?>
+    <?php $renderLink('docs/onboarding.php', ['label' => 'Guida', 'ico' => 'onboarding']); ?>
   </div>
 
   <div class="sb-foot">

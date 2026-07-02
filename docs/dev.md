@@ -453,7 +453,7 @@ GP_Tour.init([
 
 Il tour usa opacity crossfade (nessuna animazione su proprietà layout). Il tooltip si posiziona automaticamente sopra o sotto l'elemento evidenziato in base allo spazio disponibile.
 
-Per resettare il tour: `localStorage.removeItem('gp_wizard_done')` oppure il pulsante "Rivedi guida popup" in `utils/onboarding.php`.
+Per resettare il tour: `localStorage.removeItem('gp_wizard_done')` oppure il pulsante "Rivedi guida popup" in `docs/onboarding.php`.
 
 ---
 

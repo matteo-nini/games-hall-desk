@@ -720,7 +720,7 @@ File di libreria per l'invio centralizzato di email HTML transazionali. Non acce
 Struttura:
 - `sb-head` — logo sala (da `impostazioni`) + pulsante collapse sidebar
 - `sb-nav` — gruppi di link di navigazione (filtrati per ruolo e moduli attivi)
-- `sb-util` — link Guida (`utils/onboarding.php`)
+- `sb-util` — link Guida (`docs/onboarding.php`)
 - `sb-foot` — avatar utente (`avatar_initials` + `avatar_style`), toggle dark mode, logout
 
 **Link navigazione per ruolo:**
@@ -788,7 +788,7 @@ Sistema spotlight contestuale. Si attiva al primo accesso (flag `gp_wizard_done`
 
 **Struttura:** `GP_Tour.init([{ selector, title, body }, ...])` — selector CSS o `null` (tooltip centrato).
 
-**Reset:** `localStorage.removeItem('gp_wizard_done')` o bottone in `utils/onboarding.php`.
+**Reset:** `localStorage.removeItem('gp_wizard_done')` o bottone in `docs/onboarding.php`.
 
 **Integrazione:** dashboard responsabile (5 step), giornaliero e altre pagine.
 
@@ -881,7 +881,7 @@ Export completo del log audit.
 
 ---
 
-## Appendice: Guida operativa (`utils/onboarding.php`)
+## Appendice: Guida operativa (`docs/onboarding.php`)
 
 **Accesso:** tutti i ruoli autenticati (`require_login()`).
 

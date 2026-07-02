@@ -11,7 +11,7 @@
     giornaliero: {
       title: 'Cassa giornaliera',
       text: 'Compila fondo cassa, contanti per taglio, scassettamenti VLT, ticket pagati e bancomat per ogni turno. La barra di stato mostra cassetto, versamento e scostamento in tempo reale. Salva ogni turno separatamente, poi chiudi la giornata.',
-      link: BASE + 'utils/onboarding.php',
+      link: BASE + 'docs/onboarding.php',
       linkText: 'Guida operativa'
     },
     settimanale: {
@@ -45,7 +45,7 @@
     utenti: {
       title: 'Gestione utenti',
       text: 'Crea utenti con password (accesso immediato) o con solo email (il sistema invia un link di attivazione valido 24 ore). Con email configurata, ogni utente può fare il reset password autonomamente dalla pagina di login.',
-      link: BASE + 'utils/onboarding.php',
+      link: BASE + 'docs/onboarding.php',
       linkText: 'Guida per responsabili'
     },
     macchine: {
@@ -63,7 +63,7 @@
     dashboard: {
       title: 'Dashboard',
       text: 'Riepilogo giornata e accesso rapido alle funzioni principali. I KPI si aggiornano automaticamente ogni 30 secondi — il badge live lampeggia ad ogni refresh.',
-      link: BASE + 'utils/onboarding.php',
+      link: BASE + 'docs/onboarding.php',
       linkText: 'Guida operativa'
     },
     revisore: {
