@@ -1,6 +1,198 @@
 # Documentazione sviluppo — Games Palace Desk
 
-Riferimento tecnico per sviluppatori che lavorano sul codebase.
+Riferimento tecnico per sviluppatori che installano, personalizzano o estendono il sistema.
+
+---
+
+## Requisiti di sistema
+
+| Componente | Minimo | Raccomandato |
+|---|---|---|
+| PHP | 8.0 | 8.2+ |
+| MySQL | 8.0 | 8.0 / MariaDB 10.6+ |
+| Estensioni PHP | `pdo_mysql`, `mbstring`, `json` | + `zip` (export XLSX), `gd` o `imagick` (foto profilo) |
+| Web server | Apache 2.4+ con `mod_rewrite` | Apache; Nginx richiede config manuale |
+| HTTPS | opzionale in sviluppo | **obbligatorio in produzione** (cookie sicuri, PWA) |
+
+---
+
+## Installazione da zero
+
+1. **Copia i file sul server** nella directory pubblica (es. `/var/www/html/cassa/`).
+
+2. **Crea il database MySQL** e un utente dedicato:
+   ```sql
+   CREATE DATABASE cassa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'cassa_user'@'localhost' IDENTIFIED BY 'password_sicura';
+   GRANT ALL PRIVILEGES ON cassa.* TO 'cassa_user'@'localhost';
+   ```
+
+3. **Apri il setup wizard** nel browser: `https://tuodominio.it/cassa/install/setup.php`  
+   Il wizard guida in 6 passi: credenziali DB → configurazione sala → creazione admin → dati iniziali → moduli → fine.
+
+4. **Dopo il setup**, il file `install/config.php` viene creato automaticamente.  
+   **Non versionarlo mai** (è già in `.gitignore`).
+
+### Installazione manuale (senza wizard)
+
+```bash
+# 1. Importa lo schema
+mysql -u cassa_user -p cassa < install/schema.sql
+
+# 2. Crea config.php manualmente
+cp install/config.example.php install/config.php
+# Modifica le credenziali nel file
+```
+
+---
+
+## Aggiornamento di un'installazione esistente
+
+Non esistono file di migration. Il procedimento è:
+
+1. Aggiorna i file PHP/CSS/JS (git pull o upload).
+2. Leggi le note di `CHANGELOG.md` per la nuova versione.
+3. Se la release aggiunge colonne o tabelle, il CHANGELOG riporta le query da eseguire manualmente:
+   ```sql
+   -- Esempio: aggiunta colonna email nella v1.4.0
+   ALTER TABLE utenti ADD COLUMN email VARCHAR(255) NULL AFTER nome;
+   ```
+4. Le chiavi `impostazioni` nuove vengono create automaticamente al primo accesso alle pagine che le usano (con `INSERT IGNORE`).
+
+---
+
+## Configurazione Apache
+
+Il `.htaccess` nella root dell'applicazione gestisce:
+- Rewrite delle URL (non necessario per questa app — non usa URL friendly)
+- Blocco accesso a `install/`, `includes/`, `docs/`
+- Pagine di errore personalizzate 403 e 404
+
+```apache
+# Esempio .htaccess minimo per installazione in sottocartella
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /cassa/
+</IfModule>
+
+# Blocca accesso diretto alle directory sensibili
+<Files "*.php">
+  <RequireAll>
+    Require all granted
+  </RequireAll>
+</Files>
+Options -Indexes
+```
+
+### Nginx (configurazione equivalente)
+
+```nginx
+location /cassa/install/ { deny all; }
+location /cassa/includes/ { deny all; }
+location /cassa/docs/ { deny all; }
+location /cassa/account/uploads/profili/ { deny all; }
+```
+
+---
+
+## Configurazione email
+
+Il sistema usa `mail()` nativo di PHP. Perché le email arrivino correttamente:
+
+### 1. Imposta `mail_from` in Impostazioni → Sistema
+
+```
+noreply@tuodominio.it
+```
+
+Se lasciato vuoto, il sistema usa `noreply@cassasala.it` come fallback (alta probabilità di spam su domini non configurati).
+
+### 2. Configura sendmail/Postfix sul server
+
+```bash
+# Ubuntu/Debian
+sudo apt install postfix
+# Scegli "Internet Site" e inserisci il dominio
+
+# Test
+echo "Test" | mail -s "Test" destinatario@esempio.it
+```
+
+### 3. Alternativa: relay SMTP esterno
+
+Se il server non ha un MTA locale, usa un relay (Mailgun, SendGrid, SMTP Gmail):
+
+```ini
+; php.ini o .htaccess
+SMTP = smtp.mailgun.org
+smtp_port = 587
+sendmail_from = noreply@tuodominio.it
+```
+
+O installa `msmtp` come wrapper sendmail per relay SMTP autenticato.
+
+### Funzioni email disponibili (`includes/mail/mailer.php`)
+
+Tutte le email passano da questo file. Non inviare mai email direttamente con `mail()` fuori da qui.
+
+| Funzione | Trigger | Token |
+|---|---|---|
+| `mail_reset_password($pdo, $uid, $email, $sett, $cfg)` | Richiesta reset da login | 64-char hex, 1 ora |
+| `mail_nuovo_account($pdo, $uid, $email, $nome, $sett, $cfg)` | Account creato senza password | 64-char hex, 24 ore |
+| `mail_cambio_password($email, $nome, $ip, $sett, $cfg)` | Cambio password da profilo | nessuno (notifica) |
+| `mail_chiusura_giornata($revs, $tot, $mailVers, $data, $nomeOp, $appUrl, $sett, $cfg)` | Chiusura giornata | nessuno (riepilogo) |
+
+I template email usano automaticamente logo e colore brand da `impostazioni`. L'header HTML è generato da `_mail_header_html()` (privata — non chiamare direttamente).
+
+---
+
+## White-label: configurare una nuova istanza per un cliente
+
+Guida completa per preparare una copia dell'app per un nuovo cliente.
+
+### Step 1 — Fork o copia del repository
+
+```bash
+git clone git@github.com:matteo-nini/games-hall-desk.git nome-cliente-desk
+cd nome-cliente-desk
+```
+
+### Step 2 — Deploy e setup wizard
+
+Segui la sezione [Installazione da zero](#installazione-da-zero). Durante il wizard:
+- **Nome sala**: nome del cliente (es. "Sala Giochi Rossi")
+- **Admin**: crea un account `responsabile` per il gestore
+- **Moduli**: abilita/disabilita in base alle esigenze (prestiti, documenti, etc.)
+
+### Step 3 — Brand color e logo
+
+In **Impostazioni → Aspetto**:
+
+1. **Colore accent**: inserisci il colore brand del cliente in formato HEX (es. `#dc2626`). Il sistema deriva automaticamente le varianti per badge, hover e dark mode.
+2. **Logo**: carica il logo della sala (PNG/SVG, max 2 MB). Viene usato in header, email e stampa guasto.
+3. **Nome sala**: appare nel titolo del browser, nell'header login, nelle email.
+
+### Step 4 — Configurazione sale e macchine
+
+1. **Impostazioni → Turni**: configura numero turni (1-3), nomi e orari.
+2. **Macchine**: aggiungi le VLT e AWP della sala con codice, tipo e fornitore.
+3. **Fornitori**: configura i fornitori reali (NOVO, SNAI, etc. → nomi della sala).
+4. **Impostazioni → Email**: imposta `mail_from` con l'email del dominio della sala.
+
+### Step 5 — Operatori e revisori
+
+1. Crea gli utenti operatori e assegna il ruolo `operatore`.
+2. Crea almeno un `revisore` con email valida per ricevere le notifiche di chiusura giornata.
+3. Se il revisore non accede mai all'app, basta l'email: riceverà il riepilogo versamento ad ogni chiusura.
+
+### Step 6 — Test pre-consegna
+
+- [ ] Login funziona per tutti i ruoli
+- [ ] Cassa giornaliera: inserisci un turno di prova e chiudi la giornata
+- [ ] Email revisore ricevuta alla chiusura giornata
+- [ ] Reset password: richiedi un reset e verifica che il link arrivi
+- [ ] PWA: installa sul telefono del gestore
+- [ ] Dark mode: funziona correttamente con il brand color scelto
 
 ---
 
@@ -70,14 +262,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ### Note su `riepilogo_giornata()`
 
 ```php
-// Tutte le giornate (comportamento standard)
+// Default: legge solo l'ultimo turno del giorno (issue Q-01 — sottostima report mensili)
 riepilogo_giornata($pdo, '2026-06-01');
 
-// Solo i turni dell'operatore 3
+// Con opId: aggrega tutti i turni dell'operatore (corretto, usato nei report per operatore)
 riepilogo_giornata($pdo, '2026-06-01', 3);
 ```
 
-Quando `$opId > 0`, la query rimuove il `LIMIT 1` e aggiunge `AND operatore_id = $opId`, restituendo la somma di tutti i turni di quell'operatore nel giorno.
+**Attenzione**: con `$opId = 0` la query usa `ORDER BY numero DESC LIMIT 1`, restituendo solo l'ultimo turno. Questo è corretto per la dashboard live, ma causa sottostima nei report mensili aggregati su giornate con 2 turni (issue #11 — fix pianificato).
 
 ---
 
@@ -373,14 +565,73 @@ asset_url('assets/css/core.css')
 ## Struttura directory
 
 ```
-includes/       auth.php, lib.php, db.php, nav.php, XlsxWriter.php
-account/        login, logout, dashboard, profilo, responsabile, responsabile_live + admin/
-cassa/          giornaliero, settimanale, mensile, annuale
-sala/           awp, turni, ticket, prestiti, documenti, doc_view, print_guasto
-utils/          export, export_xlsx, onboarding
-assets/css/     core.css + fogli per pagina + tour.css
-assets/js/      sidebar.js, giornaliero.js, turni.js, toast.js, tour.js, ...
-install/        schema.sql, setup.php, config.php (non versionare)
+/
+├── includes/           Codice condiviso caricato da ogni pagina
+│   ├── auth.php        Sessioni, CSRF, rate limiting, guard functions
+│   ├── lib.php         Logica di dominio: calcoli, helper, query aggregate
+│   ├── db.php          Singleton PDO + config()
+│   ├── nav.php         Sidebar HTML, topbar, dark mode, brand inject
+│   ├── XlsxWriter.php  Writer XLSX nativo (ZIP + OpenXML)
+│   └── mail/
+│       └── mailer.php  Tutte le funzioni di invio email
+│
+├── account/            Pagine accessibili a tutti i ruoli autenticati
+│   ├── login.php
+│   ├── logout.php
+│   ├── dashboard.php   Vista unificata per ruolo (responsabile/revisore/operatore)
+│   ├── profilo.php
+│   ├── responsabile_live.php  Endpoint JSON KPI (solo responsabile)
+│   ├── reset_password.php
+│   ├── reset_confirm.php
+│   └── admin/          Pagine solo responsabile
+│       ├── utenti.php
+│       └── impostazioni.php
+│
+├── cassa/              Pagine di cassa (operatore + responsabile)
+│   ├── giornaliero.php Il form principale della cassa giornaliera
+│   ├── settimanale.php
+│   ├── mensile.php
+│   └── annuale.php
+│
+├── sala/               Moduli di sala (ticket, turni, documenti, prestiti)
+│   ├── turni.php       Calendario turni mensile
+│   ├── ticket.php      Ticket assistenza macchine
+│   ├── prestiti.php    Prestiti e rientri
+│   ├── documenti.php   Archivio documenti con cartelle e D&D
+│   ├── contatti.php    Rubrica contatti sala
+│   ├── macchine.php    Gestione macchine VLT/AWP e fornitori
+│   ├── doc_view.php    Serve documenti con autenticazione (non accesso diretto)
+│   └── print_guasto.php  Pagina stampa standalone (no nav, auto-print)
+│
+├── utils/              Utility e tool interni
+│   ├── export.php      Export CSV mensile
+│   ├── export_xlsx.php Export XLSX settimanale/mensile/annuale
+│   └── onboarding.php  Guida interattiva e reset tour
+│
+├── assets/
+│   ├── css/
+│   │   ├── core.css    Design system: variabili, layout, componenti riusabili
+│   │   ├── login.css
+│   │   ├── tour.css    Spotlight e tooltip tour onboarding
+│   │   └── *.css       Fogli per pagina specifica
+│   └── js/
+│       ├── sidebar.js  Toggle sidebar mobile
+│       ├── tour.js     Sistema onboarding spotlight
+│       ├── toast.js    Notifiche toast
+│       └── *.js        Script per pagina specifica
+│
+├── install/
+│   ├── schema.sql      Schema DB completo — unica fonte di verità
+│   ├── setup.php       Wizard installazione (6 passi)
+│   └── config.php      Credenziali DB — NON versionare
+│
+└── docs/               Documentazione (questo file è qui)
+    ├── dev.md
+    ├── features.md
+    ├── issues.md
+    ├── guida-operatori.md
+    ├── guida-responsabili.md
+    └── guida-revisori.md
 ```
 
 ---
