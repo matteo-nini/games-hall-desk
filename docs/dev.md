@@ -153,7 +153,7 @@ Guida completa per preparare una copia dell'app per un nuovo cliente.
 ### Step 1 — Fork o copia del repository
 
 ```bash
-git clone git@github.com:matteo-nini/games-hall-desk.git gestsuite-cliente
+git clone git@github.com:matteo-nini/gestHall-suite.git gestsuite-cliente
 cd nome-cliente-desk
 ```
 
