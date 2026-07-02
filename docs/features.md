@@ -433,7 +433,7 @@ Endpoint JSON-only. Salva in batch i dati bet/win su più date in un'unica trans
 
 ### 6.3 Documenti (`sala/documenti.php`)
 
-**Accesso:** `require_login()`. Verifica `modulo_documenti='1'` in `impostazioni`. Tre livelli: revisore (sola lettura), operatore (upload e gestione propri documenti), responsabile (tutte le azioni incluse eliminazione e gestione cartelle).
+**Accesso:** `require_login()`. Verifica `modulo_documenti='1'` in `impostazioni`. Tre livelli: revisore (sola lettura), operatore (upload, creazione cartelle, drag & drop tra cartelle), responsabile (tutte le azioni incluse eliminazione documenti e rinomina/eliminazione cartelle).
 
 **Funzione:** gestione documenti aziendali (PDF, immagini, Office) organizzati in cartelle.
 

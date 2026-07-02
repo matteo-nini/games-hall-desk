@@ -231,7 +231,8 @@ $navRev = [
         <div class="ob-pane" data-pane="9">
           <h3 class="ob-pane-head">Strumenti extra</h3>
           <p><strong>Prestiti e rientri</strong> — traccia movimenti di denaro extra verso persone. Il saldo mostra quanto non è ancora rientrato. Ogni rientro va registrato anche nel campo <em>Rientri</em> della cassa giornaliera.</p>
-          <p style="margin-top:10px"><strong>Documenti</strong> — visualizza e scarica moduli e istruzioni caricati dal responsabile. Apri, scarica o stampa direttamente dal browser.</p>
+          <p style="margin-top:10px"><strong>Documenti</strong> — visualizza e scarica file, ma anche <strong>carica</strong> nuovi documenti, <strong>crea cartelle</strong> con <em>+ Nuova cartella</em> e <strong>sposta</strong> i file tra cartelle con drag & drop. Solo il responsabile può eliminare documenti e gestire le cartelle (rinomina/elimina).</p>
+          <p style="margin-top:10px"><strong>Settimanale</strong> — oltre a inserire i dati Bet/Win manualmente, puoi usare il pulsante <strong>↑ XLS</strong> per importare il file scaricato dal portale SISAL: il sistema aggiorna automaticamente tutti i fornitori per la settimana selezionata.</p>
           <p style="margin-top:10px"><strong>Profilo</strong> — modifica nome, telefono, email (per il reset password), password e foto profilo. Se hai un'email configurata ricevi una notifica ad ogni cambio password.</p>
           <p style="margin-top:10px"><strong>PWA</strong> — installa l'app sul telefono: Chrome Android → menu → <em>Aggiungi alla schermata Home</em>. Safari iPhone → Condividi → <em>Aggiungi alla schermata Home</em>.</p>
         </div>
@@ -466,10 +467,10 @@ $navRev = [
 
         <div class="ob-pane" data-pane="7">
           <h3 class="ob-pane-head">Modulo Documenti</h3>
-          <p>Solo il responsabile può caricare ed eliminare. Tutti gli utenti possono visualizzare e scaricare. I file richiedono sempre l'autenticazione — non sono accessibili direttamente.</p>
+          <p>Operatori e responsabili possono caricare documenti, creare cartelle e spostare file con drag & drop. Solo il responsabile può <strong>eliminare</strong> documenti e rinominare/eliminare cartelle. I revisori sono in sola lettura. I file richiedono sempre l'autenticazione — non sono accessibili direttamente.</p>
           <ul class="ob-ul">
             <li>Tipi accettati: PDF, PNG, JPG, WebP, DOCX, XLSX, ODT, ODS (max 20 MB)</li>
-            <li><strong>Cartelle</strong>: crea con <em>+ Nuova cartella</em>, sposta documenti con <strong>drag & drop</strong></li>
+            <li><strong>Cartelle</strong>: crea con <em>+ Nuova cartella</em>, sposta documenti con <strong>drag & drop</strong> (disponibile a operatori e responsabili)</li>
             <li><strong>Visibilità</strong>: nascondi un documento agli operatori senza eliminarlo</li>
             <li><strong>Attivazione</strong>: il modulo si abilita in Impostazioni → Moduli</li>
           </ul>

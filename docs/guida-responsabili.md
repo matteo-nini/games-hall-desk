@@ -151,7 +151,7 @@ Hai le stesse funzionalità degli operatori, più:
 
 ### Settimanale
 
-Dati Bet/Win SNAI per settimana. Puoi inserire i dati direttamente dalla tabella. Supporta l'**importazione XLS/XLSX** scaricato dal portale SISAL: usa il pulsante **Importa XLS/XLSX** nella pagina settimanale.
+Dati Bet/Win SNAI per settimana. Puoi inserire i dati direttamente dalla tabella. Supporta l'**importazione XLS/XLSX** scaricato dal portale SISAL: usa il pulsante **↑ XLS** nella pagina settimanale. Questa funzione è disponibile anche agli operatori.
 
 ### Mensile
 
@@ -194,7 +194,7 @@ Solo il responsabile (di default) può caricare e gestire i documenti. Gli opera
 4. Premi **Carica**
 
 ### Organizzare i documenti
-- **Cartelle**: crea cartelle con **+ Nuova cartella**; i documenti si spostano tra cartelle con drag & drop
+- **Cartelle**: crea cartelle con **+ Nuova cartella**; i documenti si spostano tra cartelle con drag & drop (disponibile anche agli operatori). Solo il responsabile può rinominare o eliminare cartelle.
 - **Visibilità**: nascondi un documento agli operatori senza eliminarlo
 - **Riordina**: modifica il numero d'ordine di cartelle e documenti
 

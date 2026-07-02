@@ -147,7 +147,7 @@ In **Sala → Documenti** trovi i moduli, le istruzioni e i file caricati dal re
 - **Scarica** — salva una copia sul tuo dispositivo
 - Per stampare: apri il documento e usa Ctrl+P (Cmd+P su Mac)
 
-Se hai i permessi abilitati dal responsabile, puoi anche **caricare** nuovi documenti, **creare cartelle** e **spostare** i file tra cartelle con il drag & drop.
+Puoi anche **caricare** nuovi documenti, **creare cartelle** con il pulsante **+ Nuova cartella** e **spostare** i file tra cartelle con il drag & drop. Solo il responsabile può eliminare documenti e rinominare/eliminare cartelle.
 
 ---
 
@@ -159,9 +159,9 @@ In molte pagine (Utenti, Contatti, Macchine, Documenti) trovi una barra di ricer
 
 ## Report
 
-Hai accesso ai report in sola lettura:
+Hai accesso a tutti i report:
 
-- **Settimanale** — dati Bet/Win per settimana
+- **Settimanale** — dati Bet/Win SNAI per settimana. Puoi inserire i valori direttamente dalla tabella oppure usare il pulsante **↑ XLS** per importare il file scaricato dal portale SISAL — il sistema aggiorna automaticamente tutti i fornitori per la settimana selezionata.
 - **Mensile** — cassa giorno per giorno con confronto Δ% sul mese precedente
 - **Annuale** — panoramica mese per mese
 
