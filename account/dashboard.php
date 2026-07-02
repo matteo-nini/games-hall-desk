@@ -430,11 +430,11 @@ if(typeof Chart!=='undefined')(function(){
 document.addEventListener('DOMContentLoaded', function () {
   if (typeof GP_Tour === 'undefined') return;
   GP_Tour.init([
-    { selector: '.dash-hero',     title: 'Stato della giornata',       body: 'Qui vedi se la giornata è aperta, chiusa o non ancora iniziata, con l\'incasso VLT corrente.' },
-    { selector: '.dash-kpi',      title: 'KPI del giorno e mese',      body: 'Incasso e versamento di oggi e il totale del mese. Si aggiornano automaticamente ogni 30 secondi.' },
-    { selector: '#chart-30d',     title: 'Andamento ultimi 30 giorni', body: 'Ogni barra è un giorno. Passa il cursore per vedere l\'importo esatto.' },
-    { selector: '.dash-op-stats', title: 'Performance operatori',      body: 'Scostamento medio e % turni in quadratura per ogni operatore degli ultimi 30 giorni.' },
-    { selector: '.live-badge',    title: 'Aggiornamento live',         body: 'Il pallino verde lampeggia ad ogni fetch riuscita. Dati sempre aggiornati senza ricaricare.' },
+    { selector: '.dash-hero',     title: 'Stato della giornata',       body: 'Qui vedi se la giornata è aperta o chiusa e l\'incasso VLT del giorno. Il link diretto porta alla cassa senza cercare la data.' },
+    { selector: '.dash-kpi',      title: 'KPI giorno e mese',          body: 'Incasso, versamento e totale mese in tempo reale. Si aggiornano ogni 30 secondi in automatico — il badge live lampeggia ad ogni fetch.' },
+    { selector: '#chart-30d',     title: 'Grafici incasso',            body: 'Le barre mostrano l\'incasso VLT degli ultimi 30 giorni; il grafico lineare l\'andamento mensile degli ultimi 6 mesi. Passa il cursore per i valori esatti.' },
+    { selector: '.dash-op-stats', title: 'Performance operatori',      body: 'Turni compilati, scostamento medio e percentuale di turni in quadratura (scostamento &lt; 4 €) negli ultimi 30 giorni per ogni operatore.' },
+    { selector: '.live-badge',    title: 'Aggiornamento live',         body: 'Il pallino verde lampeggia ad ogni refresh riuscito. Se diventa grigio, la connessione al server è interrotta.' },
   ]);
 });
 </script>

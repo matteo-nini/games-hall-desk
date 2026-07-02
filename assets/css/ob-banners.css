@@ -1,71 +1,71 @@
 /* ============================================================
-   Onboarding system — banners, tooltips, wizard
+   Onboarding system — help button, popover, wizard
    ============================================================ */
 
-/* ---- Section banners ---- */
-.ob-section-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 0 24px 0;
-  padding: 11px 14px;
-  background: var(--accent-weak);
-  border: 1px solid var(--border2);
-  border-radius: var(--rs);
-  font-size: 13px;
-  color: var(--accent-ink)
-}
-
-.ob-sb-content {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
+/* ---- Help button (iniettato in .topbar-actions) ---- */
+.ob-help-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 6px 12px
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--rxs);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .1s, border-color .1s, background .1s;
+  flex-shrink: 0
 }
 
-.ob-sb-content strong {
+.ob-help-btn:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-weak)
+}
+
+/* ---- Help popover ---- */
+.ob-help-pop {
+  position: fixed;
+  z-index: 900;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh-popup);
+  padding: 16px 18px;
+  width: 300px;
+  max-width: calc(100vw - 24px)
+}
+
+.ob-hp-title {
+  display: block;
+  font-size: 13px;
   font-weight: 700;
-  white-space: nowrap
+  color: var(--text);
+  margin-bottom: 8px
 }
 
-.ob-sb-content span {
-  color: var(--accent-ink);
-  opacity: .85
+.ob-hp-body {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 10px
 }
 
-.ob-sb-link {
+.ob-hp-link {
+  display: inline-block;
   font-size: 12px;
   font-weight: 600;
   color: var(--accent);
+  text-decoration: none
+}
+
+.ob-hp-link:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
-  white-space: nowrap
+  text-underline-offset: 2px
 }
 
-.ob-sb-close {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: none;
-  color: var(--accent-ink);
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  padding: 0;
-  opacity: .55;
-  transition: opacity .1s;
-  display: flex;
-  align-items: center;
-  justify-content: center
-}
-
-.ob-sb-close:hover {
-  opacity: 1
-}
-
-/* ---- Help tooltips ---- */
+/* ---- Help tooltips (data-tip attr) ---- */
 .help-tip {
   display: inline-flex;
   align-items: center;
@@ -130,7 +130,7 @@
 .ob-wizard-dlg {
   border: 1px solid var(--border);
   border-radius: var(--r);
-  box-shadow: 0 8px 40px rgba(0,0,0,.22);
+  box-shadow: var(--sh-popup);
   padding: 0;
   max-width: 480px;
   width: calc(100vw - 48px)
@@ -152,7 +152,7 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .6px;
+  letter-spacing: .06em;
   color: var(--faint)
 }
 
@@ -225,6 +225,17 @@
 .ob-wiz-next:hover {
   opacity: .88;
   color: #fff
+}
+
+.ob-wiz-ghost {
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--border2)
+}
+
+.ob-wiz-ghost:hover {
+  opacity: .85;
+  color: var(--accent)
 }
 
 .ob-wiz-dots {

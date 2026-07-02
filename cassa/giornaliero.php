@@ -409,12 +409,12 @@ var GP_TURNS     = <?= json_encode($gpTurns) ?>;
 document.addEventListener('DOMContentLoaded', function () {
   if (typeof GP_Tour === 'undefined') return;
   GP_Tour.init([
-    { selector: '.tabs',        title: 'Turni del giorno',    body: 'Passa da Mattino a Sera usando i tab. Su mobile puoi anche scorrere con uno swipe.' },
-    { selector: '.statusbar',   title: 'Stato in tempo reale', body: 'Cassetto, versamento e scostamento si aggiornano mentre compili i campi.' },
-    { selector: '.f-fondo_cassa', title: 'Fondo cassa',       body: 'Inserisci l\'importo presente in cassa all\'inizio del turno.' },
-    { selector: '.bills-grid',  title: 'Conta contanti',       body: 'Inserisci i pezzi per ogni taglio. Il totale contanti si calcola automaticamente.' },
-    { selector: '.scassettamenti', title: 'Scassettamenti VLT', body: 'Importo prelevato da ogni cassetta VLT durante il turno.' },
-    { selector: '.save-btn',    title: 'Salva e chiudi',       body: 'Salva il turno corrente. Dopo aver completato entrambi i turni, chiudi la giornata.' },
+    { selector: '.tabs',           title: 'Turni del giorno',     body: 'Clicca i tab per passare tra Mattino e Sera. Su mobile scorri con uno swipe destra/sinistra — i pallini in basso indicano il turno attivo.' },
+    { selector: '.statusbar',      title: 'Barra di stato',       body: 'Cassetto, versamento e scostamento si aggiornano in tempo reale mentre compili. Verde: scostamento &lt; 4 €. Giallo: 4–5 €. Rosso: &gt; 5 € — ricontrolla contanti e ticket.' },
+    { selector: '.f-fondo_cassa',  title: 'Fondo cassa',          body: 'Importo in cassa all\'inizio del turno. Usato come riferimento per il calcolo dello scostamento.' },
+    { selector: '.bills-grid',     title: 'Contanti per taglio',  body: 'Inserisci il numero di banconote per ogni taglio. Il totale si calcola automaticamente. Le monete vanno nel campo Monete sotto.' },
+    { selector: '.scassettamenti', title: 'Scassettamenti VLT',   body: 'Inserisci l\'importo prelevato da ogni cassetta VLT. Lascia a zero le macchine non scassettate in questo turno. Il versamento VLT si aggiorna in tempo reale.' },
+    { selector: '.save-btn',       title: 'Salva e chiudi',       body: 'Salva il turno corrente — gli altri turni non vengono toccati. Dopo aver salvato tutti i turni, chiudi la giornata. La chiusura invia un\'email riepilogativa ai revisori.' },
   ]);
 });
 </script>
