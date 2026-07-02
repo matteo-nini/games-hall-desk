@@ -7,6 +7,32 @@ e il progetto adotta il [Versionamento Semantico](https://semver.org/lang/it/).
 
 ---
 
+## [1.8.0] — 2026-07-02
+
+### Security
+- S-08: validazione MIME reale con `finfo_file()` su upload foto profilo (bypass estensione → rifiuto)
+- S-09: redirect `err=email_invalida` (con banner) invece di ok silenzioso su `mail_from` malformata
+- S-10: attributi `integrity` (SHA-384) e `crossorigin="anonymous"` su Chart.js 4.4.0 da CDN
+
+### Performance
+- P-06: rimossi blocchi `ALTER TABLE` auto-migrazione da `profilo.php` e `macchine.php` (schema già aggiornato)
+- P-07: export CSV `audit_log` ora usa fetch row-by-row invece di `fetchAll()` per evitare memory exhaustion
+- P-08: aggiunto `INDEX idx_ip_time (ip, attempted_at)` su `login_attempts` in `schema.sql`
+
+### Fixed
+- Q-09: aggiunto `INDEX idx_refill_macchina` su `refill_awp.n_macchina` (FK non possibile senza migrazione dati — `n_macchina` è VARCHAR libero)
+- Q-11: `mail_chiusura_giornata` ora usa `_mail_header_html()` anziché header inline — logo e accent coerenti con le altre email
+- Q-14: rimosso handler `az='prezzi'` legacy in `impostazioni.php` (non esposto da nessun form UI)
+- Q-15: link export CSV in `cassa/annuale.php` ora include `&op=` per rispettare il filtro operatore attivo
+
+### Maintenance
+- M-04: aggiunti `INDEX idx_audit_creato (creato_il)` e `INDEX idx_audit_utente (utente_id, creato_il)` su `audit_log`
+- M-05: filename foto profilo ora è UUID casuale (`bin2hex(random_bytes(16))`), non più `uid_timestamp`
+- M-06: `account/uploads/profili/.htaccess` con `Deny from all` per bloccare accesso HTTP diretto alle foto
+- M-07: `canvas.toBlob()` in `profilo.js` ora usa il MIME reale del file selezionato (JPEG → `image/jpeg` + quality 0.88, PNG → `image/png`)
+
+---
+
 ## [1.7.0] — 2026-07-02
 
 ### Security
