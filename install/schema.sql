@@ -277,6 +277,7 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('modulo_assistenze',          '1'),
   ('modulo_prestiti',            '1'),
   ('modulo_documenti',           '1'),
+  ('modulo_contatti',            '1'),
   ('mail_from',                  ''),
   ('tel_sala',                   ''),
   ('email_sala',                 ''),

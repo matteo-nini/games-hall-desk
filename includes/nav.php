@@ -12,6 +12,7 @@ function top_menu(array $user): void {
     $modAssistenze    = ($navSett['modulo_assistenze']  ?? '1') === '1';
     $modPrestiti      = ($navSett['modulo_prestiti']    ?? '1') === '1';
     $modDocumenti     = ($navSett['modulo_documenti']   ?? '1') === '1';
+    $modContatti      = ($navSett['modulo_contatti']    ?? '1') === '1';
     $mobGiornalerioOk = ($navSett['mobile_giornaliero'] ?? '0') === '1';
 
     $ico = [
@@ -60,7 +61,7 @@ function top_menu(array $user): void {
         if ($modAssistenze) $salaItems['sala/ticket.php']    = ['label' => 'Assistenze', 'ico' => 'ticket'];
         if ($modPrestiti)   $salaItems['sala/prestiti.php']  = ['label' => 'Prestiti',   'ico' => 'prestiti'];
         if ($modDocumenti)  $salaItems['sala/documenti.php'] = ['label' => 'Documenti',  'ico' => 'documenti'];
-        $salaItems['sala/contatti.php'] = ['label' => 'Contatti', 'ico' => 'contatti'];
+        if ($modContatti)   $salaItems['sala/contatti.php']  = ['label' => 'Contatti',   'ico' => 'contatti'];
     }
 
     $adminItems = ($role === 'responsabile') ? [

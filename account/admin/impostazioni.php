@@ -120,11 +120,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         $ma = isset($_POST['modulo_assistenze']) ? '1' : '0';
         $mp = isset($_POST['modulo_prestiti'])   ? '1' : '0';
         $md = isset($_POST['modulo_documenti'])  ? '1' : '0';
+        $mc = isset($_POST['modulo_contatti'])   ? '1' : '0';
         $st = $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
         $st->execute(['modulo_assistenze', $ma]);
         $st->execute(['modulo_prestiti',   $mp]);
         $st->execute(['modulo_documenti',  $md]);
-        audit('impostazioni_moduli', null, null, "assistenze=$ma prestiti=$mp documenti=$md");
+        $st->execute(['modulo_contatti',   $mc]);
+        audit('impostazioni_moduli', null, null, "assistenze=$ma prestiti=$mp documenti=$md contatti=$mc");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -690,6 +692,13 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
                   <span class="imp-opt-text">
                     <strong>Documenti</strong>
                     <span>Caricamento e stampa di documenti operativi (moduli, avvisi, istruzioni)</span>
+                  </span>
+                </label>
+                <label class="imp-opt">
+                  <input type="checkbox" name="modulo_contatti" <?= ($sett['modulo_contatti'] ?? '1') === '1' ? 'checked' : '' ?>>
+                  <span class="imp-opt-text">
+                    <strong>Contatti</strong>
+                    <span>Rubrica interna con tecnici, fornitori e referenti della sala</span>
                   </span>
                 </label>
               </div>
