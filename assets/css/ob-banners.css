@@ -15,7 +15,8 @@
   color: var(--muted);
   cursor: pointer;
   transition: color .1s, border-color .1s, background .1s;
-  flex-shrink: 0
+  flex-shrink: 0;
+  padding: 0;
 }
 
 .ob-help-btn:hover {
@@ -137,7 +138,7 @@
 }
 
 .ob-wizard-dlg::backdrop {
-  background: rgba(0,0,0,.45);
+  background: rgba(0, 0, 0, .45);
   backdrop-filter: blur(2px)
 }
 
