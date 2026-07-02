@@ -38,7 +38,8 @@
 
 /* ---- login rinnovato ---- */
 .login-page {
-  background: radial-gradient(1200px 500px at 50% -10%, var(--accent-weak), var(--bg))
+  background: radial-gradient(1200px 500px at 50% -10%, var(--accent-weak), var(--bg));
+  margin-left: 0px;
 }
 
 .login-wrap {
