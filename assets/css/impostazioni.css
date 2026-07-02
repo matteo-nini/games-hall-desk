@@ -15,7 +15,11 @@
   text-decoration: none;
   transition: color .1s, background .1s
 }
-.icon-link:hover { color: var(--text); background: var(--surface2) }
+
+.icon-link:hover {
+  color: var(--text);
+  background: var(--surface2)
+}
 
 .imp-page {
   display: grid;
@@ -86,8 +90,17 @@
 }
 
 .imp-field input[type=time],
-.imp-field input[type=number] {
-  width: auto
+.imp-field input[type=number],
+.imp-field input[type=text],
+.imp-field input[type=time],
+.imp-field input[type=password],
+.imp-field input[type=email],
+.imp-field input[type=url],
+.imp-field input[type=tel],
+.imp-field input[type=file],
+.imp-field select {
+  width: auto;
+  text-align: left;
 }
 
 .imp-unit {
