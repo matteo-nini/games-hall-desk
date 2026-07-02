@@ -52,13 +52,24 @@ function get_turns(array $sett): array {
     return $turns;
 }
 
-/** Arrotonda il versamento al multiplo di 5 più vicino: su se resto > 2, giù altrimenti. */
+/**
+ * Arrotonda il versamento al multiplo di 5 più vicino.
+ * Soglia 2.0 anziché 2.5 (punto di mezzo matematico): scelta deliberata per
+ * favorire l'arrotondamento verso il basso su importi vicini al multiplo inferiore,
+ * riducendo i piccoli scostamenti sulle note di chiusura dei responsabili.
+ */
 function arrotonda_versamento(float $v): float {
     $v    = round($v, 2);
     $base = floor($v / 5) * 5;
     return ($v - $base) > 2.0 ? $base + 5.0 : $base;
 }
 
+/**
+ * Restituisce l'URL assoluto dalla root dell'applicazione.
+ * La logica ricava il prefisso di percorso confrontando la directory fisica dell'app
+ * con il path dello script corrente — supporta installazioni in sottocartella
+ * (es. /demo/games-hall-desk/) senza configurazione manuale.
+ */
 function base_url(string $path = ''): string {
     static $base = null;
     if ($base === null) {
@@ -76,12 +87,20 @@ function base_url(string $path = ''): string {
     return $base . ltrim($path, '/');
 }
 
+/** URL di un asset con cache-busting basato su mtime del file (?v=timestamp). */
 function asset_url(string $path): string {
     $file = dirname(__DIR__) . '/' . ltrim($path, '/');
     $v    = is_file($file) ? filemtime($file) : 0;
     return base_url($path) . ($v ? '?v=' . $v : '');
 }
 
+/**
+ * Deriva le varianti CSS dell'accent color dal colore brand.
+ * --accent-weak: 85% bianco + 15% accent (sfondo badge, highlight leggeri).
+ * --accent-ink:  accent × 60% (hover, testo su sfondo weak — garantisce contrasto).
+ * Queste proporzioni sono deliberate: cambiarle rompe il sistema colore in dark mode
+ * (che usa color-mix() sulle stesse variabili in core.css).
+ */
 function brand_derive(string $hex): array {
     if (!preg_match('/^#[0-9a-fA-F]{6}$/', $hex)) return [];
     $r = hexdec(substr($hex, 1, 2));
@@ -95,9 +114,22 @@ function brand_derive(string $hex): array {
 }
 
 /**
- * Calcola la riconciliazione di un turno.
+ * Riconciliazione di un singolo turno. Fonte di verità server-side;
+ * le stesse formule esistono in JS (giornaliero.php) per il ricalcolo live.
+ *
  * $t deve contenere: fondo_cassa, monete, bancomat, differenze, ii_cassa,
- * rientri, contanti (somma), refill (somma), scass (somma), ticket (somma).
+ * rientri, contanti (somma taglio×pezzi), refill (somma euro), scass (totale
+ * scassettamenti), ticket (totale ticket vincita pagati).
+ *
+ * Formule:
+ *   cassetto   = contanti + refill + differenze − 2ª_cassa − rientri
+ *   vers_vlt   = scass − bancomat − ticket       (denaro da versare al gestore)
+ *   vers_cassa = cassetto + monete − fondo_cassa  (quadratura cassa fisica)
+ *   errore     = vers_vlt − vers_cassa            (deve essere 0 a fine giornata)
+ *   totale     = cassetto + monete + bancomat + ticket  (bilancio complessivo del turno)
+ *
+ * Nota: `bancomat` e `ticket` compaiono sia in vers_vlt (uscite) sia in totale
+ * (rientri contabili) — è corretto perché bilanciano i rispettivi movimenti di cassa.
  */
 function calcola_turno(array $t): array {
     $g = fn($k) => (float)($t[$k] ?? 0);
@@ -164,7 +196,16 @@ function sums_turno(PDO $pdo, int $tid): array {
     return compact('contanti','refill','scass','ticket') + ['scass_forn' => $scass_forn];
 }
 
-/** Riepilogo finanziario di giornata: usa l'ultimo turno disponibile (massimo numero). */
+/**
+ * Riepilogo finanziario di una giornata.
+ *
+ * Con $opId = 0 (default): legge SOLO l'ultimo turno (ORDER BY numero DESC LIMIT 1).
+ * Comportamento intenzionale per la dashboard "live" (mostra lo stato corrente),
+ * ma causa SOTTOSTIMA nei report aggregati su giornate con 2 turni — issue Q-01.
+ *
+ * Con $opId > 0: filtra per operatore e aggrega tutti i suoi turni (usato nei
+ * report per operatore e nel calcolo stipendi).
+ */
 function riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array {
     $fornitori = get_fornitori($pdo);
     $z = ['bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,'incasso_vlt'=>0.0,
@@ -236,6 +277,11 @@ function ensure_turno(PDO $pdo, int $giornata_id, int $n): array {
     return $t;
 }
 
+/**
+ * Tutte le impostazioni come array associativo chiave→valore.
+ * Cache statica: stale se la tabella viene modificata nella stessa request (issue P-03).
+ * In caso di DB irraggiungibile ritorna [] senza eccezione.
+ */
 function get_settings(PDO $pdo): array {
     static $cache = null;
     if ($cache !== null) return $cache;
@@ -261,6 +307,10 @@ function avatar_initials(string $name): string {
     );
 }
 
+/**
+ * Gradiente HSL deterministico dal nome: crc32 → hue primario, +40° per il secondo.
+ * Garantisce che lo stesso nome produca sempre lo stesso colore tra sessioni e pagine.
+ */
 function avatar_style(string $name): string {
     $h1 = abs(crc32($name)) % 360;
     $h2 = ($h1 + 40) % 360;
