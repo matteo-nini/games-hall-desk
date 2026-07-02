@@ -387,6 +387,8 @@ var GP_30D=<?= json_encode($chart30, JSON_UNESCAPED_UNICODE) ?>;
 var GP_6M=<?= json_encode($chart6m, JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+        integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
+        crossorigin="anonymous"
         onerror="document.querySelectorAll('.dash-chart-wrap').forEach(function(w){w.innerHTML='<p style=\'padding:8px;font-size:12px;color:#999\'>Grafici non disponibili</p>';})"></script>
 <script>
 if(typeof Chart!=='undefined')(function(){

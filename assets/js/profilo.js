@@ -17,10 +17,12 @@
   var csrf = (document.querySelector('meta[name="csrf"]') || {}).content || '';
   var scale = 1, initScale = 1, ox = 0, oy = 0;
   var dragging = false, startX = 0, startY = 0, startOx = 0, startOy = 0;
+  var selectedMime = 'image/png';
 
   fileIn.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
+    selectedMime = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
     var url = URL.createObjectURL(file);
     imgEl.onload = function () {
       imgEl.style.width  = imgEl.naturalWidth  + 'px';
@@ -118,11 +120,12 @@
     var srcH = STAGE / scale;
     ctx.clearRect(0, 0, 256, 256);
     ctx.drawImage(imgEl, srcX, srcY, srcW, srcH, 0, 0, 256, 256);
+    var ext = selectedMime === 'image/jpeg' ? 'jpg' : 'png';
     canvas.toBlob(function (blob) {
       var fd = new FormData();
       fd.append('csrf',   csrf);
       fd.append('azione', 'foto');
-      fd.append('foto',   blob, 'profilo.png');
+      fd.append('foto',   blob, 'profilo.' + ext);
       btnOk.disabled = true;
       btnOk.textContent = 'Salvataggio…';
       fetch('profilo.php', {
@@ -147,6 +150,6 @@
           btnOk.disabled = false;
           btnOk.textContent = 'Usa questa foto';
         });
-    }, 'image/png');
+    }, selectedMime, selectedMime === 'image/jpeg' ? 0.88 : undefined);
   });
 })();

@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS refill_awp (
   n_macchina VARCHAR(20)   DEFAULT NULL,
   euro       DECIMAL(10,2) NOT NULL DEFAULT 0,
   ora        TIME          DEFAULT NULL,
+  INDEX idx_refill_macchina (n_macchina),
   CONSTRAINT fk_refill_turno FOREIGN KEY (turno_id) REFERENCES turni(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -136,6 +137,8 @@ CREATE TABLE IF NOT EXISTS audit_log (
   dettaglio TEXT         DEFAULT NULL,
   ip        VARCHAR(45)  DEFAULT NULL,
   creato_il TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_audit_creato (creato_il),
+  INDEX idx_audit_utente (utente_id, creato_il),
   CONSTRAINT fk_audit_utente FOREIGN KEY (utente_id) REFERENCES utenti(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -230,7 +233,8 @@ INSERT IGNORE INTO prezzi_turni (nome, prezzo) VALUES
 CREATE TABLE IF NOT EXISTS login_attempts (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   ip           VARCHAR(45) NOT NULL,
-  attempted_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
+  attempted_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_ip_time (ip, attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Fornitori (lista configurabile) ----------

@@ -7,12 +7,6 @@ $cfg  = config();
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $msg  = '';
 
-/* Auto-migrazione colonne seriale/civ */
-try {
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN seriale VARCHAR(100) NULL AFTER fornitore');
-    $pdo->exec('ALTER TABLE macchine ADD COLUMN civ VARCHAR(100) NULL AFTER seriale');
-} catch (Throwable) {}
-
 $fornitori = get_fornitori($pdo);
 
 /* ====================================================================

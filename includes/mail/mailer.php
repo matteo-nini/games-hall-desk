@@ -205,17 +205,12 @@ function mail_chiusura_giornata(
 ): void {
     if (empty($revs)) return;
 
-    $hE       = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
-    $nomeSala = $cfg['nome_sala'] ?? 'Cassa Sala';
-    $accent   = ($sett['brand_accent'] ?? '') ?: '#111827';
-    $dataFmt  = date('d/m/Y', strtotime($data));
+    $hE        = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+    $nomeSala  = $cfg['nome_sala'] ?? 'Cassa Sala';
+    $dataFmt   = date('d/m/Y', strtotime($data));
     $chiusaOra = date('H:i');
 
-    $hdr = '<div style="background:' . $accent . ';padding:24px 28px">'
-         . '<p style="margin:0 0 3px;color:rgba(255,255,255,.65);font-size:11px;letter-spacing:.08em;text-transform:uppercase">'
-         . $hE($nomeSala) . '</p>'
-         . '<h1 style="margin:0;color:#fff;font-size:20px;font-weight:700">Riepilogo versamento</h1>'
-         . '</div>';
+    $hdr = _mail_header_html('Riepilogo versamento', $sett, $cfg);
 
     $content = '<div style="padding:24px">'
              . '<table style="width:100%;border-collapse:collapse;font-size:14px">'

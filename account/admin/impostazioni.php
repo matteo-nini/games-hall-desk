@@ -91,15 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
-    if ($az === 'prezzi') {
-        $pm = is_numeric($_POST['prezzo_mattino'] ?? '') ? abs((float)$_POST['prezzo_mattino']) : null;
-        $ps = is_numeric($_POST['prezzo_sera']   ?? '') ? abs((float)$_POST['prezzo_sera'])   : null;
-        if ($pm !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="mattino"')->execute([$pm]);
-        if ($ps !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="sera"')->execute([$ps]);
-        audit('impostazioni_prezzi', null, null, "mattino=$pm sera=$ps");
-        header('Location: impostazioni.php?ok=1'); exit;
-    }
-
     if ($az === 'permessi') {
         $st = $pdo->prepare('INSERT INTO impostazioni (chiave,valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)');
         $v1 = isset($_POST['operatori_modifica_turni']) ? '1' : '0';
@@ -192,12 +183,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     if ($az === 'email') {
         $mf = mb_substr(trim($_POST['mail_from'] ?? ''), 0, 200);
         if ($mf !== '' && !filter_var($mf, FILTER_VALIDATE_EMAIL)) {
-            /* Ignora silenziosamente email malformata, non blocchiamo il redirect */
-        } else {
-            $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
-                ->execute(['mail_from', $mf]);
-            audit('impostazioni_email', null, null, "mail_from=$mf");
+            header('Location: impostazioni.php?err=email_invalida'); exit;
         }
+        $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
+            ->execute(['mail_from', $mf]);
+        audit('impostazioni_email', null, null, "mail_from=$mf");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -278,6 +268,8 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
 
     <?php if (isset($_GET['ok'])): ?>
     <div class="ok" role="alert">Impostazioni salvate.</div>
+    <?php elseif (($_GET['err'] ?? '') === 'email_invalida'): ?>
+    <div class="warn" role="alert">Indirizzo email mittente non valido. Verificare il formato (es. <code>noreply@miasala.it</code>).</div>
     <?php endif; ?>
 
     <?php if (!$migrationOk): ?>
