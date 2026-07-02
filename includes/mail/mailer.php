@@ -55,7 +55,8 @@ function _mail_wrap(string $hdr, string $content, string $footer): string {
 function _mail_send(string $to, string $subject, string $body, array $sett): void {
     $from    = ($sett['mail_from'] ?? '') ?: 'noreply@cassasala.it';
     $headers = 'From: ' . $from . "\r\nContent-Type: text/html; charset=UTF-8\r\nMIME-Version: 1.0\r\n";
-    @mail($to, $subject, $body, $headers);
+    $ok = mail($to, $subject, $body, $headers);
+    if (!$ok) error_log('[mailer] mail() fallita — to=' . $to . ' subject=' . $subject);
 }
 
 // ─── Email specifiche ────────────────────────────────────────────────────────
@@ -64,13 +65,22 @@ function _mail_send(string $to, string $subject, string $body, array $sett): voi
  * Genera un token di reset password (1 ora) e spedisce l'email all'utente.
  */
 function mail_reset_password(PDO $pdo, int $uid, string $email, array $sett, array $cfg): void {
-    $pdo->prepare('UPDATE password_reset SET usato=1 WHERE utente_id=? AND usato=0')
-        ->execute([$uid]);
+    // Pulizia opportunistica dei token scaduti (Q-08)
+    $pdo->exec('DELETE FROM password_reset WHERE scade_il < NOW()');
 
     $token = bin2hex(random_bytes(32));
     $scade = date('Y-m-d H:i:s', time() + 3600);
-    $pdo->prepare('INSERT INTO password_reset (utente_id, token, scade_il) VALUES (?,?,?)')
-        ->execute([$uid, $token, $scade]);
+
+    // Transazione: invalida i vecchi token e inserisce il nuovo atomicamente (Q-13)
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('UPDATE password_reset SET usato=1 WHERE utente_id=? AND usato=0')->execute([$uid]);
+        $pdo->prepare('INSERT INTO password_reset (utente_id, token, scade_il) VALUES (?,?,?)')->execute([$uid, $token, $scade]);
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
 
     $hE       = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
     $resetUrl = _mail_abs_url('account/reset_confirm.php') . '?token=' . urlencode($token);
@@ -106,13 +116,19 @@ function mail_reset_password(PDO $pdo, int $uid, string $email, array $sett, arr
  * Token valido per 24 ore.
  */
 function mail_nuovo_account(PDO $pdo, int $uid, string $email, string $nome, array $sett, array $cfg): void {
-    $pdo->prepare('UPDATE password_reset SET usato=1 WHERE utente_id=? AND usato=0')
-        ->execute([$uid]);
-
     $token = bin2hex(random_bytes(32));
     $scade = date('Y-m-d H:i:s', time() + 86400);
-    $pdo->prepare('INSERT INTO password_reset (utente_id, token, scade_il) VALUES (?,?,?)')
-        ->execute([$uid, $token, $scade]);
+
+    // Transazione: invalida eventuali token precedenti e inserisce il nuovo atomicamente (Q-13)
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('UPDATE password_reset SET usato=1 WHERE utente_id=? AND usato=0')->execute([$uid]);
+        $pdo->prepare('INSERT INTO password_reset (utente_id, token, scade_il) VALUES (?,?,?)')->execute([$uid, $token, $scade]);
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
 
     $hE       = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
     $setUrl   = _mail_abs_url('account/reset_confirm.php') . '?token=' . urlencode($token);
@@ -189,17 +205,12 @@ function mail_chiusura_giornata(
 ): void {
     if (empty($revs)) return;
 
-    $hE       = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
-    $nomeSala = $cfg['nome_sala'] ?? 'Cassa Sala';
-    $accent   = ($sett['brand_accent'] ?? '') ?: '#111827';
-    $dataFmt  = date('d/m/Y', strtotime($data));
+    $hE        = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
+    $nomeSala  = $cfg['nome_sala'] ?? 'Cassa Sala';
+    $dataFmt   = date('d/m/Y', strtotime($data));
     $chiusaOra = date('H:i');
 
-    $hdr = '<div style="background:' . $accent . ';padding:24px 28px">'
-         . '<p style="margin:0 0 3px;color:rgba(255,255,255,.65);font-size:11px;letter-spacing:.08em;text-transform:uppercase">'
-         . $hE($nomeSala) . '</p>'
-         . '<h1 style="margin:0;color:#fff;font-size:20px;font-weight:700">Riepilogo versamento</h1>'
-         . '</div>';
+    $hdr = _mail_header_html('Riepilogo versamento', $sett, $cfg);
 
     $content = '<div style="padding:24px">'
              . '<table style="width:100%;border-collapse:collapse;font-size:14px">'

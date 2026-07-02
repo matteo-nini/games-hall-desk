@@ -7,6 +7,55 @@ e il progetto adotta il [Versionamento Semantico](https://semver.org/lang/it/).
 
 ---
 
+## [1.8.0] — 2026-07-02
+
+### Security
+- S-08: validazione MIME reale con `finfo_file()` su upload foto profilo (bypass estensione → rifiuto)
+- S-09: redirect `err=email_invalida` (con banner) invece di ok silenzioso su `mail_from` malformata
+- S-10: attributi `integrity` (SHA-384) e `crossorigin="anonymous"` su Chart.js 4.4.0 da CDN
+
+### Performance
+- P-06: rimossi blocchi `ALTER TABLE` auto-migrazione da `profilo.php` e `macchine.php` (schema già aggiornato)
+- P-07: export CSV `audit_log` ora usa fetch row-by-row invece di `fetchAll()` per evitare memory exhaustion
+- P-08: aggiunto `INDEX idx_ip_time (ip, attempted_at)` su `login_attempts` in `schema.sql`
+
+### Fixed
+- Q-09: aggiunto `INDEX idx_refill_macchina` su `refill_awp.n_macchina` (FK non possibile senza migrazione dati — `n_macchina` è VARCHAR libero)
+- Q-11: `mail_chiusura_giornata` ora usa `_mail_header_html()` anziché header inline — logo e accent coerenti con le altre email
+- Q-14: rimosso handler `az='prezzi'` legacy in `impostazioni.php` (non esposto da nessun form UI)
+- Q-15: link export CSV in `cassa/annuale.php` ora include `&op=` per rispettare il filtro operatore attivo
+
+### Maintenance
+- M-04: aggiunti `INDEX idx_audit_creato (creato_il)` e `INDEX idx_audit_utente (utente_id, creato_il)` su `audit_log`
+- M-05: filename foto profilo ora è UUID casuale (`bin2hex(random_bytes(16))`), non più `uid_timestamp`
+- M-06: `account/uploads/profili/.htaccess` con `Deny from all` per bloccare accesso HTTP diretto alle foto
+- M-07: `canvas.toBlob()` in `profilo.js` ora usa il MIME reale del file selezionato (JPEG → `image/jpeg` + quality 0.88, PNG → `image/png`)
+
+---
+
+## [1.7.0] — 2026-07-02
+
+### Security
+- S-04: campo `assistenza_password` in impostazioni ora usa `type="password"` con `autocomplete="off"`
+- S-05: IP validato con `filter_var(FILTER_VALIDATE_IP)` nella conferma versamento
+- S-06: stringa `onclick confirm()` wrappata con `json_encode()` per prevenire XSS
+
+### Fixed
+- Q-02: conferma versamento duplicata non restituiva più un "ok" falso; cattura `\PDOException` con SQLSTATE `23000` e redirect `err=gia_confermato`
+- Q-08: pulizia token scaduti (`DELETE … WHERE scade_il < NOW()`) prima di generare un nuovo token di reset
+- Q-12: rimosso `@` suppressor da `mail()`; aggiunto `error_log()` su fallimento
+- Q-13: UPDATE + INSERT token password avvolti in `beginTransaction/commit/rollBack` per atomicità
+
+### Performance
+- P-03: `get_settings()` accetta parametro `bool $force = false`; chiamata con `true` dopo le scritture in `impostazioni.php` per evitare cache stale
+- P-04: rimosso `CREATE TABLE IF NOT EXISTS login_attempts` da `auth.php` (tabella già definita in `install/schema.sql`)
+
+### Maintenance
+- M-01: aggiunte chiavi seed `brand_accent` e `logo_path` in `install/schema.sql`
+- M-03: `COLLATE=utf8mb4_unicode_ci` uniformato su tutte le tabelle in `install/schema.sql`
+
+---
+
 ## [1.6.0] — 2026-07-02
 
 ### Added

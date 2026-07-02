@@ -9,11 +9,6 @@ $sett = get_settings($pdo);
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $uid  = (int)$user['id'];
 
-/* Auto-migrazione colonne */
-try { $pdo->exec('ALTER TABLE utenti ADD COLUMN telefono VARCHAR(30) DEFAULT NULL'); } catch (Throwable) {}
-try { $pdo->exec('ALTER TABLE contatti ADD COLUMN utente_id INT DEFAULT NULL'); } catch (Throwable) {}
-try { $pdo->exec('ALTER TABLE contatti ADD COLUMN sistema TINYINT(1) NOT NULL DEFAULT 0'); } catch (Throwable) {}
-
 $ok  = '';
 $err = '';
 
@@ -102,14 +97,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $err = 'Errore nel caricamento del file.';
         } else {
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+            $fi  = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($fi, $file['tmp_name']);
+            finfo_close($fi);
+            $mimeAllowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            if (!isset($mimeAllowed[$mime])) {
                 $err = 'Formato non supportato. Usa JPG, PNG o WebP.';
             } elseif ($file['size'] > 2 * 1024 * 1024) {
                 $err = 'File troppo grande. Massimo 2 MB.';
             } else {
-                $dir = __DIR__ . '/uploads/profili/';
+                $ext   = $mimeAllowed[$mime]; // usa estensione dal MIME reale (S-08)
+                $dir   = __DIR__ . '/uploads/profili/';
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $fname = $uid . '_' . time() . '.' . $ext;
+                $fname = bin2hex(random_bytes(16)) . '.' . $ext; // UUID casuale (M-05)
                 if (move_uploaded_file($file['tmp_name'], $dir . $fname)) {
                     $old = $pdo->prepare('SELECT foto FROM utenti WHERE id=?');
                     $old->execute([$uid]);

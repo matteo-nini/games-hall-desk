@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
             if (preg_match('/^\d{1,2}:\d{2}$/', $fine))   $st->execute(["turno_{$i}_fine",   $fine]);
         }
         /* Mantieni le chiavi legacy in sync per backward compat */
-        $sett_new = get_settings($pdo);
+        $sett_new = get_settings($pdo, true); // force-refresh dopo le scritture (P-03)
         $st->execute(['turno_mattino_inizio', $sett_new['turno_1_inizio'] ?? '13:00']);
         $st->execute(['turno_mattino_fine',   $sett_new['turno_1_fine']   ?? '19:00']);
         $st->execute(['turno_sera_inizio',    $sett_new['turno_2_inizio'] ?? '19:00']);
@@ -88,15 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
             file_put_contents($cfgFile, "<?php\nreturn " . var_export($cfgData, true) . ";\n");
             audit('impostazioni_timezone', null, null, $tz);
         }
-        header('Location: impostazioni.php?ok=1'); exit;
-    }
-
-    if ($az === 'prezzi') {
-        $pm = is_numeric($_POST['prezzo_mattino'] ?? '') ? abs((float)$_POST['prezzo_mattino']) : null;
-        $ps = is_numeric($_POST['prezzo_sera']   ?? '') ? abs((float)$_POST['prezzo_sera'])   : null;
-        if ($pm !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="mattino"')->execute([$pm]);
-        if ($ps !== null) $pdo->prepare('UPDATE prezzi_turni SET prezzo=? WHERE nome="sera"')->execute([$ps]);
-        audit('impostazioni_prezzi', null, null, "mattino=$pm sera=$ps");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -192,12 +183,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
     if ($az === 'email') {
         $mf = mb_substr(trim($_POST['mail_from'] ?? ''), 0, 200);
         if ($mf !== '' && !filter_var($mf, FILTER_VALIDATE_EMAIL)) {
-            /* Ignora silenziosamente email malformata, non blocchiamo il redirect */
-        } else {
-            $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
-                ->execute(['mail_from', $mf]);
-            audit('impostazioni_email', null, null, "mail_from=$mf");
+            header('Location: impostazioni.php?err=email_invalida'); exit;
         }
+        $pdo->prepare('INSERT INTO impostazioni (chiave, valore) VALUES (?,?) ON DUPLICATE KEY UPDATE valore=VALUES(valore)')
+            ->execute(['mail_from', $mf]);
+        audit('impostazioni_email', null, null, "mail_from=$mf");
         header('Location: impostazioni.php?ok=1'); exit;
     }
 
@@ -278,6 +268,8 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
 
     <?php if (isset($_GET['ok'])): ?>
     <div class="ok" role="alert">Impostazioni salvate.</div>
+    <?php elseif (($_GET['err'] ?? '') === 'email_invalida'): ?>
+    <div class="warn" role="alert">Indirizzo email mittente non valido. Verificare il formato (es. <code>noreply@miasala.it</code>).</div>
     <?php endif; ?>
 
     <?php if (!$migrationOk): ?>
@@ -741,8 +733,8 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
                 </div>
                 <div class="imp-field">
                   <label for="imp-apwd">Password</label>
-                  <input id="imp-apwd" type="text" name="assistenza_password" maxlength="200"
-                         value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123">
+                  <input id="imp-apwd" type="password" name="assistenza_password" maxlength="200"
+                         value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123" autocomplete="off">
                 </div>
               </div>
               <div class="imp-form-footer">

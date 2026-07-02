@@ -35,17 +35,17 @@ $page   = min($page, $pages);
 $offset = ($page - 1) * $per;
 
 if (($_GET['export'] ?? '') === 'csv') {
-    $rows = $pdo->query(
-        'SELECT a.*, u.username FROM audit_log a
-         LEFT JOIN utenti u ON u.id=a.utente_id
-         ORDER BY a.id DESC'
-    )->fetchAll();
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="audit_' . date('Ymd') . '.csv"');
     echo "\xEF\xBB\xBF";
-    $f = fopen('php://output', 'w');
+    $f  = fopen('php://output', 'w');
     fputcsv($f, ['Data/ora','Utente','Azione','Entità','ID','Dettaglio','IP'], ';');
-    foreach ($rows as $r) {
+    $st = $pdo->query(
+        'SELECT a.*, u.username FROM audit_log a
+         LEFT JOIN utenti u ON u.id=a.utente_id
+         ORDER BY a.id DESC'
+    );
+    while ($r = $st->fetch()) {
         fputcsv($f, [
             $r['creato_il'], $r['username'] ?? '', $r['azione'],
             $r['entita'] ?? '', $r['entita_id'] ?? '',

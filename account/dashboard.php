@@ -46,14 +46,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ');
                 $stV->execute([$gid, $gid, $gid]);
                 $importo = (float)$stV->fetchColumn();
+                $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '', FILTER_VALIDATE_IP) ?: 'unknown';
+                $ua = mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
                 try {
                     $pdo->prepare('INSERT INTO versamenti_confermati (giornata_id,confermato_da,importo_dichiarato,ip,user_agent) VALUES (?,?,?,?,?)')
-                        ->execute([$gid, (int)$user['id'], $importo, $_SERVER['REMOTE_ADDR'] ?? '', mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500)]);
-                    audit('versamento_confermato', 'giornate', $gid, "importo=$importo ip=" . ($_SERVER['REMOTE_ADDR'] ?? ''));
-                } catch (Throwable) {}
+                        ->execute([$gid, (int)$user['id'], $importo, $ip, $ua]);
+                    audit('versamento_confermato', 'giornate', $gid, "importo=$importo ip=$ip");
+                    header('Location: dashboard.php?ok=confermato'); exit;
+                } catch (\PDOException $e) {
+                    // Duplicate key: giornata già confermata da qualcun altro
+                    if ($e->getCode() === '23000') {
+                        header('Location: dashboard.php?err=gia_confermato'); exit;
+                    }
+                    throw $e;
+                }
             }
         }
-        header('Location: dashboard.php?ok=confermato'); exit;
+        header('Location: dashboard.php'); exit;
     }
 
     header('Location: dashboard.php'); exit;
@@ -378,6 +387,8 @@ var GP_30D=<?= json_encode($chart30, JSON_UNESCAPED_UNICODE) ?>;
 var GP_6M=<?= json_encode($chart6m, JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+        integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
+        crossorigin="anonymous"
         onerror="document.querySelectorAll('.dash-chart-wrap').forEach(function(w){w.innerHTML='<p style=\'padding:8px;font-size:12px;color:#999\'>Grafici non disponibili</p>';})"></script>
 <script>
 if(typeof Chart!=='undefined')(function(){
@@ -493,6 +504,8 @@ elseif (is_revisore()):
 
 <?php if (isset($_GET['ok'])): ?>
 <div class="ok rv-ok">Versamento confermato e registrato.</div>
+<?php elseif (($_GET['err'] ?? '') === 'gia_confermato'): ?>
+<div class="warn rv-ok">Questa giornata è già stata confermata da un altro utente.</div>
 <?php endif; ?>
 
 <main class="rv-main" id="main">
@@ -537,7 +550,7 @@ elseif (is_revisore()):
               <input type="hidden" name="azione" value="conferma_ritiro">
               <input type="hidden" name="giornata_id" value="<?= (int)$p['id'] ?>">
               <button type="submit" class="rv-btn-conf"
-                      onclick="return confirm('Confermi il ritiro di € <?= $nv((float)$p['versamento']) ?> del <?= $fmtData($p['data']) ?>?\n\nVerranno registrati IP, orario e identità account.')">
+                      onclick="return confirm(<?= json_encode('Confermi il ritiro di € ' . $nv((float)$p['versamento']) . ' del ' . $fmtData($p['data']) . "?\n\nVerranno registrati IP, orario e identità account.") ?>)">
                 Conferma ritiro
               </button>
             </form>

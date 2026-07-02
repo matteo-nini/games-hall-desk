@@ -357,9 +357,14 @@ function ensure_turno(PDO $pdo, int $giornata_id, int $n): array {
  * Cache statica: stale se la tabella viene modificata nella stessa request (issue P-03).
  * In caso di DB irraggiungibile ritorna [] senza eccezione.
  */
-function get_settings(PDO $pdo): array {
+/**
+ * Legge tutte le chiavi dalla tabella impostazioni.
+ * Passa $force=true dopo una scrittura per invalidare la cache statica
+ * ed evitare dati stale nella stessa request (P-03).
+ */
+function get_settings(PDO $pdo, bool $force = false): array {
     static $cache = null;
-    if ($cache !== null) return $cache;
+    if ($cache !== null && !$force) return $cache;
     try {
         $rows  = $pdo->query('SELECT chiave, valore FROM impostazioni')->fetchAll();
         $cache = array_column($rows, 'valore', 'chiave');

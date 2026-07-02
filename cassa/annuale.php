@@ -138,7 +138,7 @@ $totGiorni = array_sum($giorniM);
     </form>
   </div>
   <div class="topbar-actions">
-    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&export=csv">&#8595; CSV</a>
+    <a class="topbar-action-btn" href="?anno=<?= $anno ?>&op=<?= $opFiltro ?>&export=csv">&#8595; CSV</a>
     <button class="topbar-action-btn no-print" onclick="window.print()" type="button">&#128438; Stampa</button>
   </div>
 </header>
