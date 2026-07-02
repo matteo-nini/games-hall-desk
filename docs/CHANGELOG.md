@@ -7,6 +7,29 @@ e il progetto adotta il [Versionamento Semantico](https://semver.org/lang/it/).
 
 ---
 
+## [1.7.0] — 2026-07-02
+
+### Security
+- S-04: campo `assistenza_password` in impostazioni ora usa `type="password"` con `autocomplete="off"`
+- S-05: IP validato con `filter_var(FILTER_VALIDATE_IP)` nella conferma versamento
+- S-06: stringa `onclick confirm()` wrappata con `json_encode()` per prevenire XSS
+
+### Fixed
+- Q-02: conferma versamento duplicata non restituiva più un "ok" falso; cattura `\PDOException` con SQLSTATE `23000` e redirect `err=gia_confermato`
+- Q-08: pulizia token scaduti (`DELETE … WHERE scade_il < NOW()`) prima di generare un nuovo token di reset
+- Q-12: rimosso `@` suppressor da `mail()`; aggiunto `error_log()` su fallimento
+- Q-13: UPDATE + INSERT token password avvolti in `beginTransaction/commit/rollBack` per atomicità
+
+### Performance
+- P-03: `get_settings()` accetta parametro `bool $force = false`; chiamata con `true` dopo le scritture in `impostazioni.php` per evitare cache stale
+- P-04: rimosso `CREATE TABLE IF NOT EXISTS login_attempts` da `auth.php` (tabella già definita in `install/schema.sql`)
+
+### Maintenance
+- M-01: aggiunte chiavi seed `brand_accent` e `logo_path` in `install/schema.sql`
+- M-03: `COLLATE=utf8mb4_unicode_ci` uniformato su tutte le tabelle in `install/schema.sql`
+
+---
+
 ## [1.6.0] — 2026-07-02
 
 ### Added
