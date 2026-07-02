@@ -1,8 +1,11 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/lib.php';
+require_once __DIR__ . '/../includes/mail/mailer.php';
 $user = require_login();
 $pdo  = db();
+$cfg  = config();
+$sett = get_settings($pdo);
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $uid  = (int)$user['id'];
 
@@ -76,6 +79,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($nuova, PASSWORD_DEFAULT);
             $pdo->prepare('UPDATE utenti SET password_hash=? WHERE id=?')->execute([$hash, $uid]);
             audit('profilo_password', 'utenti', $uid);
+            $me2 = $pdo->prepare('SELECT email, nome, username FROM utenti WHERE id=?');
+            $me2->execute([$uid]);
+            $me2 = $me2->fetch();
+            if (!empty($me2['email'])) {
+                mail_cambio_password(
+                    $me2['email'],
+                    $me2['nome'] ?: $me2['username'],
+                    $_SERVER['REMOTE_ADDR'] ?? '',
+                    $sett, $cfg
+                );
+            }
             header('Location: profilo.php?ok=pwd'); exit;
         }
     }

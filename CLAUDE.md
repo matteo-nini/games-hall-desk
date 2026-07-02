@@ -116,14 +116,31 @@ I moduli si attivano/disattivano da Impostazioni → Moduli. La chiave in `impos
 
 In `nav.php` i moduli vengono letti via `$navSett = get_settings($pdo)` e il nav item compare solo se la chiave è `'1'`.
 
+## Email centralizzate (`includes/mail/mailer.php`)
+
+Tutte le funzioni di invio email sono raccolte in `includes/mail/mailer.php`. Ogni file che spedisce email deve fare `require_once` di questo file.
+
+| Funzione | Quando si usa |
+|---|---|
+| `mail_reset_password(PDO, uid, email, sett, cfg)` | Reset password self-service (1 ora) |
+| `mail_nuovo_account(PDO, uid, email, nome, sett, cfg)` | Account creato dal responsabile senza password (24 ore) |
+| `mail_cambio_password(email, nome, ip, sett, cfg)` | Notifica al cambio password da profilo.php |
+| `mail_chiusura_giornata(revs, tot, mailVers, data, nomeOp, appUrl, sett, cfg)` | Riepilogo versamento ai revisori |
+
+Le funzioni interne `_mail_*` costruiscono header, footer, wrapper HTML e gestiscono logo/accent dalla tabella `impostazioni`. Non chiamarle direttamente dall'esterno.
+
 ## Reset password (`account/reset_password.php` + `account/reset_confirm.php`)
 
-Flusso in due pagine. L'utente inserisce il proprio username → il sistema cerca l'email nella tabella `utenti` → genera `bin2hex(random_bytes(32))` (token 64 char) → salva in `password_reset` con `scade_il = NOW() + 1 ora` → invia email via `mail()`.
+Flusso in due pagine. L'utente inserisce il proprio username → il sistema cerca l'email nella tabella `utenti` → chiama `mail_reset_password()` che genera il token (64 char) → salva in `password_reset` con `scade_il = NOW() + 1 ora` → invia email via `mail()`.
 
 Il link porta a `reset_confirm.php?token=XXX` che:
 1. Valida il token (esiste, non scaduto, non usato)
 2. Mostra form nuova password
 3. Al POST: aggiorna `password_hash`, marca il token `usato=1`
+
+**Nuovo account con email**: quando il responsabile crea un utente con email ma senza password, viene chiamata `mail_nuovo_account()` con un token valido 24 ore. L'utente usa il link per impostare la propria password tramite lo stesso `reset_confirm.php`.
+
+**Cambio password**: al salvataggio in `profilo.php`, se l'utente ha un'email, viene inviata una notifica via `mail_cambio_password()` (nessun link, solo info + IP).
 
 Per le installazioni esistenti, configura `mail_from` in Impostazioni → Sistema → Email. Se `mail_from` è vuoto, usa `noreply@cassasala.it` come fallback (la mail potrebbe finire nello spam se il dominio non è configurato).
 

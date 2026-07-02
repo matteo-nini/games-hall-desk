@@ -55,7 +55,10 @@ Applicazione web completa per il controllo operativo quotidiano di una sala gioc
 | **Responsabile** | Tutto + admin (macchine, fornitori, utenti, impostazioni, audit) + caricamento documenti |
 | **Revisore** | Report in sola lettura (settimanale, mensile, annuale); calendario turni opzionale (vedi Permessi) |
 
-Ogni utente può avere un **indirizzo email** configurato (gestito da Impostazioni → Utenti). L'email abilita il **reset password self-service** dalla pagina di login: l'utente inserisce il proprio username, riceve un link valido 1 ora e imposta la nuova password senza l'intervento del responsabile.
+Ogni utente può avere un **indirizzo email** configurato (da Profilo o da Impostazioni → Utenti). L'email abilita tre flussi automatici:
+- **Reset password self-service**: l'utente inserisce il proprio username dalla pagina di login, riceve un link valido 1 ora e imposta la nuova password senza l'intervento del responsabile.
+- **Nuovo account**: quando il responsabile crea un account senza password ma con email, viene inviato automaticamente un link di attivazione valido 24 ore. L'utente imposta la propria password al primo accesso.
+- **Notifica cambio password**: dopo ogni cambio password eseguito dal profilo, l'utente riceve un'email di conferma con ora e IP. Se non è stato lui, può avvisare il responsabile.
 
 ### Impostazioni configurabili
 - **Logo sala**: caricabile da Impostazioni, mostrato nella sidebar e nella pagina di login
@@ -66,7 +69,7 @@ Ogni utente può avere un **indirizzo email** configurato (gestito da Impostazio
 - **Permessi unificati**: sezione unica per operatori (modifica calendario e turni), mobile (compilazione cassa e modifica turni da smartphone) e revisori (accesso opzionale al calendario turni in sola lettura)
 - **Moduli opzionali**: Ticket assistenza · Prestiti e rientri · Documenti
 - Dati assistenza tecnica (numero, lock, password)
-- Email di sistema (`mail_from`): indirizzo mittente per le email di reset password
+- Email di sistema (`mail_from`): indirizzo mittente per tutte le email transazionali (reset, nuovo account, notifica cambio password, riepilogo versamento)
 - Retention log audit (min 7 giorni)
 
 ### Sicurezza
