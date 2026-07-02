@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/lib.php';
+require_once __DIR__ . '/../../includes/mail/mailer.php';
 $user = require_responsabile();
 $pdo  = db();
 $cfg  = config();
+$sett = get_settings($pdo);
 $h    = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 $err  = '';
 
@@ -22,14 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ruolo    = in_array($_POST['ruolo'] ?? '', ['responsabile','revisore'], true) ? $_POST['ruolo'] : 'operatore';
         if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $err = 'Indirizzo email non valido.';
-        } elseif ($username === '' || strlen($pw) < 8) {
-            $err = 'Username obbligatorio e password di almeno 8 caratteri.';
+        } elseif ($username === '') {
+            $err = 'Username obbligatorio.';
+        } elseif ($email === null && strlen($pw) < 8) {
+            $err = 'Senza email, imposta una password di almeno 8 caratteri.';
         } else {
+            /* Se c'è email e nessuna password → hash casuale; l'utente imposterà la sua via email */
+            $hash = ($email !== null && $pw === '')
+                ? password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT)
+                : password_hash($pw, PASSWORD_DEFAULT);
             try {
                 $pdo->prepare(
                     'INSERT INTO utenti (username, password_hash, nome, email, ruolo) VALUES (?,?,?,?,?)'
-                )->execute([$username, password_hash($pw, PASSWORD_DEFAULT), $nome, $email, $ruolo]);
-                audit('utente_aggiunto', 'utenti', (int)$pdo->lastInsertId(), $username);
+                )->execute([$username, $hash, $nome, $email, $ruolo]);
+                $newUid = (int)$pdo->lastInsertId();
+                audit('utente_aggiunto', 'utenti', $newUid, $username);
+                if ($email !== null) {
+                    mail_nuovo_account($pdo, $newUid, $email, $nome ?? $username, $sett, $cfg);
+                }
                 header('Location: utenti.php?ok=add'); exit;
             } catch (Throwable) {
                 $err = 'Username già in uso oppure errore di sistema.';
@@ -105,7 +117,7 @@ $n_resp   = count(array_filter($utenti, fn($u) => $u['ruolo'] === 'responsabile'
 $n_rev    = count(array_filter($utenti, fn($u) => $u['ruolo'] === 'revisore'));
 
 $okMsg = match ($_GET['ok'] ?? '') {
-    'add'    => 'Utente creato.',
+    'add'    => 'Utente creato. Se è stata fornita un\'email, l\'utente riceverà un link per impostare la password.',
     'toggle' => 'Stato aggiornato.',
     'reset'  => 'Password aggiornata.',
     'nome'   => 'Nome aggiornato.',
@@ -168,7 +180,8 @@ $okMsg = match ($_GET['ok'] ?? '') {
       </div>
       <div class="ul-field">
         <label for="nu-email">Email</label>
-        <input id="nu-email" type="email" name="email" placeholder="es. mario@sala.it" maxlength="255" autocomplete="off">
+        <input id="nu-email" type="email" name="email" placeholder="es. mario@sala.it" maxlength="255" autocomplete="off" oninput="toggleNuovoPw()">
+        <p class="ul-field-hint" id="nu-email-hint">Con un'email, l'utente riceve un link per impostare la propria password.</p>
       </div>
       <div class="ul-field ul-field-full">
         <label for="nu-ruolo">Ruolo</label>
@@ -179,13 +192,14 @@ $okMsg = match ($_GET['ok'] ?? '') {
         </select>
         <p id="ruolo-desc" class="ul-field-hint">Accesso completo alla cassa giornaliera e alle sezioni operative.</p>
       </div>
-      <div class="ul-field">
-        <label for="nu-pw">Password <span class="ul-req">*</span></label>
-        <input id="nu-pw" type="password" name="password" required minlength="8" placeholder="minimo 8 caratteri" autocomplete="new-password">
+      <div class="ul-field" id="nu-pw-wrap">
+        <label for="nu-pw">Password <span class="ul-req" id="nu-pw-req">*</span></label>
+        <input id="nu-pw" type="password" name="password" minlength="8" placeholder="minimo 8 caratteri" autocomplete="new-password">
+        <p class="ul-field-hint" id="nu-pw-hint" style="display:none">Obbligatoria se non è fornita un'email.</p>
       </div>
-      <div class="ul-field">
-        <label for="nu-rpw">Ripeti password <span class="ul-req">*</span></label>
-        <input id="nu-rpw" type="password" required minlength="8" placeholder="ripeti" autocomplete="new-password">
+      <div class="ul-field" id="nu-rpw-wrap">
+        <label for="nu-rpw">Ripeti password</label>
+        <input id="nu-rpw" type="password" minlength="8" placeholder="ripeti" autocomplete="new-password">
       </div>
     </div>
     <div class="dlg-actions">
@@ -541,11 +555,32 @@ $okMsg = match ($_GET['ok'] ?? '') {
   });
 }());
 
+function toggleNuovoPw() {
+  var hasEmail = document.getElementById('nu-email').value.trim() !== '';
+  var pw  = document.getElementById('nu-pw');
+  var req = document.getElementById('nu-pw-req');
+  var hint = document.getElementById('nu-pw-hint');
+  pw.required  = !hasEmail;
+  req.style.display  = hasEmail ? 'none' : '';
+  hint.style.display = hasEmail ? 'none' : '';
+}
 function validateNuovo(f) {
-  var pw = document.getElementById('nu-pw');
-  var rp = document.getElementById('nu-rpw');
-  if (pw.value !== rp.value) { rp.setCustomValidity('Le password non coincidono'); rp.reportValidity(); return false; }
-  rp.setCustomValidity(''); return true;
+  var email = document.getElementById('nu-email').value.trim();
+  var pw    = document.getElementById('nu-pw');
+  var rp    = document.getElementById('nu-rpw');
+  if (!email && pw.value === '') {
+    pw.setCustomValidity('Imposta una password oppure fornisci un\'email.');
+    pw.reportValidity();
+    return false;
+  }
+  pw.setCustomValidity('');
+  if (pw.value && pw.value !== rp.value) {
+    rp.setCustomValidity('Le password non coincidono');
+    rp.reportValidity();
+    return false;
+  }
+  rp.setCustomValidity('');
+  return true;
 }
 function validateReset(f) {
   var pw = document.getElementById('reset-pw');

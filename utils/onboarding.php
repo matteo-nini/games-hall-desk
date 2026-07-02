@@ -347,7 +347,7 @@ $navChiusura = [
             <li><strong>Costo turni</strong>: compenso per turno, visibile nel riepilogo guadagni.</li>
             <li><strong>Permessi</strong>: sezione unica per operatori (calendario, turni giornalieri), mobile (compilazione e modifica da smartphone) e revisori (accesso opzionale al calendario turni in sola lettura).</li>
             <li><strong>Moduli</strong>: attiva/disattiva Ticket assistenza, Prestiti e Documenti.</li>
-            <li><strong>Email di sistema</strong>: indirizzo mittente per le email di reset password (in Sistema → Email).</li>
+            <li><strong>Email di sistema</strong>: indirizzo mittente per tutte le email transazionali: reset password, attivazione nuovo account, notifica cambio password, riepilogo versamento ai revisori (in Sistema → Email).</li>
           </ul>
           <a class="ob-panel-link" href="<?= base_url('account/admin/impostazioni.php') ?>">Vai alle impostazioni →</a>
         </div>
@@ -372,7 +372,9 @@ $navChiusura = [
             <li>Ruolo <strong>operatore</strong>: accesso a cassa, sala, assistenze e prestiti.</li>
             <li>Ruolo <strong>responsabile</strong>: accesso completo incluse le funzioni admin.</li>
             <li>Ruolo <strong>revisore</strong>: sola lettura dei report. Il calendario turni è opzionale (da Impostazioni → Permessi).</li>
-            <li><strong>Email utente</strong>: aggiungila dal menu azione (⋮) della riga utente. Abilita il reset password self-service dalla pagina di login.</li>
+            <li><strong>Email utente</strong>: inseriscila nella form di creazione oppure successivamente dal menu azione (⋮). Abilita il reset password self-service e le notifiche automatiche.</li>
+            <li><strong>Nuovo account con email</strong>: lascia vuoto il campo password durante la creazione. Il sistema genera un hash casuale e manda all'utente un link valido 24 ore per impostare la propria password. Se non viene fornita email, imposta tu una password temporanea.</li>
+            <li><strong>Notifica cambio password</strong>: quando un operatore cambia la password dal profilo, riceve un'email di conferma con ora e IP. Utile per rilevare accessi non autorizzati.</li>
           </ul>
           <div class="ob-tip">Con un'email configurata, ogni operatore può reimpostare la propria password autonomamente dalla pagina di login, senza contattare il responsabile.</div>
           <a class="ob-panel-link" href="<?= base_url('account/admin/utenti.php') ?>">Vai agli utenti →</a>
