@@ -29,11 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($u && !empty($u['email'])) {
             mail_reset_password($pdo, (int)$u['id'], $u['email'], $sett, $cfg);
             audit('password_reset_richiesto', 'utenti', (int)$u['id'], $username);
-        } elseif ($u && empty($u['email'])) {
-            $err = 'Nessuna email configurata per questo account. Contatta il responsabile.';
         }
-        /* Se utente non trovato → $sent = true senza rivelare l'esistenza */
-        if (!$err) $sent = true;
+        // Risposta identica in tutti i casi: non rivela se l'utente esiste
+        // o se manca l'email (issue S-03 — user enumeration prevention).
+        $sent = true;
     }
 }
 
