@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS utenti (
   creato_il     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   foto          VARCHAR(255) DEFAULT NULL,
   telefono      VARCHAR(30)  DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Reset password ----------
 CREATE TABLE IF NOT EXISTS password_reset (
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS password_reset (
   UNIQUE KEY uk_token (token),
   INDEX idx_user_usato (utente_id, usato),
   CONSTRAINT fk_pwreset_utente FOREIGN KEY (utente_id) REFERENCES utenti(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Macchine ----------
 CREATE TABLE IF NOT EXISTS macchine (
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS macchine (
   civ       VARCHAR(100) DEFAULT NULL,
   ordine    INT          NOT NULL DEFAULT 0,
   attiva    TINYINT(1)   NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Giornate ----------
 CREATE TABLE IF NOT EXISTS giornate (
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS giornate (
   chiusa_il TIMESTAMP DEFAULT NULL,
   note      VARCHAR(255) DEFAULT NULL,
   CONSTRAINT fk_giornate_utente FOREIGN KEY (chiusa_da) REFERENCES utenti(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Turni ----------
 CREATE TABLE IF NOT EXISTS turni (
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS turni (
   UNIQUE KEY uq_turno (giornata_id, numero),
   CONSTRAINT fk_turni_giornata  FOREIGN KEY (giornata_id)  REFERENCES giornate(id) ON DELETE CASCADE,
   CONSTRAINT fk_turni_operatore FOREIGN KEY (operatore_id) REFERENCES utenti(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Conteggio contanti ----------
 CREATE TABLE IF NOT EXISTS contanti (
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS contanti (
   pezzi    INT NOT NULL DEFAULT 0,
   UNIQUE KEY uq_contanti (turno_id, taglio),
   CONSTRAINT fk_contanti_turno FOREIGN KEY (turno_id) REFERENCES turni(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Scassettamenti VLT ----------
 CREATE TABLE IF NOT EXISTS scassettamenti (
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS scassettamenti (
   UNIQUE KEY uq_scass (turno_id, macchina_id),
   CONSTRAINT fk_scass_turno    FOREIGN KEY (turno_id)    REFERENCES turni(id)    ON DELETE CASCADE,
   CONSTRAINT fk_scass_macchina FOREIGN KEY (macchina_id) REFERENCES macchine(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Refill AWP ----------
 CREATE TABLE IF NOT EXISTS refill_awp (
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS refill_awp (
   euro       DECIMAL(10,2) NOT NULL DEFAULT 0,
   ora        TIME          DEFAULT NULL,
   CONSTRAINT fk_refill_turno FOREIGN KEY (turno_id) REFERENCES turni(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Ticket vincite ----------
 CREATE TABLE IF NOT EXISTS ticket (
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS ticket (
   importo   DECIMAL(10,2) NOT NULL DEFAULT 0,
   UNIQUE KEY uq_ticket (turno_id, fornitore),
   CONSTRAINT fk_ticket_turno FOREIGN KEY (turno_id) REFERENCES turni(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Bet/Win ----------
 CREATE TABLE IF NOT EXISTS snai_betwin (
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS snai_betwin (
   giocato   DECIMAL(12,2) NOT NULL DEFAULT 0,
   pagato    DECIMAL(12,2) NOT NULL DEFAULT 0,
   UNIQUE KEY uq_betwin (data, fornitore)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Audit log ----------
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
   ip        VARCHAR(45)  DEFAULT NULL,
   creato_il TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_audit_utente FOREIGN KEY (utente_id) REFERENCES utenti(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Ticket assistenza ----------
 CREATE TABLE IF NOT EXISTS ticket_assistenza (
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS ticket_assistenza (
   creato_da     INT          DEFAULT NULL,
   creato_il     DATETIME     NOT NULL DEFAULT NOW(),
   FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Cartelle documenti ----------
 CREATE TABLE IF NOT EXISTS documenti_cartelle (
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS prestiti_persone (
   nome           VARCHAR(100)  NOT NULL UNIQUE,
   saldo_iniziale DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   note           VARCHAR(255)  DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS prestiti_movimenti (
   id         INT AUTO_INCREMENT PRIMARY KEY,
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS prestiti_movimenti (
   creato_il  DATETIME      NOT NULL DEFAULT NOW(),
   FOREIGN KEY (persona_id) REFERENCES prestiti_persone(id) ON DELETE CASCADE,
   FOREIGN KEY (creato_da)  REFERENCES utenti(id)           ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Turni programmati ----------
 CREATE TABLE IF NOT EXISTS turni_programmati (
@@ -213,14 +213,14 @@ CREATE TABLE IF NOT EXISTS turni_programmati (
   KEY idx_op_data (operatore_id, data),
   FOREIGN KEY (operatore_id) REFERENCES utenti(id) ON DELETE CASCADE,
   FOREIGN KEY (creato_da)    REFERENCES utenti(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Prezzi turni ----------
 CREATE TABLE IF NOT EXISTS prezzi_turni (
   nome          ENUM('mattino','sera') NOT NULL PRIMARY KEY,
   prezzo        DECIMAL(8,2)           NOT NULL DEFAULT 0.00,
   aggiornato_il DATETIME               DEFAULT NOW() ON UPDATE NOW()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO prezzi_turni (nome, prezzo) VALUES
   ('mattino', 0.00),
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   ip           VARCHAR(45) NOT NULL,
   attempted_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Fornitori (lista configurabile) ----------
 CREATE TABLE IF NOT EXISTS fornitori (
@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS fornitori (
   nome   VARCHAR(50)  NOT NULL UNIQUE,
   ordine INT          NOT NULL DEFAULT 0,
   attiva TINYINT(1)   NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO fornitori (nome, ordine) VALUES
   ('NOVO',     1),
@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS impostazioni (
   chiave        VARCHAR(60)  NOT NULL PRIMARY KEY,
   valore        VARCHAR(255) NOT NULL DEFAULT '',
   aggiornato_il DATETIME     DEFAULT NULL ON UPDATE NOW()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('num_turni',                  '2'),
@@ -278,6 +278,8 @@ INSERT IGNORE INTO impostazioni (chiave, valore) VALUES
   ('modulo_prestiti',            '1'),
   ('modulo_documenti',           '1'),
   ('modulo_contatti',            '1'),
+  ('brand_accent',               ''),
+  ('logo_path',                  ''),
   ('mail_from',                  ''),
   ('tel_sala',                   ''),
   ('email_sala',                 ''),
@@ -307,7 +309,7 @@ CREATE TABLE IF NOT EXISTS versamenti_confermati (
   UNIQUE KEY uk_giornata (giornata_id),
   CONSTRAINT fk_vc_giornata FOREIGN KEY (giornata_id) REFERENCES giornate(id) ON DELETE CASCADE,
   CONSTRAINT fk_vc_revisore FOREIGN KEY (confermato_da) REFERENCES utenti(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------- Contatti (fornitori / tecnici sala) ----------
 CREATE TABLE IF NOT EXISTS contatti (
@@ -323,6 +325,6 @@ CREATE TABLE IF NOT EXISTS contatti (
   creato_da  INT           DEFAULT NULL,
   creato_il  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET foreign_key_checks = 1;

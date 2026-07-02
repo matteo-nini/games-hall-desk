@@ -70,12 +70,6 @@ function require_not_revisore(): void {
 function rate_limit_check(string $ip): bool {
     try {
         $pdo = db();
-        $pdo->exec('CREATE TABLE IF NOT EXISTS login_attempts (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            ip VARCHAR(45) NOT NULL,
-            attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_ip_time (ip, attempted_at)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
         $window = date('Y-m-d H:i:s', time() - 900);
         $st = $pdo->prepare('SELECT COUNT(*) FROM login_attempts WHERE ip=? AND attempted_at > ?');
         $st->execute([$ip, $window]);

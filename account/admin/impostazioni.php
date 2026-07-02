@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $migrationOk) {
             if (preg_match('/^\d{1,2}:\d{2}$/', $fine))   $st->execute(["turno_{$i}_fine",   $fine]);
         }
         /* Mantieni le chiavi legacy in sync per backward compat */
-        $sett_new = get_settings($pdo);
+        $sett_new = get_settings($pdo, true); // force-refresh dopo le scritture (P-03)
         $st->execute(['turno_mattino_inizio', $sett_new['turno_1_inizio'] ?? '13:00']);
         $st->execute(['turno_mattino_fine',   $sett_new['turno_1_fine']   ?? '19:00']);
         $st->execute(['turno_sera_inizio',    $sett_new['turno_2_inizio'] ?? '19:00']);
@@ -741,8 +741,8 @@ $curAccent = strtolower($sett['brand_accent'] ?? '#3b5bdb');
                 </div>
                 <div class="imp-field">
                   <label for="imp-apwd">Password</label>
-                  <input id="imp-apwd" type="text" name="assistenza_password" maxlength="200"
-                         value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123">
+                  <input id="imp-apwd" type="password" name="assistenza_password" maxlength="200"
+                         value="<?= $h($sett['assistenza_password'] ?? '') ?>" placeholder="es. abc123" autocomplete="off">
                 </div>
               </div>
               <div class="imp-form-footer">
