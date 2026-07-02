@@ -197,14 +197,10 @@ function sums_turno(PDO $pdo, int $tid): array {
 }
 
 /**
- * Riepilogo finanziario di una giornata.
+ * Riepilogo finanziario di una giornata — aggrega tutti i turni.
  *
- * Con $opId = 0 (default): legge SOLO l'ultimo turno (ORDER BY numero DESC LIMIT 1).
- * Comportamento intenzionale per la dashboard "live" (mostra lo stato corrente),
- * ma causa SOTTOSTIMA nei report aggregati su giornate con 2 turni — issue Q-01.
- *
- * Con $opId > 0: filtra per operatore e aggrega tutti i suoi turni (usato nei
- * report per operatore e nel calcolo stipendi).
+ * Con $opId = 0 (default): somma tutti i turni del giorno.
+ * Con $opId > 0: filtra per operatore (usato nei report per operatore e stipendi).
  */
 function riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array {
     $fornitori = get_fornitori($pdo);
@@ -216,8 +212,7 @@ function riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array {
         $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? AND operatore_id=? ORDER BY numero');
         $ts->execute([$g['id'], $opId]);
     } else {
-        /* Usa solo l'ultimo turno del giorno per il riepilogo finanziario */
-        $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? ORDER BY numero DESC LIMIT 1');
+        $ts = $pdo->prepare('SELECT * FROM turni WHERE giornata_id=? ORDER BY numero');
         $ts->execute([$g['id']]);
     }
     foreach ($ts as $t) {
@@ -234,6 +229,86 @@ function riepilogo_giornata(PDO $pdo, string $data, int $opId = 0): array {
         foreach ($fornitori as $f) $z['scass'][$f] += ($s['scass_forn'][$f] ?? 0.0);
     }
     return $z;
+}
+
+/**
+ * Riepilogo finanziario di un mese intero — due query aggregate.
+ * Rimpiazza N×riepilogo_giornata() nei report mensili (issue P-01).
+ *
+ * @return array{righe: array<int,array>, tot: array}
+ *   righe: keyed 1–31, stessa struttura di riepilogo_giornata()
+ *   tot:   ['incasso'=>float,'ticket'=>float,'bancomat'=>float,'versamento'=>float]
+ */
+function riepilogo_mese(PDO $pdo, string $primo, string $ultimo, int $opId = 0): array {
+    $fornitori = get_fornitori($pdo);
+    $zero = ['incasso_vlt'=>0.0,'bancomat'=>0.0,'versamento'=>0.0,'ticket'=>0.0,
+             'scass' => array_fill_keys($fornitori, 0.0)];
+    $tot  = ['incasso'=>0.0,'ticket'=>0.0,'bancomat'=>0.0,'versamento'=>0.0];
+
+    $firstDay = (int)substr($primo, 8, 2);
+    $lastDay  = (int)substr($ultimo, 8, 2);
+    $righe = [];
+    for ($d = $firstDay; $d <= $lastDay; $d++) $righe[$d] = $zero;
+
+    $opFilter = $opId > 0 ? ' AND t.operatore_id = :op' : '';
+    $params   = ['primo' => $primo, 'ultimo' => $ultimo];
+    if ($opId > 0) $params['op'] = $opId;
+
+    // Aggregazione principale: bancomat, incasso_vlt, ticket, versamento per giorno.
+    // versamento = vers_cassa = cassetto + monete - fondo_cassa (stessa formula di calcola_turno()).
+    $st = $pdo->prepare("
+        SELECT DAY(g.data) AS giorno,
+               COALESCE(SUM(t.bancomat), 0)  AS bancomat,
+               COALESCE(SUM(s_agg.val), 0)   AS incasso_vlt,
+               COALESCE(SUM(tk_agg.val), 0)  AS ticket,
+               COALESCE(SUM(
+                   COALESCE(c_agg.val,0) + COALESCE(r_agg.val,0)
+                   + COALESCE(t.differenze,0) - COALESCE(t.ii_cassa,0)
+                   - COALESCE(t.rientri,0)   + COALESCE(t.monete,0)
+                   - COALESCE(t.fondo_cassa,0)
+               ), 0) AS versamento
+        FROM giornate g
+        LEFT JOIN turni t ON t.giornata_id = g.id{$opFilter}
+        LEFT JOIN (SELECT turno_id, SUM(taglio*pezzi) val FROM contanti        GROUP BY turno_id) c_agg  ON c_agg.turno_id  = t.id
+        LEFT JOIN (SELECT turno_id, SUM(euro)          val FROM refill_awp     GROUP BY turno_id) r_agg  ON r_agg.turno_id  = t.id
+        LEFT JOIN (SELECT turno_id, SUM(importo)       val FROM ticket         GROUP BY turno_id) tk_agg ON tk_agg.turno_id = t.id
+        LEFT JOIN (SELECT turno_id, SUM(importo)       val FROM scassettamenti GROUP BY turno_id) s_agg  ON s_agg.turno_id  = t.id
+        WHERE g.data BETWEEN :primo AND :ultimo
+        GROUP BY g.data
+        ORDER BY g.data
+    ");
+    $st->execute($params);
+    foreach ($st as $row) {
+        $d = (int)$row['giorno'];
+        $righe[$d]['incasso_vlt'] = (float)$row['incasso_vlt'];
+        $righe[$d]['bancomat']    = (float)$row['bancomat'];
+        $righe[$d]['versamento']  = (float)$row['versamento'];
+        $righe[$d]['ticket']      = (float)$row['ticket'];
+        $tot['incasso']    += (float)$row['incasso_vlt'];
+        $tot['ticket']     += (float)$row['ticket'];
+        $tot['bancomat']   += (float)$row['bancomat'];
+        $tot['versamento'] += (float)$row['versamento'];
+    }
+
+    // Seconda query: scassettamenti per fornitore per giorno.
+    $st2 = $pdo->prepare("
+        SELECT DAY(g.data) AS giorno, m.fornitore,
+               COALESCE(SUM(s.importo), 0) AS tot
+        FROM giornate g
+        JOIN turni t ON t.giornata_id = g.id{$opFilter}
+        JOIN scassettamenti s ON s.turno_id = t.id
+        JOIN macchine m ON m.id = s.macchina_id
+        WHERE g.data BETWEEN :primo AND :ultimo
+        GROUP BY g.data, m.fornitore
+    ");
+    $st2->execute($params);
+    foreach ($st2 as $row) {
+        $d = (int)$row['giorno'];
+        $f = $row['fornitore'];
+        if (isset($righe[$d]['scass'][$f])) $righe[$d]['scass'][$f] = (float)$row['tot'];
+    }
+
+    return ['righe' => $righe, 'tot' => $tot];
 }
 
 /** Bet/win per un giorno: ['NOVO'=>['giocato'=>..,'pagato'=>..], ...]. */

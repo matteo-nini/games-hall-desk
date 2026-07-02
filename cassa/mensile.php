@@ -16,20 +16,13 @@ $fornitori = get_fornitori($pdo);
 $opFiltro = (int)($_GET['op'] ?? 0);
 $operatori = $pdo->query("SELECT id, COALESCE(NULLIF(nome,''), username) AS nome FROM utenti WHERE attivo=1 AND ruolo IN ('operatore','responsabile') ORDER BY nome")->fetchAll();
 
-// cassa per giorno
-$righe = []; $tot = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
-for ($d = 1; $d <= $ngiorni; $d++) {
-    $data = sprintf('%04d-%02d-%02d', $anno, $mese, $d);
-    $r = riepilogo_giornata($pdo, $data, $opFiltro);
-    $righe[$d] = $r;
-    $tot['incasso']    += $r['incasso_vlt'];
-    $tot['ticket']     += $r['ticket'];
-    $tot['bancomat']   += $r['bancomat'];
-    $tot['versamento'] += $r['versamento'];
-}
+// cassa per giorno e confronto mese precedente — query aggregata (P-01)
+$primo  = sprintf('%04d-%02d-01', $anno, $mese);
+$ultimo = sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
+$rm     = riepilogo_mese($pdo, $primo, $ultimo, $opFiltro);
+$righe  = $rm['righe'];
+$tot    = $rm['tot'];
 // bet/win per fornitore (mese)
-$primo = sprintf('%04d-%02d-01', $anno, $mese);
-$ultimo= sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
 $bw = array_fill_keys($fornitori, ['g'=>0,'p'=>0]);
 $st = $pdo->prepare('SELECT fornitore, SUM(giocato) g, SUM(pagato) p FROM snai_betwin WHERE data BETWEEN ? AND ? GROUP BY fornitore');
 $st->execute([$primo,$ultimo]);
@@ -39,15 +32,10 @@ foreach ($righe as $r) foreach ($fornitori as $f) $ins[$f] = ($ins[$f] ?? 0) + (
 // delta vs mese precedente
 $mesePre = $mese - 1; $annoPre = $anno;
 if ($mesePre < 1) { $mesePre = 12; $annoPre--; }
-$ngPre = (int)date('t', mktime(0,0,0,$mesePre,1,$annoPre));
-$totPre = ['incasso'=>0,'ticket'=>0,'bancomat'=>0,'versamento'=>0];
-for ($d = 1; $d <= $ngPre; $d++) {
-    $rp = riepilogo_giornata($pdo, sprintf('%04d-%02d-%02d', $annoPre, $mesePre, $d), $opFiltro);
-    $totPre['incasso']    += $rp['incasso_vlt'];
-    $totPre['ticket']     += $rp['ticket'];
-    $totPre['bancomat']   += $rp['bancomat'];
-    $totPre['versamento'] += $rp['versamento'];
-}
+$ngPre     = (int)date('t', mktime(0,0,0,$mesePre,1,$annoPre));
+$primoPre  = sprintf('%04d-%02d-01', $annoPre, $mesePre);
+$ultimoPre = sprintf('%04d-%02d-%02d', $annoPre, $mesePre, $ngPre);
+$totPre    = riepilogo_mese($pdo, $primoPre, $ultimoPre, $opFiltro)['tot'];
 $delta = function(float $cur, float $pre): string {
     if ($pre == 0) return $cur > 0 ? '<span class="delta-pos">+∞</span>' : '—';
     $pct = ($cur - $pre) / abs($pre) * 100;

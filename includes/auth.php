@@ -23,17 +23,20 @@ function start_session(): void {
         session_start([
             'cookie_httponly' => true,
             'cookie_samesite' => 'Lax',
-            // In produzione (HTTPS) imposta 'cookie_secure' => true
+            'cookie_secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
         ]);
     }
 }
 
 function current_user(): ?array {
+    static $memo = 'unset';
+    if ($memo !== 'unset') return $memo;
     start_session();
-    if (empty($_SESSION['uid'])) return null;
+    if (empty($_SESSION['uid'])) { $memo = null; return null; }
     $st = db()->prepare('SELECT * FROM utenti WHERE id = ? AND attivo = 1');
     $st->execute([$_SESSION['uid']]);
-    return $st->fetch() ?: null;
+    $memo = $st->fetch() ?: null;
+    return $memo;
 }
 
 function require_login(): array {
@@ -78,7 +81,8 @@ function rate_limit_check(string $ip): bool {
         $st->execute([$ip, $window]);
         return (int)$st->fetchColumn() >= 5;
     } catch (Throwable) {
-        return false;
+        // fail-closed: se il DB non risponde blocchiamo per sicurezza (issue S-02)
+        return true;
     }
 }
 

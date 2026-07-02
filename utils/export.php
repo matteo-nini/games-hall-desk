@@ -22,13 +22,17 @@ $w = function(array $r) use ($out, $sep) {
     fputcsv($out, $r, $sep);
 };
 
+$primo     = sprintf('%04d-%02d-01', $anno, $mese);
+$ultimo    = sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
+$fornitori = get_fornitori($pdo);
+$rm        = riepilogo_mese($pdo, $primo, $ultimo);
+
 $w(["Cassa per giorno - $anno/$mese"]);
 $w(['Giorno','Incasso VLT','Ticket','Bancomat','Versamento','Scass NOVO','Scass INSPIRED','Scass SPIELO']);
 $tot = [0.0,0.0,0.0,0.0,0.0,0.0,0.0];
-for ($d=1;$d<=$ngiorni;$d++){
-    $r = riepilogo_giornata($pdo, sprintf('%04d-%02d-%02d',$anno,$mese,$d));
+foreach ($rm['righe'] as $d => $r) {
     $vals = [(float)$r['incasso_vlt'],(float)$r['ticket'],(float)$r['bancomat'],(float)$r['versamento'],
-             (float)$r['scass']['NOVO'],(float)$r['scass']['INSPIRED'],(float)$r['scass']['SPIELO']];
+             (float)($r['scass']['NOVO'] ?? 0),(float)($r['scass']['INSPIRED'] ?? 0),(float)($r['scass']['SPIELO'] ?? 0)];
     foreach ($vals as $i=>$v) $tot[$i]+=$v;
     $w(array_merge([$d], $vals));
 }
@@ -37,15 +41,12 @@ $w([]);
 
 $w(["Bet/Win SNAI per fornitore"]);
 $w(['Fornitore','Giocato','Pagato','Ricavo','Inserito']);
-$primo = sprintf('%04d-%02d-01',$anno,$mese);
-$ultimo= sprintf('%04d-%02d-%02d',$anno,$mese,$ngiorni);
-$fornitori = get_fornitori($pdo);
 $bw = array_fill_keys($fornitori, ['g'=>0.0,'p'=>0.0]);
 $st = $pdo->prepare('SELECT fornitore,SUM(giocato) g,SUM(pagato) p FROM snai_betwin WHERE data BETWEEN ? AND ? GROUP BY fornitore');
 $st->execute([$primo,$ultimo]);
 foreach ($st as $row) if (isset($bw[$row['fornitore']])) $bw[$row['fornitore']]=['g'=>(float)$row['g'],'p'=>(float)$row['p']];
 $ins = array_fill_keys($fornitori, 0.0);
-for ($d=1;$d<=$ngiorni;$d++){ $r=riepilogo_giornata($pdo,sprintf('%04d-%02d-%02d',$anno,$mese,$d)); foreach($fornitori as $f) $ins[$f]+=$r['scass'][$f]??0; }
+foreach ($rm['righe'] as $r) foreach ($fornitori as $f) $ins[$f] += $r['scass'][$f] ?? 0;
 foreach ($fornitori as $f){
     $w([$f,(float)$bw[$f]['g'],(float)$bw[$f]['p'],(float)($bw[$f]['g']-$bw[$f]['p']),(float)$ins[$f]]);
 }

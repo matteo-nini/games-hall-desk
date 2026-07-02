@@ -26,11 +26,12 @@ $header = [$S('Giorno', 1), $S('Incasso VLT', 1), $S('Ticket', 1), $S('Bancomat'
 foreach ($fornitori as $f) $header[] = $S($f, 1);
 $xlsx->addRow($header);
 
-$tot = array_fill_keys(['inc','tk','banc','vers'], 0.0);
+$primo   = sprintf('%04d-%02d-01', $anno, $mese);
+$ultimo  = sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
+$rm      = riepilogo_mese($pdo, $primo, $ultimo);
+$tot     = array_fill_keys(['inc','tk','banc','vers'], 0.0);
 $totForn = array_fill_keys($fornitori, 0.0);
-for ($d = 1; $d <= $ngiorni; $d++) {
-    $data = sprintf('%04d-%02d-%02d', $anno, $mese, $d);
-    $r    = riepilogo_giornata($pdo, $data);
+foreach ($rm['righe'] as $d => $r) {
     $tot['inc']  += $r['incasso_vlt'];
     $tot['tk']   += $r['ticket'];
     $tot['banc'] += $r['bancomat'];
@@ -50,8 +51,6 @@ $xlsx->addRow($totRow);
 $xlsx->addRow([]);
 $xlsx->addRow([$S('Bet/Win SNAI per fornitore', 1)]);
 $xlsx->addRow([$S('Fornitore', 1), $S('Giocato', 1), $S('Pagato', 1), $S('Ricavo', 1), $S('Inserito', 1), $S('Payout %', 1)]);
-$primo  = sprintf('%04d-%02d-01', $anno, $mese);
-$ultimo = sprintf('%04d-%02d-%02d', $anno, $mese, $ngiorni);
 $bw     = array_fill_keys($fornitori, ['g' => 0.0, 'p' => 0.0]);
 $st     = $pdo->prepare('SELECT fornitore, SUM(giocato) g, SUM(pagato) p FROM snai_betwin WHERE data BETWEEN ? AND ? GROUP BY fornitore');
 $st->execute([$primo, $ultimo]);

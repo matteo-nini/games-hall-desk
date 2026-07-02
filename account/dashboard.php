@@ -145,14 +145,21 @@ if (is_responsabile()):
         $chart6m['data'][]   = $mesiMap[$m] ?? 0;
     }
 
+    // Derived table JOINs sostituiscono 4 subquery correlate per riga (issue P-02).
     $stOp = $pdo->prepare("
         SELECT t.id, t.operatore_id, t.fondo_cassa, t.monete, t.bancomat, t.differenze, t.ii_cassa, t.rientri,
                COALESCE(NULLIF(u.nome,''), u.username) AS op_nome,
-               COALESCE((SELECT SUM(c.taglio*c.pezzi) FROM contanti c WHERE c.turno_id=t.id),0) AS contanti,
-               COALESCE((SELECT SUM(r.euro) FROM refill_awp r WHERE r.turno_id=t.id),0) AS refill,
-               COALESCE((SELECT SUM(s.importo) FROM scassettamenti s WHERE s.turno_id=t.id),0) AS scass,
-               COALESCE((SELECT SUM(tk.importo) FROM ticket tk WHERE tk.turno_id=t.id),0) AS ticket
-        FROM turni t JOIN giornate g ON g.id=t.giornata_id LEFT JOIN utenti u ON u.id=t.operatore_id
+               COALESCE(c_agg.val, 0)  AS contanti,
+               COALESCE(r_agg.val, 0)  AS refill,
+               COALESCE(s_agg.val, 0)  AS scass,
+               COALESCE(tk_agg.val, 0) AS ticket
+        FROM turni t
+        JOIN giornate g ON g.id = t.giornata_id
+        LEFT JOIN utenti u ON u.id = t.operatore_id
+        LEFT JOIN (SELECT turno_id, SUM(taglio*pezzi) val FROM contanti       GROUP BY turno_id) c_agg  ON c_agg.turno_id  = t.id
+        LEFT JOIN (SELECT turno_id, SUM(euro)          val FROM refill_awp    GROUP BY turno_id) r_agg  ON r_agg.turno_id  = t.id
+        LEFT JOIN (SELECT turno_id, SUM(importo)       val FROM scassettamenti GROUP BY turno_id) s_agg ON s_agg.turno_id  = t.id
+        LEFT JOIN (SELECT turno_id, SUM(importo)       val FROM ticket        GROUP BY turno_id) tk_agg ON tk_agg.turno_id = t.id
         WHERE g.data >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND t.operatore_id IS NOT NULL
     ");
     $stOp->execute();
