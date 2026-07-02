@@ -182,10 +182,10 @@ e il progetto adotta il [Versionamento Semantico](https://semver.org/lang/it/).
 
 ---
 
-[1.6.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.5.0...v1.6.0
-[1.5.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/matteo-nini/games-palace-desk/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/matteo-nini/games-palace-desk/releases/tag/v1.0.0
+[1.6.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/matteo-nini/games-hall-desk/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/matteo-nini/games-hall-desk/releases/tag/v1.0.0
