@@ -1,4 +1,4 @@
-# Issue log — Games Palace Desk
+# Issue log — GestHall Suite
 
 Report generato dall'audit automatico del codebase (2026-07-02, 37 agenti).
 Classificato per categoria e priorità. Le issue risolte vanno marcate con ✅.

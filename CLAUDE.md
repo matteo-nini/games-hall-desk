@@ -20,7 +20,7 @@ Dopo ogni modifica significativa (nuova feature, cambio schema DB, nuovo modulo)
 
 ## Panoramica progetto
 
-**Games Palace Desk** è un'app PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT e AWP. Nessun framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
+**GestHall Suite** è un'app PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT e AWP. Nessun framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
 
 ## Pattern architetturali
 

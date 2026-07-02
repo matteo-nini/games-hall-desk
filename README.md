@@ -1,4 +1,4 @@
-# Games Palace Desk
+# GestHall Suite
 
 **Sistema di gestione cassa per sale giochi VLT/AWP**
 

@@ -10,7 +10,7 @@ Operatori di sala giochi e responsabili di turno che compilano la cassa due volt
 
 ## Product Purpose
 
-Games Palace Desk è il registro operativo della cassa giornaliera: raccoglie i dati di ogni turno (contanti, scassettamenti, refill, bancomat, ticket), calcola la quadratura in tempo reale e segnala immediatamente se qualcosa non torna. Il successo si misura sulla velocità di inserimento e sull'assenza di ambiguità sul risultato: verde = tutto ok, rosso = c'è qualcosa da verificare.
+GestHall Suite è il registro operativo della cassa giornaliera: raccoglie i dati di ogni turno (contanti, scassettamenti, refill, bancomat, ticket), calcola la quadratura in tempo reale e segnala immediatamente se qualcosa non torna. Il successo si misura sulla velocità di inserimento e sull'assenza di ambiguità sul risultato: verde = tutto ok, rosso = c'è qualcosa da verificare.
 
 ## Brand Personality
 

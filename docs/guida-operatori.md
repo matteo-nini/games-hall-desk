@@ -1,4 +1,4 @@
-# Guida operatori — Games Palace Desk
+# Guida operatori — GestHall Suite
 
 Guida passo per passo per l'uso quotidiano del sistema di cassa.
 

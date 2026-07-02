@@ -1,4 +1,4 @@
-# Guida responsabili — Games Palace Desk
+# Guida responsabili — GestHall Suite
 
 Guida completa per la gestione amministrativa della sala: configurazione, supervisione operativa, reportistica e controllo.
 

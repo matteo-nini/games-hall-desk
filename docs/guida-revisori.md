@@ -1,4 +1,4 @@
-# Guida revisori — Games Palace Desk
+# Guida revisori — GestHall Suite
 
 Guida per chi ha il compito di verificare e confermare i versamenti giornalieri.
 

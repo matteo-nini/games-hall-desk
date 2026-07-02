@@ -1,4 +1,4 @@
-# Documentazione sviluppo — Games Palace Desk
+# Documentazione sviluppo — GestHall Suite
 
 Riferimento tecnico per sviluppatori che installano, personalizzano o estendono il sistema.
 
@@ -153,7 +153,7 @@ Guida completa per preparare una copia dell'app per un nuovo cliente.
 ### Step 1 — Fork o copia del repository
 
 ```bash
-git clone git@github.com:matteo-nini/games-hall-desk.git nome-cliente-desk
+git clone git@github.com:matteo-nini/games-hall-desk.git gestsuite-cliente
 cd nome-cliente-desk
 ```
 

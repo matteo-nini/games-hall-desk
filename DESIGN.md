@@ -1,5 +1,5 @@
 ---
-name: Games Palace Desk
+name: GestHall Suite
 description: Sistema di gestione cassa giornaliera per sala giochi VLT/AWP
 colors:
   accent: "#3b5bdb"
@@ -115,7 +115,7 @@ components:
     padding: "8px 10px"
 ---
 
-# Design System: Games Palace Desk
+# Design System: GestHall Suite
 
 ## 1. Overview
 

@@ -68,7 +68,7 @@ function arrotonda_versamento(float $v): float {
  * Restituisce l'URL assoluto dalla root dell'applicazione.
  * La logica ricava il prefisso di percorso confrontando la directory fisica dell'app
  * con il path dello script corrente — supporta installazioni in sottocartella
- * (es. /demo/games-hall-desk/) senza configurazione manuale.
+ * (es. /demo/gestsuite/) senza configurazione manuale.
  */
 function base_url(string $path = ''): string {
     static $base = null;

@@ -1,6 +1,6 @@
 # Changelog
 
-Tutte le modifiche notevoli a Games Palace Desk sono documentate in questo file.
+Tutte le modifiche notevoli a GestHall Suite sono documentate in questo file.
 
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.0.0/),
 e il progetto adotta il [Versionamento Semantico](https://semver.org/lang/it/).

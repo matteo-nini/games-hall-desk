@@ -1,8 +1,8 @@
-# Games Palace Desk — Documentazione Funzionalità Complete
+# GestHall Suite — Documentazione Funzionalità Complete
 
 ## 1. Overview
 
-Games Palace Desk è un'applicazione web PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT (Video Lottery Terminal) e AWP (Amusement With Prizes). Non usa framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
+GestHall Suite è un'applicazione web PHP+MySQL per la gestione della cassa giornaliera di una sala giochi con macchine VLT (Video Lottery Terminal) e AWP (Amusement With Prizes). Non usa framework: PHP 8+, PDO, HTML/CSS/JS vanilla. Progettata per essere white-label e rivendibile.
 
 **Stack tecnico:** PHP 8+, MySQL 8 / MariaDB 10.6+, InnoDB, utf8mb4, PDO, HTML/CSS/JS vanilla, Chart.js (CDN), ZipArchive per export XLSX.
 
